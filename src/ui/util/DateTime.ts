@@ -3,6 +3,8 @@ import * as moment from 'moment';
 export default class DateTime {
    public static stringify(stamp: number, elements?: JQuery) {
       let momentObject = moment(stamp);
+      var locale =  window.navigator.language;
+      momentObject.locale(locale);
       let fromNow = momentObject.fromNow();
 
       if (!elements) {
