@@ -36,4 +36,38 @@ $emoticons: jabber, jsxc, klaus, nextcloud, xmpp, owncloud;
       background-image: url("../images/emoticons/#{$emoticon}.svg");
     }
   }
+
+  &-search {
+    border: 1px solid var(--jsxc-color-border-dark);
+    border-radius: 5px;
+    font-size: 13px;
+    height: 25px;
+    outline: none;
+    padding: 2px;
+    width: 99%;
+  }
+}
+
+.jsxc-menu-emoticon-list {
+    max-height: 200px;
+    overflow-y: auto !important;
+
+    &::-webkit-scrollbar {
+        width:0.5em !important;
+
+        /* Track */
+        &-track {
+          background: #f1f1f1;
+        }
+
+        /* Handle */
+        &-thumb {
+          background: #888;
+        }
+
+        /* Handle on hover */
+        &-thumb:hover {
+          background: #555;
+        }
+    }
 }

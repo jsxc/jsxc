@@ -66,7 +66,10 @@ export default class Menu {
 
       window.clearTimeout(this.timer);
 
-      this.element.toggleClass(CLASSNAME_OPENED);
+      if (!$(ev.target).hasClass("jsxc-input-search"))
+      {
+         this.element.toggleClass(CLASSNAME_OPENED);
+      }
 
       if (this.element.hasClass(CLASSNAME_OPENED)) {
          $('body').on('click', this.closeMenu);
@@ -85,6 +88,9 @@ export default class Menu {
 
    private closeMenu = () => {
       this.element.removeClass(CLASSNAME_OPENED);
+      if (this.element.find(".jsxc-input-search").length>0){
+         this.element.find(".jsxc-input-search").val(null);
+      }
 
       $('body').off('click', null, this.closeMenu);
    };

@@ -26,6 +26,8 @@ const EMOTICONS: any[] = [
 ];
 import * as emojione from 'emojione/lib/js/emojione';
 
+let emojiList = require('../full-emoji-list.json');
+
 const EMOTICON_LIST = {
    core: {
       ':klaus:': 'klaus',
@@ -47,13 +49,15 @@ export default class Emoticons {
    );
 
    public static getDefaultEmoticonList() {
-      let list = [];
+      /*let list = [];
+      console.log(emojiList);
 
       EMOTICONS.forEach(emoticon => {
          list.push(emoticon[0].split(' ')[0]);
       });
 
-      return list;
+      return list;*/
+      return emojiList;
    }
 
    public static toImage(text: string): string {

@@ -697,30 +697,71 @@ export default class ChatWindow {
       let emoticonListElement = this.element.find('.jsxc-menu--emoticons ul');
       let emoticonList = Emoticons.getDefaultEmoticonList();
 
-      emoticonList.forEach(emoticon => {
-         let li = $('<li>');
+      let findInList = function (list:string[], filter:string):boolean{         
+         for (let item of list)
+         {
+            if (item.startsWith(filter))
+            {
+               return true;
+            }
+         }
+         return false;
+      };
 
-         li.append(Emoticons.toImage(emoticon));
-         li.find('div').attr('title', emoticon);
-         li.click(() => {
-            let inputElement = this.element.find('.jsxc-message-input');
-            let inputValue = <string>inputElement.val() || '';
-            let selectionStart = (<HTMLInputElement>inputElement[0]).selectionStart;
-            let selectionEnd = (<HTMLInputElement>inputElement[0]).selectionEnd;
-            let inputStart = inputValue.slice(0, selectionStart);
-            let inputEnd = inputValue.slice(selectionEnd);
+      var addSmileys = (emoticonList, emoticonListElement, filterElement) => {
+         emoticonListElement.empty();
+         let filter = filterElement.val()!==null?filterElement.val().toString():null;
+         for (let type in emoticonList)
+         {
+            for (let smiley of emoticonList[type])
+            {
+               if (filter===null||filter===''||findInList(smiley.keywords,filter))
+               {
+                  let li = $('<li>');
+                  emoticonListElement.append(li);
+                  li.append(smiley.emoji);
+                  li.attr('title', smiley.keywords[0]);
+                  li.on("click",(ev) => {
+                     let inputElement = this.element.find('.jsxc-message-input');
+                     let inputValue = <string>inputElement.val() || '';
+                     let selectionStart = (<HTMLInputElement>inputElement[0]).selectionStart;
+                     let selectionEnd = (<HTMLInputElement>inputElement[0]).selectionEnd;
+                     let inputStart = inputValue.slice(0, selectionStart);
+                     let inputEnd = inputValue.slice(selectionEnd);
 
-            let newValue = inputStart;
-            newValue += inputStart.length && inputStart.slice(-1) !== ' ' ? ' ' : '';
-            newValue += emoticon;
-            newValue += inputEnd.length && inputEnd.slice(0, 1) !== ' ' ? ' ' : '';
-            newValue += inputEnd;
+                     let newValue = inputStart;
+                     newValue += inputStart.length && inputStart.slice(-1) !== ' ' ? ' ' : '';
+                     newValue += li.text();
+                     newValue += inputEnd.length && inputEnd.slice(0, 1) !== ' ' ? ' ' : '';
+                     newValue += inputEnd;
 
-            inputElement.val(newValue);
-            inputElement.focus();
-         });
+                     inputElement.val(newValue);
+                     inputElement.focus();
+                     filterElement.val(null);
+                  });
+               }
+            }
+         }
+      };
 
-         emoticonListElement.prepend(li);
+      let jsxcemoticonsearch = this.element.find('.jsxc-emoticon-search');
+      addSmileys(emoticonList,emoticonListElement,jsxcemoticonsearch);
+      jsxcemoticonsearch.on("keyup change",(ev:any)=>{
+         ev.preventDefault();
+         ev.stopPropagation();
+         var code = ev.keyCode || ev.which;
+         if (code===undefined)
+         {
+            jsxcemoticonsearch.val(null);
+            addSmileys(emoticonList,emoticonListElement,jsxcemoticonsearch);
+            return;
+         }
+         else {
+            var charTyped = String.fromCharCode(code);
+            if (/[a-zA-Z0-9]/g.test(charTyped)||code==8) {
+               addSmileys(emoticonList,emoticonListElement,jsxcemoticonsearch);
+            }
+         }
       });
    }
 
