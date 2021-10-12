@@ -864,3 +864,18 @@
     background-color: var(--jsxc-color-background-hover);
   }
 }
+
+.jsxc-message-area-anchor {
+    display: none;
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgMCAwIDI0IDI0IiBoZWlnaHQ9IjI0cHgiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0cHgiIGZpbGw9IiMwMDAwMDAiPjxnPjxyZWN0IGZpbGw9Im5vbmUiIGhlaWdodD0iMjQiIHdpZHRoPSIyNCIvPjxwYXRoIGQ9Ik0xMiw0YzQuNDEsMCw4LDMuNTksOCw4cy0zLjU5LDgtOCw4cy04LTMuNTktOC04UzcuNTksNCwxMiw0IE0xMiwyQzYuNDgsMiwyLDYuNDgsMiwxMmMwLDUuNTIsNC40OCwxMCwxMCwxMCBjNS41MiwwLDEwLTQuNDgsMTAtMTBDMjIsNi40OCwxNy41MiwyLDEyLDJMMTIsMnogTTEzLDEybDAtNGgtMmwwLDRIOGw0LDRsNC00SDEzeiIvPjwvZz48L3N2Zz4");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    height: 30px;
+    opacity: 0.5;
+    position: absolute;
+    right: 10px;
+    top: 6px;
+    width: 30px;
+    z-index: 10;
+}

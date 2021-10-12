@@ -111,8 +111,42 @@ export default class ChatWindow {
 
       this.element.on('mousedown click', (ev) => {
           if (!($(ev.target).parents('.jsxc-custom-menu').length > 0)) {
-            $('.jsxc-custom-menu').hide();
+            $('.jsxc-custom-menu').hide(250);
           }
+      });
+
+      let messageAreaElement = this.element.find('.jsxc-message-area');
+      let anchorElement = this.element.find('.jsxc-message-area-anchor');
+      messageAreaElement.on('scroll', function () {
+         if (messageAreaElement.text().trim().length>0)
+         {
+            let scrollHeight: number   = messageAreaElement[0].scrollHeight;
+            let clientHeight : number  = messageAreaElement[0].clientHeight;
+            let scrollTop : number     = messageAreaElement[0].scrollTop;
+            if (scrollTop<0)
+               scrollTop=scrollTop*(-1);
+
+            if (!(clientHeight + 42 < scrollHeight - scrollTop))
+            {
+               anchorElement.hide(400);
+            }
+            else
+            if (scrollTop>50)
+            {
+               anchorElement.show(400);
+            }
+            else
+            {
+               anchorElement.hide(400);
+            }
+         }
+         else {
+            anchorElement.hide(400);
+         }
+      });
+
+      anchorElement.on('click',()=>{
+         this.scrollMessageAreaToBottom();
       });
    }
 
@@ -783,6 +817,7 @@ export default class ChatWindow {
       let messageArea = this.element.find('.jsxc-message-area');
 
       messageArea[0].scrollTop = messageArea[0].scrollHeight;
+      this.element.find('.jsxc-message-area-anchor').hide(400);
    }
 
    private registerHooks() {
