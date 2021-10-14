@@ -152,3 +152,5 @@ export let automaticallyRestoreAccounts = true;
 export let trustedDomains: string[] = [];
 
 export let includeOSInVersionResponse = false;
+
+export let keepWindowSizeOnResize = false;

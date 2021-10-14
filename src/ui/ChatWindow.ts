@@ -719,12 +719,16 @@ export default class ChatWindow {
          });
 
       $(window).on('resize', () => {
-         fadeElement.css({
-            width: '',
-            height: '',
-         });
+         let keepWindowSizeOnResize = Client.getOption('keepWindowSizeOnResize') || false;
+         if (!keepWindowSizeOnResize)
+         {
+            fadeElement.css({
+               width: '',
+               height: '',
+            });
 
-         element.find('.jsxc-bar--window').css('width', '');
+            element.find('.jsxc-bar--window').css('width', '');
+         }
       });
    }
 
