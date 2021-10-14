@@ -21,6 +21,7 @@ import Location from '@util/Location';
 import interact from 'interactjs';
 import Translation from '../util/Translation';
 import MultiUserContact from '@src/MultiUserContact';
+import UUID from '@util/UUID';
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
@@ -745,6 +746,7 @@ export default class ChatWindow {
       var addSmileys = (emoticonList, emoticonListElement, filterElement) => {
          emoticonListElement.empty();
          let filter = filterElement.val()!==null?filterElement.val().toString():null;
+         let ids = new Array();;
          for (let type in emoticonList)
          {
             for (let smiley of emoticonList[type])
@@ -755,7 +757,14 @@ export default class ChatWindow {
                   emoticonListElement.append(li);
                   li.append(smiley.emoji);
                   li.attr('title', smiley.keywords[0]);
-                  li.on("click",(ev) => {
+                  let id = UUID.v4();
+                  ids.push(id);
+                  li.attr('id', id);
+                  $(emoticonListElement).on('click','li[id="'+id+'"]',(ev) => {
+                     for (let strid in ids)
+                     {
+                        $(document).off('click','li[id="'+strid+'"]');
+                     }
                      let inputElement = this.element.find('.jsxc-message-input');
                      let inputValue = <string>inputElement.val() || '';
                      let selectionStart = (<HTMLInputElement>inputElement[0]).selectionStart;
@@ -772,6 +781,7 @@ export default class ChatWindow {
                      inputElement.val(newValue);
                      inputElement.focus();
                      filterElement.val(null);
+                     addSmileys(emoticonList,emoticonListElement,jsxcemoticonsearch);
                   });
                }
             }
@@ -780,9 +790,7 @@ export default class ChatWindow {
 
       let jsxcemoticonsearch = this.element.find('.jsxc-emoticon-search');
       addSmileys(emoticonList,emoticonListElement,jsxcemoticonsearch);
-      jsxcemoticonsearch.on("keyup change",(ev:any)=>{
-         ev.preventDefault();
-         ev.stopPropagation();
+      jsxcemoticonsearch.on("keyup",(ev:any)=>{
          var code = ev.keyCode || ev.which;
          if (code===undefined)
          {
