@@ -2,9 +2,9 @@ $jsxc-icons-font: "jsxc-icons";
 
 @font-face {
     font-family: $jsxc-icons-font;
-    src: url("../fonts/jsxc-icons.eot?35faf2bd298bc9584ee660e778a87e18#iefix") format("embedded-opentype"),
-url("../fonts/jsxc-icons.woff2?35faf2bd298bc9584ee660e778a87e18") format("woff2"),
-url("../fonts/jsxc-icons.woff?35faf2bd298bc9584ee660e778a87e18") format("woff");
+    src: url("../fonts/jsxc-icons.eot?1a3d16709418122adaef6fedd3d0c8fe#iefix") format("embedded-opentype"),
+url("../fonts/jsxc-icons.woff2?1a3d16709418122adaef6fedd3d0c8fe") format("woff2"),
+url("../fonts/jsxc-icons.woff?1a3d16709418122adaef6fedd3d0c8fe") format("woff");
 }
 
 [class^="jsxc-icon-"]:before, [class*=" jsxc-icon-"]:before {
@@ -24,40 +24,42 @@ $jsxc-icons-map: (
     "bookmark": "\f103",
     "camera-disabled": "\f104",
     "camera": "\f105",
-    "close": "\f106",
-    "contact": "\f107",
-    "delete": "\f108",
-    "download": "\f109",
-    "dragover": "\f10a",
-    "drop": "\f10b",
-    "edit": "\f10c",
-    "fullscreen": "\f10d",
-    "gear": "\f10e",
-    "group": "\f10f",
-    "groupcontact": "\f110",
-    "hang-up": "\f111",
-    "help": "\f112",
-    "info": "\f113",
-    "jsxc": "\f114",
-    "location": "\f115",
-    "maximize": "\f116",
-    "megaphone": "\f117",
-    "menu": "\f118",
-    "microphone-disabled": "\f119",
-    "microphone": "\f11a",
-    "minimize": "\f11b",
-    "more": "\f11c",
-    "mute": "\f11d",
-    "padlock-close": "\f11e",
-    "padlock-open-disabled": "\f11f",
-    "padlock-open": "\f120",
-    "pick-up-disabled": "\f121",
-    "pick-up": "\f122",
-    "placeholder": "\f123",
-    "resize": "\f124",
-    "search": "\f125",
-    "smiley": "\f126",
-    "speech-balloon": "\f127",
+    "channel": "\f106",
+    "close": "\f107",
+    "contact": "\f108",
+    "delete": "\f109",
+    "download": "\f10a",
+    "dragover": "\f10b",
+    "drop": "\f10c",
+    "edit": "\f10d",
+    "fullscreen": "\f10e",
+    "gear": "\f10f",
+    "group": "\f110",
+    "groupcontact": "\f111",
+    "hang-up": "\f112",
+    "help": "\f113",
+    "info": "\f114",
+    "jsxc": "\f115",
+    "location": "\f116",
+    "maximize": "\f117",
+    "megaphone": "\f118",
+    "menu": "\f119",
+    "microphone-disabled": "\f11a",
+    "microphone": "\f11b",
+    "minimize": "\f11c",
+    "more": "\f11d",
+    "mute": "\f11e",
+    "nonanonymous-group": "\f11f",
+    "padlock-close": "\f120",
+    "padlock-open-disabled": "\f121",
+    "padlock-open": "\f122",
+    "pick-up-disabled": "\f123",
+    "pick-up": "\f124",
+    "placeholder": "\f125",
+    "resize": "\f126",
+    "search": "\f127",
+    "smiley": "\f128",
+    "speech-balloon": "\f129",
 );
 
 .jsxc-icon-attachment:before {
@@ -74,6 +76,9 @@ $jsxc-icons-map: (
 }
 .jsxc-icon-camera:before {
     content: map-get($jsxc-icons-map, "camera");
+}
+.jsxc-icon-channel:before {
+    content: map-get($jsxc-icons-map, "channel");
 }
 .jsxc-icon-close:before {
     content: map-get($jsxc-icons-map, "close");
@@ -146,6 +151,9 @@ $jsxc-icons-map: (
 }
 .jsxc-icon-mute:before {
     content: map-get($jsxc-icons-map, "mute");
+}
+.jsxc-icon-nonanonymous-group:before {
+    content: map-get($jsxc-icons-map, "nonanonymous-group");
 }
 .jsxc-icon-padlock-close:before {
     content: map-get($jsxc-icons-map, "padlock-close");

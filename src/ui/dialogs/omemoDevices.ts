@@ -1,12 +1,13 @@
-import Dialog from '../Dialog'
-import Device, { Trust } from '../../plugins/omemo/lib/Device'
-import { IContact } from '../../Contact.interface'
+import Dialog from '../Dialog';
+import Device, { Trust } from '../../plugins/omemo/lib/Device';
+import { IContact } from '../../Contact.interface';
 import Omemo from '../../plugins/omemo/lib/Omemo';
 import IdentityManager from 'plugins/omemo/lib/IdentityManager';
 import DateTime from '@ui/util/DateTime';
 import Translation from '@util/Translation';
 import Log from '@util/Log';
 import OMEMOPlugin from '@src/plugins/omemo/Plugin';
+import * as QRCode from 'qrcode';
 
 let omemoDeviceListTemplate = require('../../../template/dialogOmemoDeviceList.hbs');
 let omemoDeviceItemTemplate = require('../../../template/dialogOmemoDeviceItem.hbs');
@@ -48,6 +49,18 @@ class OmemoDeviceDialog {
       });
    }
 
+   private buildQRCode(jid: string, params: string[]): Promise<string> {
+      let data = 'xmpp:' + jid + '?' + params.join(';');
+
+      return QRCode.toDataURL(data, { errorCorrectionLevel: 'L' })
+         .then(url => {
+            return url;
+         })
+         .catch(err => {
+            return null;
+         });
+   }
+
    public getPromise() {
       return this.promise;
    }
@@ -57,7 +70,7 @@ class OmemoDeviceDialog {
       let buttonElement = $('<button>');
       buttonElement.addClass('jsxc-button jsxc-button--default');
       buttonElement.text(Translation.t('Clean_up_own_devices'));
-      buttonElement.click((ev) => {
+      buttonElement.click(ev => {
          ev.preventDefault();
 
          this.omemo.cleanUpDeviceList().then(localDeviceId => {
@@ -75,15 +88,18 @@ class OmemoDeviceDialog {
    private async insertDevices(devices: Device[], identityManager: IdentityManager, listElement) {
       if (devices.length === 0) {
          listElement.empty().append($('<p>').text(Translation.t('No_devices_available')));
+         listElement.prev('.jsxc-qr-code').remove();
 
          return;
       }
 
+      let qrCodeParams = [];
+
       for (let device of devices) {
          //@TODO show spinner
          let properties = await this.getDeviceProperties(device, identityManager);
-         let element = $(omemoDeviceItemTemplate(properties));
 
+         let element = $(omemoDeviceItemTemplate(properties));
          let lastUsedElement = element.find('.jsxc-omemo-device-last-used');
 
          if (properties.lastUsed) {
@@ -92,10 +108,16 @@ class OmemoDeviceDialog {
             lastUsedElement.text(Translation.t('never'));
          }
 
+         qrCodeParams.push('omemo-sid-' + device.getId() + '=' + properties.fingerprint.split(' ').join(''));
+
          this.attachActionHandler(element, device);
 
          listElement.append(element);
       }
+
+      this.buildQRCode(devices[0].getAddress().getName(), qrCodeParams).then(datauri => {
+         listElement.prev('.jsxc-qr-code').find('img').attr('src', datauri);
+      });
    }
 
    private async getDeviceProperties(device: Device, identityManager: IdentityManager) {
@@ -105,7 +127,6 @@ class OmemoDeviceDialog {
 
       try {
          fingerprint = await identityManager.loadFingerprint(device.getAddress());
-
          if (device.isDisabled()) {
             device.enable();
          }
@@ -125,14 +146,14 @@ class OmemoDeviceDialog {
          fingerprint,
          trust: Trust[trust],
          lastUsed: device.getLastUsed(),
-         showControls
+         showControls,
       };
    }
 
    private attachActionHandler(deviceElement: JQuery<HTMLElement>, device: Device) {
       const self = this;
 
-      deviceElement.find('.jsxc-omemo-device-action a').click(function(ev) {
+      deviceElement.find('.jsxc-omemo-device-action a').click(function (ev) {
          ev.preventDefault();
 
          self.actionHandler(deviceElement, $(this), device);

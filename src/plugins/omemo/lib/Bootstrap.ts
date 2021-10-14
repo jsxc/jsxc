@@ -1,14 +1,12 @@
-import Store from './Store'
+import Store from './Store';
 import { KeyHelper } from '../vendor/KeyHelper';
-import Random from '../../../util/Random'
-import Log from '../../../util/Log'
+import Random from '../../../util/Random';
+import Log from '../../../util/Log';
 import BundleManager from './BundleManager';
 import { MAX_REGISTRATION_ID } from '../util/Const';
 
 export default class Bootstrap {
-   constructor(private deviceName: string, private store: Store, private bundleManager: BundleManager) {
-
-   }
+   constructor(private deviceName: string, private store: Store, private bundleManager: BundleManager) {}
 
    public async prepare(): Promise<void> {
       if (!this.store.isPublished()) {

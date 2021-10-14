@@ -1,4 +1,3 @@
-
 export interface IJID {
    readonly full: string;
 
@@ -17,4 +16,6 @@ export interface IJID {
    isBare(): boolean;
 
    isServer(): boolean;
+
+   toBareJID(): IJID;
 }

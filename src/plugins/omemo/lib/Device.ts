@@ -3,13 +3,15 @@ import Session from './Session';
 import EncryptedDeviceMessage from '../model/EncryptedDeviceMessage';
 import Store from './Store';
 
-export enum Trust { unknown, recognized, confirmed, ignored };
+export enum Trust {
+   unknown,
+   recognized,
+   confirmed,
+   ignored,
+}
 
 export default class Device {
-
-   constructor(private address: Address, private session: Session, private store: Store) {
-
-   }
+   constructor(private address: Address, private session: Session, private store: Store) {}
 
    public async decrypt(ciphertext, preKey: boolean = false): Promise<ArrayBuffer> {
       return this.session.decrypt(ciphertext, preKey).then(plaintext => {

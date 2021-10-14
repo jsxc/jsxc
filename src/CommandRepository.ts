@@ -6,21 +6,31 @@ export class OnlyGroupChatError extends Error {
    constructor() {
       super(Translation.t('Command_only_available_in_groupchat'));
    }
-};
+}
 export class ArgumentError extends Error {
    constructor() {
       super(Translation.t('Wrong_number_of_arguments'));
    }
-};
+}
 
 export type CommandAction = (args: string[], contact: IContact | MultiUserContact) => Promise<boolean>;
 
 export default class CommandRepository {
-   private commands: { [command: string]: { action: CommandAction, description: string, category: string } } = {}
+   private commands: {
+      [command: string]: {
+         action: CommandAction;
+         description: string;
+         category: string;
+      };
+   } = {};
 
    public register(command: string, action: CommandAction, description: string, category: string = 'general') {
       if (command && !this.commands[command.toLowerCase()]) {
-         this.commands[command.toLowerCase()] = { action, description, category };
+         this.commands[command.toLowerCase()] = {
+            action,
+            description,
+            category,
+         };
       }
    }
 
@@ -41,28 +51,34 @@ export default class CommandRepository {
    }
 
    public getHelp() {
-      let help: {[category: string]: {command: string, description: string}[]} = {};
+      let help: {
+         [category: string]: { command: string; description: string }[];
+      } = {};
 
-      Object.keys(this.commands).sort().forEach(id => {
-         let command = this.commands[id];
+      Object.keys(this.commands)
+         .sort()
+         .forEach(id => {
+            let command = this.commands[id];
 
-         if (!command.description) {
-            return;
-         }
+            if (!command.description) {
+               return;
+            }
 
-         if (!help[command.category]) {
-            help[command.category] = [];
-         }
+            if (!help[command.category]) {
+               help[command.category] = [];
+            }
 
-         help[command.category].push({
-            command: id,
-            description: command.description,
+            help[command.category].push({
+               command: id,
+               description: command.description,
+            });
          });
-      });
 
-      return Object.keys(help).sort().map(category => ({
-         label: 'cmd_category_' + category,
-         commands: help[category],
-      }));
+      return Object.keys(help)
+         .sort()
+         .map(category => ({
+            label: 'cmd_category_' + category,
+            commands: help[category],
+         }));
    }
 }

@@ -20,7 +20,9 @@ export default class LocalService extends AbstractService {
       for (let id in data) {
          let roomData = data[id];
 
-         rooms.push(new RoomBookmark(new JID(id), roomData.alias, roomData.nickname, roomData.autoJoin, roomData.password));
+         rooms.push(
+            new RoomBookmark(new JID(id), roomData.alias, roomData.nickname, roomData.autoJoin, roomData.password)
+         );
       }
 
       return rooms;

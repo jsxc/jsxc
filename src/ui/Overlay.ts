@@ -1,4 +1,3 @@
-
 export default class Overlay {
    private element;
 

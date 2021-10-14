@@ -139,8 +139,9 @@ body.jsxc-fullscreen {
   }
 
   .jsxc-message-input {
-    background-color: #ececec;
+    background-color: var(--jsxc-color-background-darker);
     border-radius: 2em;
+    color: var(--jsxc-color-main-text);
     line-height: 1.4em;
     margin-right: 1em;
     padding: 0.6em 2em 0.4em;
@@ -155,8 +156,8 @@ body.jsxc-fullscreen {
   }
 
   #jsxc-roster>.jsxc-bottom li {
-    height: 62px;
-    line-height: 62px;
+    height: 42px;
+    line-height: 42px;
   }
 
   .jsxc-bar__action-entry {
@@ -251,5 +252,39 @@ body.jsxc-fullscreen.jsxc-two-columns {
 
   &-action {
     float: right;
+  }
+}
+
+.jsxc-qr-code {
+  label {
+    cursor: zoom-in;
+  }
+
+  input[type="checkbox"] {
+    display: none;
+
+    &:checked + img {
+      max-width: none;
+    }
+  }
+
+  img {
+    border: 1px solid var(--jsxc-color-border-dark);
+    color: var(--jsxc-color-error);
+    font-size: 0.7em;
+    max-width: 30px;
+  }
+
+  &-own,
+  &-peer {
+    margin-bottom: 1em;
+  }
+
+  &-desc-own,
+  &-desc-peer {
+    display: inline-block;
+    font-size: 0.7em;
+    margin-left: 2em;
+    opacity: 0.7;
   }
 }

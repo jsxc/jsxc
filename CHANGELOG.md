@@ -6,6 +6,109 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## 4.3.1 (2021-07-08)
+### Fixed
+- types for client interface
+- fix conflicts with external styles
+
+### Misc
+- add env flag to build script
+- update locales
+- update dependencies
+- fix otr package version
+- update code style
+
+## 4.3.0 (2021-07-05)
+### Added
+- show different icon for open rooms (muc)
+- make room features persistant
+- [#890](https://github.com/jsxc/jsxc/issues/890) add Jingle Message Initiation (XEP-0353)
+- encapsulate session storage for every plugin
+- [#864](https://github.com/jsxc/jsxc/issues/864) update sounds
+- [#748](https://github.com/jsxc/jsxc/issues/748)[#985](https://github.com/jsxc/jsxc/issues/985) avatar upload
+- [#304](https://github.com/jsxc/jsxc/issues/304) announce own avatar
+- add QR codes to device dialog (#993) (omemo)
+- [#1001](https://github.com/jsxc/jsxc/issues/1001) decrypt attachment (omemo)
+- show extended room info (muc)
+- show occupants in room info (muc)
+- add entity time (XEP-0202)
+- add Blocking Commands (XEP-0191)
+- [#978](https://github.com/jsxc/jsxc/issues/978) add status to presence
+- add software version (XEP-0092)
+- add info about general xeps to settings
+- make some sections in settings dialog collapsible
+- open xep links in new tab
+- add roster filter for groups
+- show roster group in vcard dialog
+- [#77](https://github.com/jsxc/jsxc/issues/77) show roster group in roster
+- process image url as attachment
+- open attachment in new tab
+- add User Search (XEP-0055)
+- use conference subdomain as default
+
+### Fixed
+- presence update for members with multiple devices (muc)
+- try all user media before failing
+- member jid retrieval (muc)
+- [#1025](https://github.com/jsxc/jsxc/issues/1025) nickname in status code messages (mux)
+- webpack config error
+- toggle of archive button
+- cut off roster tooltip
+- [#1004](https://github.com/jsxc/jsxc/issues/1004) text input overflow
+- handle muc codes in message elements (muc)
+- muc user list timeout
+- placeholder after avatar was removed
+- show message error
+- handle error messages from OpenFire
+- catch error messages
+- do not mark messages with error
+- [#1007](https://github.com/jsxc/jsxc/issues/1007) disable chatmarker for error messages
+- [#1009](https://github.com/jsxc/jsxc/issues/1009)[#1010](https://github.com/jsxc/jsxc/issues/1010) duplicated roster item
+- enabling from default disabled plugins (#1006)
+- do not attach thumbnail (omemo)
+- decode filename of attachment (omemo)
+- ignore case for encrypted image (omemo)
+- remove encrypted file link from message (omemo)
+- status for roster items
+- generate thumbnail for links
+- set correct filename for attachment
+- feature list (muc)
+- check support for blocking command
+- null exception
+- return type of sendIQ
+- support check (omemo)
+- collapsible settings
+- xep url
+- disable omemo checkbox in settings
+- multi user contact subscription
+- stop propagation for tag click
+- force support check (omemo)
+- move clear all notifications entry to bottom (#991)
+- [#994](https://github.com/jsxc/jsxc/issues/994) message input padding
+- [#972](https://github.com/jsxc/jsxc/issues/972) use border-box
+- open help in new tab
+- vcard parsing
+
+### Misc
+- update locales
+- add wti workflow (#1038)
+- move to github actions
+- update dependencies
+- add config for fantasticon
+- replace node-sass with dart sass
+- fix issues with upgrade deps
+- upgrade to webpack 5
+- use eslint
+- small typo fix (#988)
+- fix karma tests
+- improve build time
+- reorganize call sync
+- add types to persistant map
+- use prettier for consistent code style
+- add types
+- add missing semicolon
+- emphasize roster item with unread msg
+
 ## 4.2.1 (2020-12-28)
 ### Fixed
 - [#962](https://github.com/jsxc/jsxc/issues/962) handle muc presence errors

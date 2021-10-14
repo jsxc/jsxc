@@ -3,9 +3,7 @@ import Log from '@util/Log';
 export default class TableElement {
    private tableElement = $('<table>');
 
-   constructor(private numberOfColumns: number) {
-
-   }
+   constructor(private numberOfColumns: number) {}
 
    public appendRow(...columns) {
       return this.addRow('appendTo', columns);

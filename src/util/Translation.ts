@@ -1,7 +1,7 @@
-import i18next from 'i18next'
+import i18next from 'i18next';
 import Log from '@util/Log';
 import Client from '@src/Client';
-import LanguageDetector from 'i18next-browser-languagedetector'
+import LanguageDetector from 'i18next-browser-languagedetector';
 
 let resources = __LANGS__.reduce((resources, lang) => {
    resources[lang] = require(`../../locales/${lang}.json`);
@@ -25,7 +25,7 @@ export default class Translation {
          resources,
          interpolation: {
             prefix: '__',
-            suffix: '__'
+            suffix: '__',
          },
          saveMissing: true,
          detection: {
@@ -33,8 +33,10 @@ export default class Translation {
          },
       });
 
-      i18next.on('missingKey', function(language, namespace, key, res) {
-         Log.info(`[i18n] Translation of "${key}" is missing for language "${language}". Namespace: ${namespace}. Resource: ${res}.`);
+      i18next.on('missingKey', function (language, namespace, key, res) {
+         Log.info(
+            `[i18n] Translation of "${key}" is missing for language "${language}". Namespace: ${namespace}. Resource: ${res}.`
+         );
       });
 
       Translation.initialized = true;

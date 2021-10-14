@@ -1,12 +1,12 @@
-import Log from '../../util/Log'
+import Log from '../../util/Log';
 import { IContact } from '@src/Contact.interface';
-import Message from '../../Message'
-import { DIRECTION } from '../../Message.interface'
-import Translation from '../../util/Translation'
-import OTR from 'otr/lib/otr'
-import DSA from 'otr/lib/dsa'
-import { EncryptionState } from '../../plugin/AbstractPlugin'
-import PersistentMap from '../../util/PersistentMap'
+import Message from '../../Message';
+import { DIRECTION } from '../../Message.interface';
+import Translation from '../../util/Translation';
+import OTR from 'otr/lib/otr';
+import DSA from 'otr/lib/dsa';
+import { EncryptionState } from '../../plugin/AbstractPlugin';
+import PersistentMap from '../../util/PersistentMap';
 import OTRPlugin from './Plugin';
 import { IConnection } from '@connection/Connection.interface';
 import VerificationDialog from '@ui/dialogs/verification';
@@ -14,22 +14,22 @@ import IStorage from '@src/Storage.interface';
 
 //@REVIEW
 interface IOTR {
-   off: (name: string, func) => void
-   on: (name: string, func) => void
-   sendQueryMsg: () => void
-   receiveMsg: (message: string, meta: any) => void
-   sendMsg: (message: string, meta: any) => void
-   endOtr: (func) => void
-   smpSecret: (secret: string, question?: string) => void
-   init
-   _smInit
-   ake
+   off: (name: string, func) => void;
+   on: (name: string, func) => void;
+   sendQueryMsg: () => void;
+   receiveMsg: (message: string, meta: any) => void;
+   sendMsg: (message: string, meta: any) => void;
+   endOtr: (func) => void;
+   smpSecret: (secret: string, question?: string) => void;
+   init;
+   _smInit;
+   ake;
 
-   their_priv_pk
-   msgstate
-   SEND_WHITESPACE_TAG
-   WHITESPACE_START_AKE
-   trust
+   their_priv_pk;
+   msgstate;
+   SEND_WHITESPACE_TAG;
+   WHITESPACE_START_AKE;
+   trust;
 }
 
 export default class Session {
@@ -42,7 +42,6 @@ export default class Session {
    private verificationDialog: VerificationDialog;
 
    constructor(private peer: IContact, private key: DSA, private storage: IStorage, private connection: IConnection) {
-
       let options: any = {
          priv: key,
          debug: true,
@@ -59,7 +58,7 @@ export default class Session {
          this.session.WHITESPACE_START_AKE = true;
       }
 
-      this.session.on('status', (status) => {
+      this.session.on('status', status => {
          this.saveSession();
          // need this to get the right context in status handler
          this.statusHandler(status);
@@ -68,7 +67,7 @@ export default class Session {
          //@REVIEW do we need to save the session at this point?
          this.smpHandler(type, result);
       });
-      this.session.on('error', (err) => {
+      this.session.on('error', err => {
          this.errorHandler(err);
       });
       this.session.on('io', (msg, meta) => {
@@ -83,9 +82,9 @@ export default class Session {
 
       this.data = new PersistentMap(this.storage, 'otr', 'session', this.peer.getId());
 
-      this.data.registerHook('payload', (newPayload) => {
+      this.data.registerHook('payload', newPayload => {
          if (this.ourPayloadId !== newPayload.id) {
-            this.restoreSession(newPayload)
+            this.restoreSession(newPayload);
          }
       });
       this.restoreSession(this.data.get('payload'));
@@ -202,7 +201,7 @@ export default class Session {
       this.peer.addSystemMessage(Translation.t(messageString));
    }
 
-   private statusHandler = (status) => {
+   private statusHandler = status => {
       switch (status) {
          case OTR.CONST.STATUS_SEND_QUERY:
             this.inform('trying_to_start_private_conversation');
@@ -212,7 +211,10 @@ export default class Session {
 
             this.inform(msgState + '_private_conversation_started');
 
-            this.peer.setEncryptionState(this.session.trust ? EncryptionState.VerifiedEncrypted : EncryptionState.UnverifiedEncrypted, OTRPlugin.getId());
+            this.peer.setEncryptionState(
+               this.session.trust ? EncryptionState.VerifiedEncrypted : EncryptionState.UnverifiedEncrypted,
+               OTRPlugin.getId()
+            );
             break;
          case OTR.CONST.STATUS_END_OTR:
             if (this.session.msgstate === OTR.CONST.MSGSTATE_PLAINTEXT) {
@@ -233,7 +235,7 @@ export default class Session {
             // jsxc.keepBusyAlive();
             break;
       }
-   }
+   };
 
    private smpHandler = (type: string, data: boolean | string) => {
       switch (type) {
@@ -263,9 +265,9 @@ export default class Session {
          default:
             Log.debug('[OTR] sm callback: Unknown type: ' + type);
       }
-   }
+   };
 
-   private afterEncryptMessage = function(encryptedMessage: string, message: Message, resolve) {
+   private afterEncryptMessage = function (encryptedMessage: string, message: Message, resolve) {
       if (this.session.msgstate === OTR.CONST.MSGSTATE_ENCRYPTED) {
          message.setEncryptedPlaintextMessage(encryptedMessage);
 
@@ -277,9 +279,9 @@ export default class Session {
       }
 
       resolve(message);
-   }
+   };
 
-   private afterDecryptMessage = function(plaintextMessage: string, encrypted: boolean, message: Message, resolve) {
+   private afterDecryptMessage = function (plaintextMessage: string, encrypted: boolean, message: Message, resolve) {
       if (this.session.msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT && !encrypted) {
          message.setPlaintextMessage(Translation.t('Received_an_unencrypted_message') + '. [' + plaintextMessage + ']');
          message.setDirection(DIRECTION.SYS);
@@ -290,29 +292,29 @@ export default class Session {
       message.setEncrypted(encrypted);
 
       resolve(message);
-   }
+   };
 
    private sendOutgoingMessage(messageString: string) {
       let message = new Message({
          peer: this.peer.getJid(),
          direction: Message.DIRECTION.OUT,
-         plaintextMessage: messageString
+         plaintextMessage: messageString,
       });
 
       this.connection.sendMessage(message);
    }
 
-   private errorHandler = function(err) {
+   private errorHandler = function (err) {
       // Handle this case in jsxc.otr.receiveMessage
       if (err !== 'Received an unencrypted message.') {
          this.inform(err);
       }
 
       Log.error('[OTR] ' + err);
-   }
+   };
 
    //@REVIEW optimization possible? Update only altered values. Maybe split this in two payloads (permanent/ephemeral)
-   private restoreSession = (payload) => {
+   private restoreSession = payload => {
       if (this.session !== null || payload !== null) {
          let key;
          for (key in payload) {
@@ -337,14 +339,17 @@ export default class Session {
       let encryptionState = this.peer.getEncryptionState();
 
       //@REVIEW can this be simplified?
-      if ((encryptionState === EncryptionState.Plaintext && this.session.msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT) ||
-         (encryptionState === EncryptionState.UnverifiedEncrypted && (this.session.msgstate !== OTR.CONST.MSGSTATE_ENCRYPTED || this.session.trust)) ||
-         (encryptionState === EncryptionState.VerifiedEncrypted && (this.session.msgstate !== OTR.CONST.MSGSTATE_ENCRYPTED || !this.session.trust)) ||
-         (encryptionState === EncryptionState.Ended && this.session.msgstate !== OTR.CONST.MSGSTATE_FINISHED)) {
-
+      if (
+         (encryptionState === EncryptionState.Plaintext && this.session.msgstate !== OTR.CONST.MSGSTATE_PLAINTEXT) ||
+         (encryptionState === EncryptionState.UnverifiedEncrypted &&
+            (this.session.msgstate !== OTR.CONST.MSGSTATE_ENCRYPTED || this.session.trust)) ||
+         (encryptionState === EncryptionState.VerifiedEncrypted &&
+            (this.session.msgstate !== OTR.CONST.MSGSTATE_ENCRYPTED || !this.session.trust)) ||
+         (encryptionState === EncryptionState.Ended && this.session.msgstate !== OTR.CONST.MSGSTATE_FINISHED)
+      ) {
          Log.warn('Expected encryption state does not match real message state');
       }
-   }
+   };
 
    private saveSession() {
       let payload: any = {}; // return value
@@ -354,7 +359,29 @@ export default class Session {
       }
 
       // all variables which should be saved
-      let exportableKeys = ['jid', 'our_instance_tag', 'msgstate', 'authstate', 'fragment', 'their_y', 'their_old_y', 'their_keyid', 'their_instance_tag', 'our_dh', 'our_old_dh', 'our_keyid', 'sessKeys', 'storedMgs', 'oldMacKeys', 'trust', 'transmittedRS', 'ssid', 'receivedPlaintext', 'authstate', 'send_interval'];
+      let exportableKeys = [
+         'jid',
+         'our_instance_tag',
+         'msgstate',
+         'authstate',
+         'fragment',
+         'their_y',
+         'their_old_y',
+         'their_keyid',
+         'their_instance_tag',
+         'our_dh',
+         'our_old_dh',
+         'our_keyid',
+         'sessKeys',
+         'storedMgs',
+         'oldMacKeys',
+         'trust',
+         'transmittedRS',
+         'ssid',
+         'receivedPlaintext',
+         'authstate',
+         'send_interval',
+      ];
 
       for (let key of exportableKeys) {
          payload[key] = JSON.stringify(this.session[key]);

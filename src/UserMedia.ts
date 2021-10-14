@@ -1,7 +1,8 @@
-import Log from './util/Log'
-import Translation from './util/Translation'
-import Overlay from './ui/Overlay'
-import * as getScreenMedia from 'getscreenmedia'
+import Log from './util/Log';
+import Translation from './util/Translation';
+import Overlay from './ui/Overlay';
+import * as getScreenMedia from 'getscreenmedia';
+import Client from './Client';
 
 export default class UserMedia {
    public static async request(um = ['video', 'audio']): Promise<MediaStream> {
@@ -19,10 +20,9 @@ export default class UserMedia {
       try {
          if (um.indexOf('screen') > -1) {
             stream = await UserMedia.getScreenMedia();
-            const userStream = await UserMedia
-               .filterUserMedia(um)
+            const userStream = await UserMedia.filterUserMedia(um)
                .then(UserMedia.getUserMedia)
-               .catch((err) => {
+               .catch(err => {
                   Log.info('Could not get other user streams.');
                });
 
@@ -35,9 +35,7 @@ export default class UserMedia {
                }
             }
          } else {
-            stream = await UserMedia
-               .filterUserMedia(um)
-               .then(UserMedia.getUserMedia);
+            stream = await UserMedia.filterUserMedia(um).then(UserMedia.getUserMedia);
          }
       } catch (err) {
          overlay.close();
@@ -51,14 +49,10 @@ export default class UserMedia {
    }
 
    private static async filterUserMedia(userMedia: string[]): Promise<string[]> {
-      let devices = await navigator.mediaDevices.enumerateDevices()
-      let availableDevices = devices.map(function(device) {
-         //@REVIEW MediaDeviceKind === string?
-         return <string> device.kind;
-      });
+      let devices = await UserMedia.getMediaDevices();
 
-      userMedia = userMedia.filter(function(el) {
-         return availableDevices.indexOf(el) !== -1 || availableDevices.indexOf(el + 'input') !== -1;
+      userMedia = userMedia.filter(function (el) {
+         return devices[el + 'input']?.length > 0;
       });
 
       if (userMedia.length === 0) {
@@ -66,6 +60,23 @@ export default class UserMedia {
       }
 
       return userMedia;
+   }
+
+   private static async getMediaDevices(): Promise<{ audioinput: string[]; videoinput: string[] }> {
+      let devices = await navigator.mediaDevices.enumerateDevices();
+      let mediaDevices = devices.reduce(
+         (mediaDevices, device) => {
+            mediaDevices[device.kind]?.push(device.deviceId);
+
+            return mediaDevices;
+         },
+         {
+            audioinput: [] as string[],
+            videoinput: [] as string[],
+         }
+      );
+
+      return mediaDevices;
    }
 
    private static getScreenMedia(): Promise<MediaStream> {
@@ -77,27 +88,84 @@ export default class UserMedia {
 
             reject(error);
          });
-      })
+      });
    }
 
-   private static getUserMedia(um) {
-      let constraints: any = {};
+   private static async getUserMedia(um) {
+      let devices = await UserMedia.getMediaDevices();
 
-      if (um.indexOf('video') > -1) {
-         constraints.video = true;
+      let videoIndex = 0;
+      let audioIndex = 0;
+
+      let lastError: any;
+
+      while (
+         (videoIndex < devices.videoinput.length || !um.includes('video')) &&
+         (audioIndex < devices.audioinput.length || !um.includes('audio'))
+      ) {
+         const constraints: MediaStreamConstraints = {};
+
+         if (um.includes('video')) {
+            constraints.video = devices.videoinput[videoIndex]
+               ? {
+                    deviceId: {
+                       exact: devices.videoinput[videoIndex],
+                    },
+                 }
+               : true;
+
+            if (Client.isDebugMode()) {
+               constraints.video = {
+                  ...(typeof constraints.video === 'object' ? constraints.video : {}),
+                  width: { ideal: 320 },
+                  height: { ideal: 180 },
+                  frameRate: { ideal: 2 },
+               };
+            }
+         }
+
+         if (um.includes('audio')) {
+            constraints.audio = devices.audioinput[audioIndex]
+               ? {
+                    deviceId: {
+                       exact: devices.audioinput[audioIndex],
+                    },
+                 }
+               : true;
+         }
+
+         try {
+            const userMedia = await navigator.mediaDevices.getUserMedia(constraints);
+
+            um.includes('video') && Log.debug(`Using ${devices.videoinput[videoIndex]} as video device`);
+            um.includes('audio') && Log.debug(`Using ${devices.audioinput[audioIndex]} as audio device`);
+
+            return userMedia;
+         } catch (err) {
+            Log.error('GUM failed: ', { err });
+
+            if (
+               err.name !== 'NotAllowedError' &&
+               err.name !== 'PERMISSION_DENIED' &&
+               !lastError &&
+               ((um.includes('video') && !devices.videoinput[videoIndex]) ||
+                  (um.includes('audio') && !devices.audioinput[audioIndex]))
+            ) {
+               devices = await UserMedia.getMediaDevices();
+            } else if (err.toString().includes('video')) {
+               videoIndex++;
+            } else if (err.toString().includes('audio')) {
+               audioIndex++;
+            } else {
+               videoIndex++;
+               audioIndex++;
+            }
+
+            lastError = err;
+         }
       }
 
-      if (um.indexOf('audio') > -1) {
-         constraints.audio = true;
-      }
-
-      try {
-         return navigator.mediaDevices.getUserMedia(constraints);
-      } catch (e) {
-         Log.error('GUM failed: ', e);
-
-         return Promise.reject('GUM failed');
-      }
+      return Promise.reject(lastError || 'GUM failed');
    }
 
    private static onMediaFailure(err: Error) {
@@ -110,11 +178,11 @@ export default class UserMedia {
             break;
          case 'HTTPS_REQUIRED':
          case 'EXTENSION_UNAVAILABLE':
+         case 'NotSupportedError':
             msg = Translation.t(err.name);
             break;
-         case 'NotSupportedError':
-            msg = Translation.t('NotSupportedError');
-            break;
+         case 'NotReadableError':
+            msg = Translation.t('User_media_not_readable');
          default:
             msg = Translation.t(err.name) !== err.name ? Translation.t(err.name) : Translation.t('UNKNOWN_ERROR');
       }

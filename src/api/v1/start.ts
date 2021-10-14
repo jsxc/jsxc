@@ -1,8 +1,8 @@
-import Log from '../../util/Log'
-import Client from '../../Client'
-import * as UI from '../../ui/web'
-import BaseError from '../../errors/BaseError'
-import InvalidParameterError from '../../errors/InvalidParameterError'
+import Log from '../../util/Log';
+import Client from '../../Client';
+import * as UI from '../../ui/web';
+import BaseError from '../../errors/BaseError';
+import InvalidParameterError from '../../errors/InvalidParameterError';
 import Account from '@src/Account';
 
 export async function startAndPause(boshUrl: string, jid: string, password: string): Promise<void> {
@@ -21,12 +21,15 @@ export function start() {
    let promise: Promise<any>;
 
    switch (arguments.length) {
-      case 0: promise = startUI();
-              break;
-      case 3: promise = startWithCredentials(arguments[0], arguments[1], arguments[2]);
-              break;
-      case 4: promise = startWithBoshParameters(arguments[0], arguments[1], arguments[2], arguments[3]);
-              break;
+      case 0:
+         promise = startUI();
+         break;
+      case 3:
+         promise = startWithCredentials(arguments[0], arguments[1], arguments[2]);
+         break;
+      case 4:
+         promise = startWithBoshParameters(arguments[0], arguments[1], arguments[2], arguments[3]);
+         break;
       default:
          promise = Promise.reject(new InvalidParameterError('Wrong number of parameters.'));
    }
@@ -59,21 +62,24 @@ async function startWithBoshParameters(url: string, jid: string, sid: string, ri
 function connectAndStartUI(account: Account): Promise<void> {
    let accountManager = Client.getAccountManager();
 
-   return account.connect(true).then(function() {
-      accountManager.addAccount(account);
+   return account
+      .connect(true)
+      .then(function () {
+         accountManager.addAccount(account);
 
-      startUI();
-   }).catch((err) => {
-      accountManager.removeAccount(account);
+         startUI();
+      })
+      .catch(err => {
+         accountManager.removeAccount(account);
 
-      if (err instanceof BaseError) {
-         Log.warn('Instance of BaseErrors', err.toString());
+         if (err instanceof BaseError) {
+            Log.warn('Instance of BaseErrors', err.toString());
 
-         throw err;
-      }
+            throw err;
+         }
 
-      Log.warn('Unknown error:', err);
+         Log.warn('Unknown error:', err);
 
-      throw new Error('Unknown error');
-   });
+         throw new Error('Unknown error');
+      });
 }

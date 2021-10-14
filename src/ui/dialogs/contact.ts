@@ -1,23 +1,25 @@
-import Dialog from '../Dialog'
-import Contact from '../../Contact'
-import * as CONST from '../../CONST'
-import Client from '../../Client'
-import JID from '../../JID'
+import Dialog from '../Dialog';
+import Contact from '../../Contact';
+import * as CONST from '../../CONST';
+import Client from '../../Client';
+import JID from '../../JID';
 
 let contactTemplate = require('../../../template/contact.hbs');
 
 let dialog: Dialog;
 
-export default function(username?: string, alias?: string) {
-   username = (typeof username === 'string') ? username : undefined;
+export default function (username?: string, alias?: string) {
+   username = typeof username === 'string' ? username : undefined;
 
    let content = contactTemplate({
-      accounts: Client.getAccountManager().getAccounts().map(account => ({
-         uid: account.getUid(),
-         jid: account.getJID().bare,
-      })),
+      accounts: Client.getAccountManager()
+         .getAccounts()
+         .map(account => ({
+            uid: account.getUid(),
+            jid: account.getJID().bare,
+         })),
       username,
-      alias
+      alias,
    });
 
    dialog = new Dialog(content);
@@ -75,9 +77,9 @@ function onUsernameInput() {
 function onSubmit(ev) {
    ev.preventDefault();
 
-   let username = <string> $('#jsxc-username').val();
-   let alias = <string> $('#jsxc-alias').val();
-   let accountId = <string> $('#jsxc-account').val();
+   let username = <string>$('#jsxc-username').val();
+   let alias = <string>$('#jsxc-alias').val();
+   let accountId = <string>$('#jsxc-account').val();
 
    let account = Client.getAccountManager().getAccount(accountId);
 
@@ -88,11 +90,13 @@ function onSubmit(ev) {
    // Check if the username is valid
    if (!username || !username.match(CONST.REGEX.JID)) {
       // Add notification
-      $('#jsxc-username').addClass('jsxc-invalid').keyup(function() {
-         if ((<string> $(this).val()).match(CONST.REGEX.JID)) {
-            $(this).removeClass('jsxc-invalid');
-         }
-      });
+      $('#jsxc-username')
+         .addClass('jsxc-invalid')
+         .keyup(function () {
+            if ((<string>$(this).val()).match(CONST.REGEX.JID)) {
+               $(this).removeClass('jsxc-invalid');
+            }
+         });
 
       return false;
    }

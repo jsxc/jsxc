@@ -1,13 +1,28 @@
-import { Strophe, $build, $iq } from '../../vendor/Strophe'
+import { Strophe, $build, $iq } from '../../vendor/Strophe';
 import UUID from '../../util/UUID';
 import BaseError from '../../errors/BaseError';
-import Form from '../../connection/Form'
-import Translation from '../../util/Translation'
-import Log from '../../util/Log'
-import Dialog from '../../ui/Dialog'
+import Form from '../../connection/Form';
+import Translation from '../../util/Translation';
+import Log from '../../util/Log';
+import Dialog from '../../ui/Dialog';
 
 const NS_REGISTER = 'jabber:iq:register';
-const ALLOWED_FIELDS = ['username', 'nick', 'password', 'name', 'first', 'last', 'email', 'address', 'city', 'state', 'zip', 'phone', 'url', 'date'];
+const ALLOWED_FIELDS = [
+   'username',
+   'nick',
+   'password',
+   'name',
+   'first',
+   'last',
+   'email',
+   'address',
+   'city',
+   'state',
+   'zip',
+   'phone',
+   'url',
+   'date',
+];
 
 export function register(service: string, domain: string, callback?: (form: Form) => Promise<Form>) {
    return new Registration(service, domain).requestForm(callback || defaultCallback);
@@ -23,7 +38,7 @@ function defaultCallback(form: Form): Promise<Form> {
    buttonElement.appendTo(dom.find('form'));
 
    return new Promise(resolve => {
-      dom.find('form').submit(function(ev) {
+      dom.find('form').submit(function (ev) {
          ev.preventDefault();
 
          resolve(Form.fromHTML(this));
@@ -45,18 +60,22 @@ class Registration {
          xmlns: NS_REGISTER,
       });
 
-      return this.connection.sendIQ(queryStanza).then((iqStanza) => {
-         let form = this.getFormFromResult(iqStanza);
+      return this.connection
+         .sendIQ(queryStanza)
+         .then(iqStanza => {
+            let form = this.getFormFromResult(iqStanza);
 
-         return callback(form);
-      }).then(this.submitForm).catch(err => {
-         Log.info('Error during registration callback', err);
+            return callback(form);
+         })
+         .then(this.submitForm)
+         .catch(err => {
+            Log.info('Error during registration callback', err);
 
-         throw err;
-      });
+            throw err;
+         });
    }
 
-   private getFormFromResult = (iqStanza) => {
+   private getFormFromResult = iqStanza => {
       let queryStanza = iqStanza.find(`query[xmlns="${NS_REGISTER}"]`);
 
       if (queryStanza.length !== 1) {
@@ -79,7 +98,7 @@ class Registration {
          type: 'form',
          title: Translation.t('Registration'),
          instructions: queryStanza.find('>instructions').text(),
-         fields: []
+         fields: [],
       };
 
       for (let allowedField of ALLOWED_FIELDS) {
@@ -104,7 +123,7 @@ class Registration {
       }
 
       return Form.fromJSON(formData);
-   }
+   };
 
    public submitForm = (form: Form) => {
       let queryStanza = $build('query', {
@@ -124,19 +143,17 @@ class Registration {
       }
 
       return this.connection.sendIQ(queryStanza, 'set');
-   }
+   };
 }
 
 class Connection {
    private sid: string;
    private rid = parseInt((Math.random() * 100000).toString(), 10);
 
-   constructor(private service: string, private domain: string) {
-
-   }
+   constructor(private service: string, private domain: string) {}
 
    public send(childStanza: Strophe.Builder): Promise<JQuery> {
-      let stanza = $build('body', this.getBodyAttributes())
+      let stanza = $build('body', this.getBodyAttributes());
       stanza.cnode(childStanza.tree());
 
       return new Promise((resolve, reject) => {
@@ -152,7 +169,7 @@ class Connection {
 
                resolve(data);
             },
-            error: (data) => reject(data),
+            error: data => reject(data),
          });
       });
    }
@@ -187,16 +204,16 @@ class Connection {
       }
 
       return {
-          'to ': this.domain,
+         'to ': this.domain,
          'xml:lang': 'en',
-          'wait ': 60,
-          'hold ': 1,
-          'content ': 'text/xml; charset=utf-8',
-          'ver ': '1.6',
-          'rid ': this.rid,
+         'wait ': 60,
+         'hold ': 1,
+         'content ': 'text/xml; charset=utf-8',
+         'ver ': '1.6',
+         'rid ': this.rid,
          'xmpp:version': '1.0',
          'xmlns:xmpp': Strophe.NS.BOSH,
-         'xmlns': Strophe.NS.HTTPBIND,
-      }
+         xmlns: Strophe.NS.HTTPBIND,
+      };
    }
 }

@@ -1,9 +1,11 @@
 button.jsxc-collapsible {
   background-color: var(--jsxc-color-background-darker);
   border: 0;
+  border-radius: 0;
   color: var(--jsxc-color-main-text);
   cursor: pointer;
   font-size: 12px;
+  font-weight: normal;
   outline: none;
   padding: 5px;
   text-align: left;
@@ -65,10 +67,11 @@ button.jsxc-collapsible {
   }
 }
 
-.jsxc-filter-input {
+input.jsxc-filter-input {
   background-color: $roster-input-bg;
   background-image: none;
   border: 0;
+  color: var(--jsxc-color-main-text);
   height: 30px;
   outline: none;
   padding: 7px 28px 5px;
@@ -197,7 +200,7 @@ button.jsxc-collapsible {
       background-color: $roster-bottom-bg-hover;
     }
 
-    >div {
+    >div:not(.jsxc-avatar) {
       height: 100%;
     }
   }

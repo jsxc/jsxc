@@ -1,5 +1,5 @@
-import Dialog from '../Dialog'
-import Client from '../../Client'
+import Dialog from '../Dialog';
+import Client from '../../Client';
 
 let exstatusTemplate = require('../../../template/extensiveStatus.hbs');
 
@@ -20,7 +20,7 @@ export default function () {
       Client.getPresenceController().setTargetPresence(targetPresence, status);
 
       dialog.close();
-   }
+   };
 
    dom.find('.jsxc-js-save').on('click', () => updateStatus());
    dom.find('.jsxc-js-clear').on('click', () => {

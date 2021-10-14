@@ -17,6 +17,8 @@
 
 .jsxc-memberlist-textarea,
 .jsxc-blocklist-textarea {
+  background-color: var(--jsxc-color-background-main);
+  color: var(--jsxc-color-main-text);
   margin-left: 15px;
   min-height: 300px !important;
   min-width: 500px !important;
@@ -75,15 +77,15 @@
   hr {
     border: 0;
     border-top: 1px solid $bg-darker;
-    margin-bottom: 20px;
-    margin-top: 20px;
+    margin-bottom: 3em;
+    margin-top: 3em;
   }
 
   h3 {
     font-size: 120%;
     font-weight: bold;
-    margin-bottom: 10px;
-    margin-top: 20px;
+    margin-bottom: 1em;
+    margin-top: 3em;
   }
 
   .jsxc-right {
@@ -266,6 +268,8 @@ button.jsxc-page__subheadline {
 
   &__secondary-action {
     align-self: flex-start;
+    background-color: var(--jsxc-color-main-background);
+    color: var(--jsxc-color-main-text);
   }
 }
 
@@ -302,4 +306,35 @@ button.jsxc-page__subheadline {
 .jsxc-account-choice-block {
   height: 30px;
   margin-bottom: 2em;
+}
+
+.jsxc-account-choice {
+  height: 30px;
+}
+
+.jsxc-dialog .jsxc-avatarimage {
+  display: flex;
+  justify-content: center;
+  margin: 2em 0;
+
+  img {
+    height: 96px;
+    width: 96px;
+  }
+
+  input[type="file"] {
+    display: none;
+  }
+
+  label {
+    cursor: pointer;
+    position: relative;
+
+    button {
+      padding: 0;
+      position: absolute;
+      right: -11px;
+      top: -11px;
+    }
+  }
 }

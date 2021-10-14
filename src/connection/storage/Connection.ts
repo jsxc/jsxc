@@ -1,13 +1,12 @@
-import JID from '../../JID'
-import { IConnection } from '../Connection.interface'
-import Log from '../../util/Log'
-import Account from '../../Account'
-import { AbstractConnection, STANZA_IQ_KEY, STANZA_KEY, STANZA_JINGLE_KEY } from '../AbstractConnection'
-import { Strophe } from '../../vendor/Strophe'
-import JingleHandler from '../JingleHandler'
+import JID from '../../JID';
+import { IConnection } from '../Connection.interface';
+import Log from '../../util/Log';
+import Account from '../../Account';
+import { AbstractConnection, STANZA_IQ_KEY, STANZA_KEY, STANZA_JINGLE_KEY } from '../AbstractConnection';
+import { Strophe } from '../../vendor/Strophe';
+import JingleHandler from '../JingleHandler';
 
 export default class StorageConnection extends AbstractConnection implements IConnection {
-
    protected connection: any = {};
 
    private handlers = [];
@@ -21,14 +20,14 @@ export default class StorageConnection extends AbstractConnection implements ICo
          sendIQ: (elem, success, error) => {
             this.sendIQ(elem).then(success).catch(error);
          },
-         addHandler: () => { }
-      }
+         addHandler: () => {},
+      };
 
-      for (let k in (<any> Strophe)._connectionPlugins) {
-         if ((<any> Strophe)._connectionPlugins.hasOwnProperty(k)) {
-            let ptype = (<any> Strophe)._connectionPlugins[k];
+      for (let k in (<any>Strophe)._connectionPlugins) {
+         if ((<any>Strophe)._connectionPlugins.hasOwnProperty(k)) {
+            let ptype = (<any>Strophe)._connectionPlugins[k];
             // jslint complaints about the below line, but this is fine
-            let F = function() { }; // jshint ignore:line
+            let F = function () {}; // jshint ignore:line
             F.prototype = ptype;
             this.connection[k] = new F();
             this.connection[k].init(this.connection);
@@ -38,7 +37,14 @@ export default class StorageConnection extends AbstractConnection implements ICo
       this.getStorage().registerHook(STANZA_JINGLE_KEY, this.storageJingleHook);
    }
 
-   public registerHandler(handler: (stanza: string) => boolean, ns?: string, name?: string, type?: string, id?: string, from?: string) {
+   public registerHandler(
+      handler: (stanza: string) => boolean,
+      ns?: string,
+      name?: string,
+      type?: string,
+      id?: string,
+      from?: string
+   ) {
       this.handlers.push(arguments);
    }
 
@@ -56,7 +62,7 @@ export default class StorageConnection extends AbstractConnection implements ICo
 
    public getCapabilitiesByJid(jid: JID): any {
       Log.info('[SC] getCapabilitiesByJid');
-   };
+   }
 
    public hasFeatureByJid(jid: JID, feature: string);
    public hasFeatureByJid(jid: JID, feature: string[]);
@@ -73,11 +79,7 @@ export default class StorageConnection extends AbstractConnection implements ICo
    public send() {
       let storage = this.getStorage();
       let stanzaString = this.stanzaElementToString(arguments[0]);
-      let key = storage.generateKey(
-         STANZA_KEY,
-         stanzaString.length + '',
-         new Date().getTime() + ''
-      );
+      let key = storage.generateKey(STANZA_KEY, stanzaString.length + '', new Date().getTime() + '');
 
       storage.setItem(key, stanzaString);
    }
@@ -87,16 +89,12 @@ export default class StorageConnection extends AbstractConnection implements ICo
    protected sendIQ() {
       let storage = this.getStorage();
       let stanzaString = this.stanzaElementToString(arguments[0]);
-      let key = storage.generateKey(
-         STANZA_IQ_KEY,
-         stanzaString.length + '',
-         new Date().getTime() + ''
-      );
+      let key = storage.generateKey(STANZA_IQ_KEY, stanzaString.length + '', new Date().getTime() + '');
 
       storage.setItem(key, stanzaString);
 
-      return new Promise<Element>(function(resolve, reject) {
-         storage.registerHook(key, function(newValue: {type: 'success'|'error', stanza: string}) {
+      return new Promise<Element>(function (resolve, reject) {
+         storage.registerHook(key, function (newValue: { type: 'success' | 'error'; stanza: string }) {
             if (!newValue) {
                return;
             }
@@ -135,7 +133,7 @@ export default class StorageConnection extends AbstractConnection implements ICo
       if (newValue && !oldValue) {
          this.processJingleStanza(newValue);
       }
-   }
+   };
 
    private processJingleStanza(stanzaString) {
       let iqElement = $.parseXML(stanzaString).getElementsByTagName('iq')[0];

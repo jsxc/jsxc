@@ -1,12 +1,11 @@
-import { State } from './ui/ChatWindow'
-import Client from './Client'
-import Contact from './Contact'
-import PersistentMap from './util/PersistentMap'
+import { State } from './ui/ChatWindow';
+import Client from './Client';
+import Contact from './Contact';
+import PersistentMap from './util/PersistentMap';
 
-const KEY = 'chatWindowState'
+const KEY = 'chatWindowState';
 
 export default class ChatWindowController {
-
    constructor(private contact: Contact, private properties: PersistentMap) {
       this.properties.registerHook(KEY, this.stateHandler);
 
@@ -73,5 +72,5 @@ export default class ChatWindowController {
             chatWindow.open();
             break;
       }
-   }
+   };
 }

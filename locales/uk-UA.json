@@ -432,7 +432,14 @@
     "trusted_domains": "Довірчі домени",
     "one_domain_per_line": "Домени, з яких буде автоматично завантажуватися вкладення (один домен на рядок).",
     "setting-command-enable": "Дозволяє контролювати різні налаштування за допомогою текстових команд.",
-    "setting-version": null
+    "setting-version": null,
+    "setting-time": null,
+    "Occupants": null,
+    "Occupants_not_provided": null,
+    "Edit_avatar": null,
+    "Every_member_can_see_your_full_JID": null,
+    "message_not_delivered": null,
+    "User_media_not_readable": null
   },
   "Notifications": "Сповіщення"
 }

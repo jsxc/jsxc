@@ -67,6 +67,7 @@
   &__tag {
     background-color: #bbb;
     border: 0;
+    border-radius: 0;
     color: var(--jsxc-color-primary-text);
     display: inline-block;
     font-size: 8px;
@@ -74,6 +75,7 @@
     line-height: 12px;
     margin-right: 1px;
     max-width: 12px;
+    min-height: auto;
     overflow: hidden;
     padding: 0 0.5em;
     text-indent: 999px;

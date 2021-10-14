@@ -1,12 +1,12 @@
-import MessageArchiveManagementPlugin from './Plugin'
-import Message from '../../Message'
-import { IContact as Contact } from '../../Contact.interface'
-import JID from '../../JID'
-import UUID from '../../util/UUID'
-import Utils from '../../util/Utils'
-import Log from '../../util/Log'
-import Translation from '../../util/Translation'
-import * as Namespace from '../../connection/xmpp/namespace'
+import MessageArchiveManagementPlugin from './Plugin';
+import Message from '../../Message';
+import { IContact as Contact } from '../../Contact.interface';
+import JID from '../../JID';
+import UUID from '../../util/UUID';
+import Utils from '../../util/Utils';
+import Log from '../../util/Log';
+import Translation from '../../util/Translation';
+import * as Namespace from '../../connection/xmpp/namespace';
 import { IMessage, MessageMark } from '@src/Message.interface';
 import { IJID } from '@src/JID.interface';
 import MultiUserContact from '@src/MultiUserContact';
@@ -82,16 +82,19 @@ export default class Archive {
       }
 
       let connection = this.plugin.getConnection();
-      this.plugin.determineServerSupport(this.archiveJid).then(version => {
-         if (!version) {
-            throw new Error(`Archive JID ${this.archiveJid.full} has no support for MAM.`);
-         }
+      this.plugin
+         .determineServerSupport(this.archiveJid)
+         .then(version => {
+            if (!version) {
+               throw new Error(`Archive JID ${this.archiveJid.full} has no support for MAM.`);
+            }
 
-         let jid = !this.contact.isGroupChat() ? this.contact.getJid() : undefined;
+            let jid = !this.contact.isGroupChat() ? this.contact.getJid() : undefined;
 
-         return connection.queryArchive(this.archiveJid, <string> version, queryId, jid, firstResultId, endDate);
-      }).then(this.onComplete)
-         .catch((stanza) => {
+            return connection.queryArchive(this.archiveJid, <string>version, queryId, jid, firstResultId, endDate);
+         })
+         .then(this.onComplete)
+         .catch(stanza => {
             Log.warn('Error while requesting archive', stanza);
          });
    }
@@ -116,7 +119,7 @@ export default class Archive {
       }
 
       let delayElement = forwardedElement.find('delay[xmlns="urn:xmpp:delay"]');
-      let stamp = (delayElement.length > 0) ? new Date(delayElement.attr('stamp')) : new Date();
+      let stamp = delayElement.length > 0 ? new Date(delayElement.attr('stamp')) : new Date();
 
       let plaintextBody = Utils.removeHTML(messageElement.find('> body').text());
       let htmlBody = messageElement.find('html body' + Namespace.getFilter('XHTML'));
@@ -125,11 +128,14 @@ export default class Archive {
          return;
       }
 
-      let direction = (this.contact.getJid().bare === to.bare) ? Message.DIRECTION.OUT : Message.DIRECTION.IN;
+      let direction = this.contact.getJid().bare === to.bare ? Message.DIRECTION.OUT : Message.DIRECTION.IN;
 
       let stanzaIdElement = messageElement.find('stanza-id[xmlns="urn:xmpp:sid:0"]');
       let originIdElement = messageElement.find('origin-id[xmlns="urn:xmpp:sid:0"]');
-      let uid = direction === Message.DIRECTION.OUT && originIdElement.length ? originIdElement.attr('id') : stanzaIdElement.attr('id');
+      let uid =
+         direction === Message.DIRECTION.OUT && originIdElement.length
+            ? originIdElement.attr('id')
+            : stanzaIdElement.attr('id');
 
       if (Message.exists(uid)) {
          return new Message(uid);
@@ -153,9 +159,10 @@ export default class Archive {
             name: from.resource,
          };
 
-         let contact = <MultiUserContact> this.contact;
+         let contact = <MultiUserContact>this.contact;
 
-         messageProperties.direction = contact.getNickname() === from.resource ? Message.DIRECTION.OUT : Message.DIRECTION.IN;
+         messageProperties.direction =
+            contact.getNickname() === from.resource ? Message.DIRECTION.OUT : Message.DIRECTION.IN;
       }
 
       return new Message(messageProperties);
@@ -203,5 +210,5 @@ export default class Archive {
       this.setExhausted(isArchiveExhausted);
       this.setFirstResultId(firstResultId);
       this.plugin.removeQueryContactRelation(queryId);
-   }
+   };
 }

@@ -1,6 +1,6 @@
 import { testBOSHServer } from './v1/testBOSHServer';
 import Client from '../Client';
-import * as v1 from './v1'
+import * as v1 from './v1';
 import { AbstractPlugin } from '@src/plugin/AbstractPlugin';
 import { EncryptionPlugin } from '@src/plugin/EncryptionPlugin';
 

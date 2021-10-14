@@ -1,8 +1,7 @@
-import AbstractService from './AbstractService'
-import { $iq } from '../../vendor/Strophe'
+import AbstractService from './AbstractService';
+import { $iq } from '../../vendor/Strophe';
 
 export default class PEP extends AbstractService {
-
    public subscribe(node: string, handler: (stanza: string) => boolean, force: boolean = false) {
       this.account.getDiscoInfo().addFeature(node);
       this.account.getDiscoInfo().addFeature(`${node}+notify`);
@@ -15,8 +14,8 @@ export default class PEP extends AbstractService {
    }
 
    public unsubscribe(node: string, force: boolean = false) {
-      this.account.getDiscoInfo().removeFeature(node)
-      this.account.getDiscoInfo().removeFeature(`${node}+notify`)
+      this.account.getDiscoInfo().removeFeature(node);
+      this.account.getDiscoInfo().removeFeature(`${node}+notify`);
 
       if (force) {
          return this.connection.sendPresence();
@@ -26,13 +25,17 @@ export default class PEP extends AbstractService {
    public publish(node: string, element: Element, id?: string): Promise<Element> {
       let iqStanza = $iq({
          type: 'set',
-      }).c('pubsub', {
-         xmlns: 'http://jabber.org/protocol/pubsub'
-      }).c('publish', {
-         node
-      }).c('item', {
-         id
-      }).cnode(element);
+      })
+         .c('pubsub', {
+            xmlns: 'http://jabber.org/protocol/pubsub',
+         })
+         .c('publish', {
+            node,
+         })
+         .c('item', {
+            id,
+         })
+         .cnode(element);
 
       return this.sendIQ(iqStanza);
    }
@@ -40,11 +43,13 @@ export default class PEP extends AbstractService {
    public delete(node: string): Promise<Element> {
       let iqStanza = $iq({
          type: 'set',
-      }).c('pubsub', {
-         xmlns: 'http://jabber.org/protocol/pubsub#owner'
-      }).c('delete', {
-         node
-      });
+      })
+         .c('pubsub', {
+            xmlns: 'http://jabber.org/protocol/pubsub#owner',
+         })
+         .c('delete', {
+            node,
+         });
 
       return this.sendIQ(iqStanza);
    }
@@ -52,14 +57,14 @@ export default class PEP extends AbstractService {
    public retrieveItems(node: string, jid?: string) {
       let iq = $iq({
          to: jid,
-         type: 'get'
+         type: 'get',
       });
 
       iq.c('pubsub', {
-         xmlns: 'http://jabber.org/protocol/pubsub'
+         xmlns: 'http://jabber.org/protocol/pubsub',
       });
       iq.c('items', {
-         node
+         node,
       });
 
       return this.sendIQ(iq);

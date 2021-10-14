@@ -5,10 +5,10 @@ const webpack = require('webpack');
 const packageJson = require('./package.json');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const GitRevisionPlugin = new(require('git-revision-webpack-plugin'))();
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const TerserPlugin = require('terser-webpack-plugin');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 let supportedLangs = fs.readdirSync('./locales/').filter(filename => {
    if (!/\.json$/.test(filename)) {
@@ -62,7 +62,8 @@ let config = {
       path: OUTPUT_PATH,
       publicPath: 'dist/',
       libraryTarget: 'var',
-      library: 'JSXC'
+      library: 'JSXC',
+      clean: true,
    },
    optimization: {
       splitChunks: {
@@ -76,28 +77,25 @@ let config = {
             }
          }
       },
-      minimizer: [
-         new TerserPlugin({
-            terserOptions: {
-               keep_fnames: /Session$/,
-            },
-         }),
-      ],
    },
    performance: {
       maxEntrypointSize: 1024 * 1000 * 1000 * 3,
       maxAssetSize: 1024 * 1000 * 1000 * 3,
    },
    module: {
-      rules: [{
+      rules: [
+         {
             test: /\.ts$/,
             loader: 'ts-loader',
-            exclude: /node_modules/,
+            include: [path.resolve(__dirname, 'src'), path.resolve(__dirname, 'test')],
+            options: {
+               // transpileOnly: true,
+             },
          },
          {
             test: /\.hbs$/,
             loader: 'handlebars-loader',
-            exclude: /node_modules/,
+            include: path.resolve(__dirname, 'template'),
             options: {
                helperDirs: [
                   path.resolve(__dirname, 'template', 'helpers')
@@ -116,6 +114,7 @@ let config = {
          },
          {
             test: /\.(sass|scss)$/,
+            include: path.resolve(__dirname, 'scss'),
             use: [
                MiniCssExtractPlugin.loader, {
                   loader: 'css-loader',
@@ -146,13 +145,13 @@ let config = {
          '@vendor': path.resolve(__dirname, 'src/vendor/'),
          '@src': path.resolve(__dirname, 'src/'),
       },
-      // prep for Webpack 5
-      // fallback: {
-      //    fs: false,
-      //    stream: false,
-      //    path: false,
-      //    crypto: false,
-      // }
+      fallback: {
+         fs: false,
+         stream: false,
+         path: false,
+         crypto: false,
+         process: false,
+      }
    },
    externals: {
       'child_process': 'child_process',
@@ -161,14 +160,12 @@ let config = {
    plugins: [
       new webpack.ProvidePlugin({
          $: 'jquery',
-         jQuery: 'jquery'
+         jQuery: 'jquery',
+         process: 'process/browser',
       }),
       new MiniCssExtractPlugin({
          filename: 'styles/jsxc.bundle.css',
 
-      }),
-      new CleanWebpackPlugin({
-         cleanStaleWebpackAssets: false,
       }),
       new CopyWebpackPlugin({
          patterns: [{
@@ -192,6 +189,7 @@ let config = {
          }
       }),
       new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, new RegExp(MOMENTJS_LOCALES.join('|'))),
+      new ForkTsCheckerWebpackPlugin(),
    ],
    devServer: {
       // https://github.com/webpack/webpack-dev-server/issues/2484
@@ -227,9 +225,17 @@ module.exports = (env, argv) => {
 
    if (config.mode === 'development') {
       config.devtool = 'eval-source-map';
+   } else {
+      config.optimization.minimizer = [
+         new TerserPlugin({
+            terserOptions: {
+               keep_fnames: /Session$/,
+            },
+         }),
+      ];
    }
 
-   if (argv.release) {
+   if (argv.release || process.env.BUILD === 'release') {
       version = packageJson.version;
    }
 

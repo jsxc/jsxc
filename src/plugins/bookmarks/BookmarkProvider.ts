@@ -8,9 +8,12 @@ import ContactManager from '@src/ContactManager';
 import RoleAllocator from '@src/RoleAllocator';
 
 export default class BookmarkProvider extends ContactProvider {
-   private services: {[name: string]: AbstractService} = {};
+   private services: { [name: string]: AbstractService } = {};
 
-   constructor(contactManager: ContactManager, private createMultiUserContact: (jid: IJID, name?: string) => MultiUserContact) {
+   constructor(
+      contactManager: ContactManager,
+      private createMultiUserContact: (jid: IJID, name?: string) => MultiUserContact
+   ) {
       super(contactManager);
    }
 
@@ -115,8 +118,12 @@ export default class BookmarkProvider extends ContactProvider {
       return contacts;
    }
 
-   private async getReducedBookmarksFromServices(): Promise<{ [id: string]: {room: RoomBookmark, service: AbstractService} }> {
-      let bookmarks: { [id: string]: {room: RoomBookmark, service: AbstractService} } = {};
+   private async getReducedBookmarksFromServices(): Promise<{
+      [id: string]: { room: RoomBookmark; service: AbstractService };
+   }> {
+      let bookmarks: {
+         [id: string]: { room: RoomBookmark; service: AbstractService };
+      } = {};
 
       for (let name in this.services) {
          let service = this.services[name];
@@ -125,7 +132,7 @@ export default class BookmarkProvider extends ContactProvider {
          for (let room of rooms) {
             bookmarks[room.getId()] = {
                room,
-               service
+               service,
             };
          }
       }

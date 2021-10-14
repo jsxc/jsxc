@@ -91,12 +91,6 @@
         filter: grayscale(1);
       }
     }
-
-    .jsxc-bar {
-      .jsxc-avatar {
-        @extend %muc-avatar-icon;
-      }
-    }
   }
 
   .jsxc-memberlist {
@@ -147,9 +141,24 @@
 }
 
 li[data-type="groupchat"] {
-  .jsxc-avatar {
-    @extend %muc-avatar-icon;
+  .jsxc-bar .jsxc-avatar:empty::after {
+    content: map-get($jsxc-icons-map, "group");
+    font-family: jsxc-icons !important;
+    font-weight: normal;
+    text-indent: 0;
   }
+
+  &[data-membersonly="false"] {
+    .jsxc-bar .jsxc-avatar:empty::after {
+      content: map-get($jsxc-icons-map, "channel");
+    }
+  }
+
+  // &[data-membersonly="true"][data-nonanonymous="true"] {
+  //   .jsxc-avatar::after {
+  //     content: map-get($jsxc-icons-map, "nonanonymous-group");
+  //   }
+  // }
 
   .jsxc-video {
     display: none;

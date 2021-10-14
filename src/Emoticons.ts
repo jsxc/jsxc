@@ -1,4 +1,3 @@
-
 const EMOTICONS: any[] = [
    ['O:-) O:)', 'innocent'],
    ['>:-( >:( &gt;:-( &gt;:(', 'angry'],
@@ -23,9 +22,9 @@ const EMOTICONS: any[] = [
    [':heart:', 'heart'],
    [':brokenheart:', 'broken_heart'],
    [':zzz:', 'zzz'],
-   [':wait:', 'hand_splayed']
-]
-import * as emojione from 'emojione/lib/js/emojione'
+   [':wait:', 'hand_splayed'],
+];
+import * as emojione from 'emojione/lib/js/emojione';
 
 const EMOTICON_LIST = {
    core: {
@@ -36,14 +35,16 @@ const EMOTICON_LIST = {
       ':owncloud:': 'owncloud',
       ':nextcloud:': 'nextcloud',
    },
-   emojione: emojione.emojioneList
-}
+   emojione: emojione.emojioneList,
+};
 
 export default class Emoticons {
-
    private static initialised = false;
 
-   private static shortRegex = new RegExp(emojione.regShortNames.source + '|(' + Object.keys(EMOTICON_LIST.core).join('|') + ')', 'gi');
+   private static shortRegex = new RegExp(
+      emojione.regShortNames.source + '|(' + Object.keys(EMOTICON_LIST.core).join('|') + ')',
+      'gi'
+   );
 
    public static getDefaultEmoticonList() {
       let list = [];
@@ -79,7 +80,7 @@ export default class Emoticons {
          return;
       }
 
-      $.each(EMOTICONS, function(i, val) {
+      $.each(EMOTICONS, function (i, val) {
          // escape characters
          let reg = val[0].replace(/(\\|\/|\||\*|\.|\+|\?|\^|\$|\(|\)|\[|\]|\{|\})/g, '\\$1');
          reg = '(' + reg.split(' ').join('|') + ')';
@@ -91,7 +92,7 @@ export default class Emoticons {
 
    private static standardToShortname(text: string): string {
       // replace emoticons from XEP-0038 and pidgin with shortnames
-      $.each(EMOTICONS, function(i, val) {
+      $.each(EMOTICONS, function (i, val) {
          text = text.replace(val[2], ':' + val[1] + ':');
       });
 
@@ -110,7 +111,11 @@ export default class Emoticons {
       text = text.replace(this.shortRegex, Emoticons.replaceShortnameWithImage);
 
       let wrapper = $('<div>' + text + '</div>');
-      if (wrapper.find('.jsxc-emoticon').length === 1 && wrapper.text().replace(/ /, '').length === 0 && wrapper.find('*').length === 1) {
+      if (
+         wrapper.find('.jsxc-emoticon').length === 1 &&
+         wrapper.text().replace(/ /, '').length === 0 &&
+         wrapper.find('*').length === 1
+      ) {
          wrapper.find('.jsxc-emoticon').addClass('jsxc-emoticon--large');
          text = wrapper.html();
       }
@@ -119,7 +124,11 @@ export default class Emoticons {
    }
 
    private static replaceShortnameWithImage = (shortname: string) => {
-      if (typeof shortname === 'undefined' || shortname === '' || (!(shortname in EMOTICON_LIST.emojione) && !(shortname in EMOTICON_LIST.core))) {
+      if (
+         typeof shortname === 'undefined' ||
+         shortname === '' ||
+         (!(shortname in EMOTICON_LIST.emojione) && !(shortname in EMOTICON_LIST.core))
+      ) {
          return shortname;
       }
 
@@ -137,5 +146,5 @@ export default class Emoticons {
       element.attr('title', shortname);
 
       return element.prop('outerHTML');
-   }
+   };
 }

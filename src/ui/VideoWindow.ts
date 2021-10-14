@@ -1,6 +1,6 @@
-import Log from '../util/Log'
-import Translation from '../util/Translation'
-import { VideoDialog } from './VideoDialog'
+import Log from '../util/Log';
+import Translation from '../util/Translation';
+import { VideoDialog } from './VideoDialog';
 import JingleMediaSession from '@src/JingleMediaSession';
 
 export default class VideoWindow {
@@ -11,6 +11,15 @@ export default class VideoWindow {
    constructor(private videoDialog: VideoDialog, private session: JingleMediaSession) {
       this.registerHooks();
       this.initWrapper();
+
+      let remoteStreams = this.session.getRemoteStreams();
+
+      if (remoteStreams.length > 0) {
+         this.wrapperElement.removeClass('jsxc-establishing');
+         this.wrapperElement.addClass('jsxc-ice-connected');
+
+         this.addStream(remoteStreams[0]);
+      }
    }
 
    private registerHooks() {
@@ -50,20 +59,20 @@ export default class VideoWindow {
       } else if (state === 'interrupted') {
          this.videoDialog.setStatus(Translation.t('Connection_interrupted'));
       }
-   }
+   };
 
    private callAccepted = () => {
       this.wrapperElement.removeClass('jsxc-ringing');
 
       this.videoDialog.clearStatus();
-   }
+   };
 
    private callRinging = () => {
       this.videoDialog.setStatus('ringing...', 0);
 
       this.wrapperElement.removeClass('jsxc-establishing');
       this.wrapperElement.addClass('jsxc-ringing');
-   }
+   };
 
    private addStream = (stream: MediaStream) => {
       if (this.videoElement) {
@@ -91,14 +100,16 @@ export default class VideoWindow {
       if (isAudioDevice) {
          this.wrapperElement.addClass('jsxc-audio-available');
       }
-   }
+   };
 
    private removeStream = () => {
       Log.debug('Remote stream for ' + this.session.getId() + ' removed.');
 
       VideoDialog.detachMediaStream(this.videoElement);
 
-      this.videoElement.remove();
-      this.videoElement = undefined;
-   }
+      if (this.videoElement) {
+         this.videoElement.remove();
+         this.videoElement = undefined;
+      }
+   };
 }

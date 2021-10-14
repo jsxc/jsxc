@@ -1,16 +1,15 @@
-import { AbstractPlugin, IMetaData } from '../plugin/AbstractPlugin'
-import PluginAPI from '../plugin/PluginAPI'
+import { AbstractPlugin, IMetaData } from '../plugin/AbstractPlugin';
+import PluginAPI from '../plugin/PluginAPI';
 import Translation from '@util/Translation';
-import Client from '../Client'
-import JID from '../JID'
+import Client from '../Client';
+import JID from '../JID';
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '99.0.0';
 
-const NAMESPACE_VERSION = 'jabber:iq:version'
+const NAMESPACE_VERSION = 'jabber:iq:version';
 
 export default class VersionPlugin extends AbstractPlugin {
-
    public static getId(): string {
       return 'version';
    }
@@ -22,12 +21,14 @@ export default class VersionPlugin extends AbstractPlugin {
    public static getMetaData(): IMetaData {
       return {
          description: Translation.t('setting-version'),
-         xeps: [{
-            id: 'XEP-0092',
-            name: 'Software Version',
-            version: '1.1',
-         }]
-      }
+         xeps: [
+            {
+               id: 'XEP-0092',
+               name: 'Software Version',
+               version: '1.1',
+            },
+         ],
+      };
    }
 
    constructor(pluginAPI: PluginAPI) {
@@ -44,9 +45,9 @@ export default class VersionPlugin extends AbstractPlugin {
       let iq = $iq({
          type: 'get',
          to: jid.full,
-         xmlns: 'jabber:client'
+         xmlns: 'jabber:client',
       }).c('query', {
-         'xmlns': NAMESPACE_VERSION
+         xmlns: NAMESPACE_VERSION,
       });
 
       return this.pluginAPI.sendIQ(iq);
@@ -58,9 +59,9 @@ export default class VersionPlugin extends AbstractPlugin {
          type: 'result',
          to: jid,
          id: idstr,
-         xmlns: 'jabber:client'
+         xmlns: 'jabber:client',
       }).c('query', {
-         'xmlns': NAMESPACE_VERSION
+         xmlns: NAMESPACE_VERSION,
       });
 
       if (name) {
@@ -85,11 +86,11 @@ export default class VersionPlugin extends AbstractPlugin {
       let type = element.attr('type');
       let id = element.attr('id');
 
-      if (type === 'get' && (
-         this.pluginAPI.getContact(fromjid) || //only send to contacts
-         tojid.domain === fromjid.bare //or own domain server
-      ))
-      {
+      if (
+         type === 'get' &&
+         (this.pluginAPI.getContact(fromjid) || //only send to contacts
+            tojid.domain === fromjid.bare) //or own domain server
+      ) {
          let OSName = '';
          let includeOS = Client.getOption<boolean>('includeOSInVersionResponse', false);
 
@@ -114,5 +115,5 @@ export default class VersionPlugin extends AbstractPlugin {
       }
 
       return true;
-   }
+   };
 }

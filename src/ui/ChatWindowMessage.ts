@@ -1,10 +1,11 @@
-import { IMessage, DIRECTION, MessageMark } from '../Message.interface'
-import DateTime from './util/DateTime'
-import ChatWindow from './ChatWindow'
-import AvatarSet from './AvatarSet'
-import Log from '../util/Log'
+import { IMessage, DIRECTION, MessageMark } from '../Message.interface';
+import DateTime from './util/DateTime';
+import ChatWindow from './ChatWindow';
+import AvatarSet from './AvatarSet';
+import Log from '../util/Log';
 import LinkHandlerGeo from '@src/LinkHandlerGeo';
 import Color from '@util/Color';
+import Translation from '@util/Translation';
 
 let chatWindowMessageTemplate = require('../../template/chat-window-message.hbs')
 const LONGPRESS_TIME = 600; //how long is a long press in millis
@@ -60,7 +61,7 @@ export default class ChatWindowMessage {
    private async generateElement() {
       let template = chatWindowMessageTemplate({
          id: this.message.getCssId(),
-         direction: this.message.getDirectionString()
+         direction: this.message.getDirectionString(),
       });
 
       this.element = $(template);
@@ -92,7 +93,7 @@ export default class ChatWindowMessage {
 
       if (this.message.getErrorMessage()) {
          this.element.addClass('jsxc-error');
-         this.element.attr('title', this.message.getErrorMessage());
+         this.element.find('.jsxc-error-content').text(Translation.t(this.message.getErrorMessage()));
       }
 
       if (this.message.hasAttachment()) {
@@ -156,7 +157,7 @@ export default class ChatWindowMessage {
             attachmentElement.addClass('jsxc-no-thumbnail');
          }
 
-         attachment.registerThumbnailHook((thumbnail) => {
+         attachment.registerThumbnailHook(thumbnail => {
             imgElement.attr('src', thumbnail || '../images/placeholder_image.svg');
 
             if (thumbnail) {
@@ -177,16 +178,20 @@ export default class ChatWindowMessage {
          attachmentElement.attr('download', attachment.getName());
 
          if (attachment.getHandler()) {
-            attachmentElement.on('click', (ev) => {
+            attachmentElement.on('click', ev => {
                ev.preventDefault();
 
                attachmentElement.find('.jsxc-attachment').addClass('jsxc-attachment--loading');
 
-               attachment.getHandler().call(undefined, attachment, true).catch(err => {
-                  this.message.setErrorMessage(err.toString());
-               }).then(() => {
-                  attachmentElement.find('.jsxc-attachment').removeClass('jsxc-attachment--loading');
-               });
+               attachment
+                  .getHandler()
+                  .call(undefined, attachment, true)
+                  .catch(err => {
+                     this.message.setErrorMessage(err.toString());
+                  })
+                  .then(() => {
+                     attachmentElement.find('.jsxc-attachment').removeClass('jsxc-attachment--loading');
+                  });
             });
          }
 
@@ -237,7 +242,7 @@ export default class ChatWindowMessage {
    }
 
    private registerHooks() {
-      this.message.registerHook('encrypted', (encrypted) => {
+      this.message.registerHook('encrypted', encrypted => {
          if (encrypted) {
             this.element.addClass('jsxc-encrypted');
          } else {
@@ -245,11 +250,12 @@ export default class ChatWindowMessage {
          }
       });
 
-      this.message.registerHook('unread', (unread) => {
+      this.message.registerHook('unread', unread => {
          if (!unread) {
             this.element.removeClass('jsxc-unread');
          }
       });
+
 
       this.message.registerHook('replaceBody', (processBodyString) => {
          if (processBodyString) {
@@ -276,27 +282,27 @@ export default class ChatWindowMessage {
 
       this.message.registerHook('progress', (progress) => {
          this.element.find('.jsxc-attachment').attr('data-progress', Math.round(progress * 100) + '%');
-      })
+      });
 
       if (this.message.getDirection() === DIRECTION.OUT || this.message.getDirection() === DIRECTION.PROBABLY_OUT) {
-         this.message.registerHook('mark', (mark) => {
+         this.message.registerHook('mark', mark => {
             this.element.attr('data-mark', MessageMark[mark]);
          });
       }
 
-      this.message.registerHook('next', (nextId) => {
+      this.message.registerHook('next', nextId => {
          if (nextId) {
             this.restoreNextMessage();
          }
       });
 
-      this.message.registerHook('errorMessage', (errorMessage) => {
+      this.message.registerHook('errorMessage', errorMessage => {
          if (errorMessage) {
             this.element.addClass('jsxc-error');
-            this.element.attr('title', errorMessage);
+            this.element.find('.jsxc-error-content').text(Translation.t(errorMessage));
          } else {
             this.element.removeClass('jsxc-error');
-            this.element.attr('title', null);
+            this.element.find('.jsxc-error-content').empty();
          }
       });
 

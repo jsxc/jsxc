@@ -1,4 +1,4 @@
-import Client from './Client'
+import Client from './Client';
 
 export default class PageVisibility {
    private static isInitialized = false;
@@ -10,11 +10,11 @@ export default class PageVisibility {
 
       PageVisibility.isInitialized = true;
 
-      Client.getStorage().registerHook('isHidden', (hidden) => {
+      Client.getStorage().registerHook('isHidden', hidden => {
          if (hidden && !document.hidden) {
             Client.getStorage().setItem('isHidden', document.hidden);
          }
-      })
+      });
 
       function visibilityChangeHandler() {
          Client.getStorage().setItem('isHidden', document.hidden);

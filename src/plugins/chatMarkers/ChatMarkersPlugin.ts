@@ -1,14 +1,14 @@
-import * as Namespace from '@src/connection/xmpp/namespace'
-import { ContactSubscription } from '@src/Contact.interface'
-import JID from '@src/JID'
-import { IJID } from '@src/JID.interface'
-import Message from '@src/Message'
-import { DIRECTION } from '@src/Message.interface'
-import { AbstractPlugin, IMetaData } from '@src/plugin/AbstractPlugin'
-import PluginAPI from '@src/plugin/PluginAPI'
-import ChatWindow from '@src/ui/ChatWindow'
-import Translation from '@src/util/Translation'
-import { $msg } from '@src/vendor/Strophe'
+import * as Namespace from '@src/connection/xmpp/namespace';
+import { ContactSubscription } from '@src/Contact.interface';
+import JID from '@src/JID';
+import { IJID } from '@src/JID.interface';
+import Message from '@src/Message';
+import { DIRECTION } from '@src/Message.interface';
+import { AbstractPlugin, IMetaData } from '@src/plugin/AbstractPlugin';
+import PluginAPI from '@src/plugin/PluginAPI';
+import ChatWindow from '@src/ui/ChatWindow';
+import Translation from '@src/util/Translation';
+import { $msg } from '@src/vendor/Strophe';
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '99.0.0';
@@ -23,7 +23,6 @@ const ID = 'id';
 const FROM = 'from';
 
 export default class ChatMarkersPlugin extends AbstractPlugin {
-
    public static getId(): string {
       return 'chat-markers';
    }
@@ -35,12 +34,14 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
    public static getMetaData(): IMetaData {
       return {
          description: Translation.t('chatmarkers-description'),
-         xeps: [{
-            id: 'XEP-0333',
-            name: 'Chat Markers',
-            version: '0.3',
-         }]
-      }
+         xeps: [
+            {
+               id: 'XEP-0333',
+               name: 'Chat Markers',
+               version: '0.3',
+            },
+         ],
+      };
    }
 
    constructor(pluginAPI: PluginAPI) {
@@ -84,45 +85,56 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
 
       let subscription = contact.getSubscription();
 
-      return subscription === ContactSubscription.FROM
-      || subscription === ContactSubscription.BOTH;
+      return subscription === ContactSubscription.FROM || subscription === ContactSubscription.BOTH;
    }
 
    // add "markable" element according to XEP-0333
    private addMarkable(xmlStanza: Strophe.Builder) {
-      xmlStanza.c(MARKABLE, {
-         xmlns: Namespace.get(CHATMARKERS)
-      }).up();
+      xmlStanza
+         .c(MARKABLE, {
+            xmlns: Namespace.get(CHATMARKERS),
+         })
+         .up();
    }
 
    // send "received" message according to XEP-0333
    private sendReceived(lastReceivedMsgId: string, to: IJID) {
       this.pluginAPI.Log.debug(`sending ${RECEIVED} message. Yaay! =)`);
 
-      this.pluginAPI.send($msg({
-         to: to.full,
-         type: 'chat',
-      }).c(RECEIVED, {
-         xmlns: Namespace.get(CHATMARKERS),
-         id: lastReceivedMsgId
-      }).up().c('store', {
-         xmlns: 'urn:xmpp:hints'
-      }));
+      this.pluginAPI.send(
+         $msg({
+            to: to.full,
+            type: 'chat',
+         })
+            .c(RECEIVED, {
+               xmlns: Namespace.get(CHATMARKERS),
+               id: lastReceivedMsgId,
+            })
+            .up()
+            .c('store', {
+               xmlns: 'urn:xmpp:hints',
+            })
+      );
    }
 
    // send "displayed" message according to XEP-0333
    private sendDisplayed(lastDisplayedMsgId: string, to: IJID) {
       this.pluginAPI.Log.debug(`sending ${DISPLAYED} message. Yaay! =)`);
 
-      this.pluginAPI.send($msg({
-         to: to.full,
-         type: 'chat',
-      }).c(DISPLAYED, {
-         xmlns: Namespace.get(CHATMARKERS),
-         id: lastDisplayedMsgId
-      }).up().c('store', {
-         xmlns: 'urn:xmpp:hints'
-      }));
+      this.pluginAPI.send(
+         $msg({
+            to: to.full,
+            type: 'chat',
+         })
+            .c(DISPLAYED, {
+               xmlns: Namespace.get(CHATMARKERS),
+               id: lastDisplayedMsgId,
+            })
+            .up()
+            .c('store', {
+               xmlns: 'urn:xmpp:hints',
+            })
+      );
    }
 
    // send "acknowledged" message according to XEP-0333
@@ -141,7 +153,7 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
 
    private preSendMessageStanzaProcessor = (msg: Message, stanza: Strophe.Builder): Promise<any> => {
       if (msg.getType() === Message.MSGTYPE.CHAT) {
-         return this.supportsChatMarkers(msg.getPeer()).then((hasFeature) => {
+         return this.supportsChatMarkers(msg.getPeer()).then(hasFeature => {
             if (hasFeature) {
                this.addMarkable(stanza);
             }
@@ -151,7 +163,7 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
       }
 
       return Promise.resolve([msg, stanza]);
-   }
+   };
 
    private onChatMarkersMessage = (stanza: string) => {
       let stanzaElement = $(stanza);
@@ -161,7 +173,8 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
          return true;
       }
 
-      let mamResultElement = stanzaElement.find(Namespace.getFilter('MAM2', 'result')) ||
+      let mamResultElement =
+         stanzaElement.find(Namespace.getFilter('MAM2', 'result')) ||
          stanzaElement.find(Namespace.getFilter('MAM1', 'result'));
       let isMam = mamResultElement.length > 0;
 
@@ -190,7 +203,11 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
       let idAttr = messageElement.attr(ID);
       let fromAttr = messageElement.attr(FROM);
       let toAttr = messageElement.attr('to');
-      let typeAttr = stanzaElement.attr('type');
+      let typeAttr = messageElement.attr('type');
+
+      if (typeAttr === Message.MSGTYPE.GROUPCHAT || typeAttr === 'error') {
+         return true;
+      }
 
       let markableMessageId = markerElement.attr(ID);
       let marker = markerElement.prop('tagName').toLowerCase() as string;
@@ -208,7 +225,7 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
             return true;
          }
 
-         if ($(stanza).attr('type') !== Message.MSGTYPE.GROUPCHAT && !isCarbon && !isMam) {
+         if (!isCarbon && !isMam) {
             let peer = new JID(fromAttr);
 
             this.sendReceived(idAttr, peer);
@@ -218,16 +235,14 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
             return true;
          }
 
-         if (typeAttr !== Message.MSGTYPE.GROUPCHAT) {
-            let peerJid = new JID(carbonSentElement.length > 0 ? toAttr : fromAttr);
-            let direction = carbonSentElement.length > 0 ? DIRECTION.IN : DIRECTION.OUT;
+         let peerJid = new JID(carbonSentElement.length > 0 ? toAttr : fromAttr);
+         let direction = carbonSentElement.length > 0 ? DIRECTION.IN : DIRECTION.OUT;
 
-            this.markMessages(markableMessageId, peerJid, marker, direction);
-         }
+         this.markMessages(markableMessageId, peerJid, marker, direction);
       }
 
       return true;
-   }
+   };
 
    private markMessages(markableMessageId: string, peer: IJID, status: string, direction: DIRECTION) {
       let contact = this.pluginAPI.getContact(peer);
@@ -251,7 +266,7 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
 
       // @REVIEW spec is not clear if only markable message from the same resource should be marked
       while (!!msg) {
-         if (msg.getDirection() === direction && msg.isTransferred()) {
+         if (msg.getDirection() === direction && msg.isTransferred() && !msg.getErrorMessage()) {
             if (status === RECEIVED) {
                if (msg.isReceived()) {
                   // no need to traverse all messages
@@ -301,7 +316,7 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
       while (!!msg) {
          if (msg.getDirection() === DIRECTION.IN && msg.getType() !== Message.MSGTYPE.GROUPCHAT) {
             if (!msg.isDisplayed()) {
-               this.supportsChatMarkers(msg.getPeer()).then((hasFeature) => {
+               this.supportsChatMarkers(msg.getPeer()).then(hasFeature => {
                   if (hasFeature && this.hasSubscription(msg.getPeer())) {
                      this.sendDisplayed(msg.getAttrId(), msg.getPeer());
                   }
@@ -315,5 +330,5 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
             msg = transcript.getMessage(msg.getNextId());
          }
       }
-   }
+   };
 }

@@ -1,7 +1,7 @@
-import AbstractHandler from '../AbstractHandler'
-import JID from '../../../JID'
-import Translation from '../../../util/Translation'
-import { TYPE, FUNCTION } from '../../../Notice'
+import AbstractHandler from '../AbstractHandler';
+import JID from '../../../JID';
+import Translation from '../../../util/Translation';
+import { TYPE, FUNCTION } from '../../../Notice';
 
 export default class extends AbstractHandler {
    public processStanza(stanza: Element) {

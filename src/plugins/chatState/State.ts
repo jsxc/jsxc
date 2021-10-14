@@ -3,5 +3,5 @@ export enum STATE {
    COMPOSING = 'composing',
    PAUSED = 'paused',
    INACTIVE = 'inactive',
-   GONE = 'gone'
-};
+   GONE = 'gone',
+}

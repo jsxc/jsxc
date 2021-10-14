@@ -1,10 +1,11 @@
-import Log from '../../../../util/Log'
-import JID from '../../../../JID'
-import Message from '../../../../Message'
-import Translation from '../../../../util/Translation'
-import MultiUserContact from '../../../../MultiUserContact'
-import AbstractHandler from '../../AbstractHandler'
-import { MessageMark } from '@src/Message.interface'
+import Log from '../../../../util/Log';
+import JID from '../../../../JID';
+import Message from '../../../../Message';
+import Translation from '../../../../util/Translation';
+import MultiUserContact from '../../../../MultiUserContact';
+import AbstractHandler from '../../AbstractHandler';
+import { MessageMark } from '@src/Message.interface';
+import MultiUserStatusCodeHandler from './StatusCodeHandler';
 
 // body.replace(/^\/me /, '<i title="/me">' + Utils.removeHTML(this.sender.getName()) + '</i> ');
 
@@ -21,7 +22,7 @@ export default class extends AbstractHandler {
       let nickname = from.resource;
       let replacetag =  messageElement.find('message > replace');
 
-      let contact = <MultiUserContact> this.account.getContact(from);
+      let contact = <MultiUserContact>this.account.getContact(from);
       if (typeof contact === 'undefined') {
          Log.info('Sender is not in our contact list');
 
@@ -54,12 +55,22 @@ export default class extends AbstractHandler {
          return this.PRESERVE_HANDLER;
       }
 
+      if (!nickname) {
+         const codes = $(stanza)
+            .find('x[xmlns="http://jabber.org/protocol/muc#user"]')
+            .find('status')
+            .map((index, element) => element.getAttribute('code'))
+            .get();
+
+         MultiUserStatusCodeHandler.processCodes(codes, contact);
+      }
+
       if (body === '') {
          return this.PRESERVE_HANDLER;
       }
 
       let delay = messageElement.find('delay[xmlns="urn:xmpp:delay"]');
-      let sendDate = (delay.length > 0) ? new Date(delay.attr('stamp')) : new Date();
+      let sendDate = delay.length > 0 ? new Date(delay.attr('stamp')) : new Date();
       let afterJoin = sendDate > contact.getJoinDate();
       let direction = afterJoin ? Message.DIRECTION.IN : Message.DIRECTION.PROBABLY_IN;
 

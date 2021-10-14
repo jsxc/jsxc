@@ -1,4 +1,4 @@
-import Log from './util/Log'
+import Log from './util/Log';
 
 export default class StateMachine {
    public static STATE = {
@@ -8,14 +8,14 @@ export default class StateMachine {
       TRYTOINTERCEPT: 3,
       INTERCEPTED: 4,
       ESTABLISHING: 5,
-      READY: 6
+      READY: 6,
    };
 
    public static UISTATE = {
       STANDBY: 0,
       INITIATING: 1,
       READY: 2,
-   }
+   };
 
    private static currentState;
    private static currentUIState = StateMachine.UISTATE.STANDBY;

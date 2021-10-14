@@ -1,6 +1,6 @@
-import SM from '../StateMachine'
-import ChatWindowList from './ChatWindowList'
-import Roster from './Roster'
+import SM from '../StateMachine';
+import ChatWindowList from './ChatWindowList';
+import Roster from './Roster';
 
 export function init() {
    if (SM.getUIState() === SM.UISTATE.STANDBY) {

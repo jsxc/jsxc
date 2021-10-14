@@ -1,13 +1,15 @@
-import Log from './util/Log'
-import UUID from './util/UUID'
-import PersistentMap from './util/PersistentMap'
-import Client from './Client'
-import beautifyBytes from './ui/util/ByteBeautifier'
+import Log from './util/Log';
+import UUID from './util/UUID';
+import PersistentMap from './util/PersistentMap';
+import Client from './Client';
+import beautifyBytes from './ui/util/ByteBeautifier';
+import ImageHelper from '@util/ImageHelper';
+import FileHelper from '@util/FileHelper';
 
 export type AttachmentHandler = (attachment: Attachment, active: boolean) => Promise<void>;
 
 export default class Attachment {
-   private static handlers: {[key: string]: AttachmentHandler} = {}
+   private static handlers: { [key: string]: AttachmentHandler } = {};
 
    public static registerHandler(key: string, handler: AttachmentHandler) {
       Attachment.handlers[key] = handler;
@@ -38,12 +40,12 @@ export default class Attachment {
          this.properties.set({
             mimeType: this.file.type,
             name: this.file.name,
-            size: this.file.size
+            size: this.file.size,
          });
       } else if (arguments.length === 3) {
          this.properties.set({
             mimeType: arguments[1],
-            name: arguments[0]
+            name: arguments[0],
          });
 
          this.data = arguments[2];
@@ -172,7 +174,7 @@ export default class Attachment {
          img.attr('title', title);
          // img.attr('src', jsxc.options.get('root') + '/img/loading.gif');
 
-         this.getDataFromFile().then((src) => {
+         FileHelper.getDataURLFromFile(this.file).then(src => {
             img.attr('src', src);
          });
 
@@ -184,23 +186,9 @@ export default class Attachment {
 
    public registerThumbnailHook = (hook: (thumbnail?: string) => void) => {
       this.properties.registerHook('thumbnail', hook);
-   }
+   };
 
-   private getDataFromFile(): Promise<string> {
-      return new Promise((resolve, reject) => {
-         let reader = new FileReader();
-
-         reader.onload = function() {
-            resolve(<string> reader.result);
-         }
-
-         reader.onerror = reject;
-
-         reader.readAsDataURL(this.file);
-      });
-   }
-
-   public generateThumbnail(force: boolean = false): void {
+   public generateThumbnail(force: boolean = false): Promise<void> {
       if (typeof Image === 'undefined') {
          return;
       }
@@ -211,7 +199,7 @@ export default class Attachment {
 
       if (force || !this.hasData()) {
          if (this.file) {
-            this.getDataFromFile().then((data) => {
+            FileHelper.getDataURLFromFile(this.file).then(data => {
                this.data = data;
 
                this.generateThumbnail();
@@ -221,40 +209,8 @@ export default class Attachment {
          return;
       }
 
-      let sHeight;
-      let sWidth;
-      let sx;
-      let sy;
-      let dHeight = 100;
-      let dWidth = 100;
-      let canvas = <HTMLCanvasElement> $('<canvas>').get(0);
-
-      canvas.width = dWidth;
-      canvas.height = dHeight;
-
-      let ctx = canvas.getContext('2d');
-      let img = new Image();
-
-      img.onload = () => {
-         if (img.height > img.width) {
-            sHeight = img.width;
-            sWidth = img.width;
-            sx = 0;
-            sy = (img.height - img.width) / 2;
-         } else {
-            sHeight = img.height;
-            sWidth = img.height;
-            sx = (img.width - img.height) / 2;
-            sy = 0;
-         }
-
-         ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, dWidth, dHeight);
-
-         let thumbnailData = canvas.toDataURL('image/jpeg', 0.3);
-
+      return ImageHelper.scaleDown(this.data).then(thumbnailData => {
          this.properties.set('thumbnail', thumbnailData);
-      };
-
-      img.src = this.data;
+      });
    }
 }

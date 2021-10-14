@@ -6,9 +6,7 @@ import { IContact } from '@src/Contact.interface';
 import Form, { IFormJSONData } from '@connection/Form';
 
 class ContactWrapper {
-   constructor(protected contact: IContact, protected account: Account) {
-
-   }
+   constructor(protected contact: IContact, protected account: Account) {}
 
    public getUid() {
       return this.contact.getUid();
@@ -59,7 +57,7 @@ class MultiUserContactWrapper extends ContactWrapper {
 
       let service = this.account.getConnection().getMUCService();
 
-      return service.submitRoomConfiguration(this.getJid(), form)
+      return service.submitRoomConfiguration(this.getJid(), form);
    }
 }
 

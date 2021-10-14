@@ -1,4 +1,4 @@
-import ListItem from './DialogListItem'
+import ListItem from './DialogListItem';
 
 export default class List {
    private element: JQuery;

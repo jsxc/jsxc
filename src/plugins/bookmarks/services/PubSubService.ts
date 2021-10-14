@@ -1,5 +1,5 @@
 import AbstractService from './AbstractService';
-import * as NS from '@connection/xmpp/namespace'
+import * as NS from '@connection/xmpp/namespace';
 import RoomBookmark from '../RoomBookmark';
 import { IJID } from '@src/JID.interface';
 import { IConnection } from '@connection/Connection.interface';
@@ -7,6 +7,7 @@ import Form from '@connection/Form';
 import JID from '@src/JID';
 import Log from '@util/Log';
 import { $build } from '@vendor/Strophe';
+import UUID from '@util/UUID';
 
 NS.register('BOOKMARKS', 'storage:bookmarks');
 
@@ -37,7 +38,9 @@ export class PubSubService extends AbstractService {
       }
       let bookmarkElements = storageElement.children().get();
 
-      return bookmarkElements.filter(element => element.tagName.toLowerCase() === 'conference').map(element => this.parseConferenceElement(element));
+      return bookmarkElements
+         .filter(element => element.tagName.toLowerCase() === 'conference')
+         .map(element => this.parseConferenceElement(element));
    }
 
    public async addRoom(room: RoomBookmark) {
@@ -52,7 +55,7 @@ export class PubSubService extends AbstractService {
       let jid = new JID(element.getAttribute('jid'));
       let alias = element.getAttribute('name');
       let nickElement = element.getElementsByTagName('nick');
-      let nickname = nickElement.length === 1 ? nickElement[0].textContent : undefined;
+      let nickname = nickElement.length === 1 ? nickElement[0].textContent : UUID.v4().split('-')[0];
       let passwordElement = element.getElementsByTagName('password');
       let password = passwordElement.length === 1 ? passwordElement[0].textContent : undefined;
       let autoJoin = element.getAttribute('autojoin') === 'true';
@@ -137,7 +140,7 @@ export class PubSubService extends AbstractService {
    private publishBookmarks(storageElement: JQuery<Element>) {
       let pubSubService = this.connection.getPubSubService();
       let item = $build('item', {
-         id: 'current'
+         id: 'current',
       }).cnode(storageElement.get(0));
 
       return pubSubService.publish(NS.get('BOOKMARKS'), item, this.getOptionForm());
@@ -146,17 +149,21 @@ export class PubSubService extends AbstractService {
    private getOptionForm(): Form {
       return Form.fromJSON({
          type: 'submit',
-         fields: [{
-            type: 'hidden',
-            name: 'FORM_TYPE',
-            values: [NS.get('PUBSUB_PUBLISH_OPTIONS')]
-         }, {
-            name: 'pubsub#persist_items',
-            values: ['1']
-         }, {
-            name: 'pubsub#access_model',
-            values: ['whitelist']
-         }]
+         fields: [
+            {
+               type: 'hidden',
+               name: 'FORM_TYPE',
+               values: [NS.get('PUBSUB_PUBLISH_OPTIONS')],
+            },
+            {
+               name: 'pubsub#persist_items',
+               values: ['1'],
+            },
+            {
+               name: 'pubsub#access_model',
+               values: ['whitelist'],
+            },
+         ],
       });
    }
 }

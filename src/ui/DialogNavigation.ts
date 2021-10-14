@@ -1,11 +1,9 @@
-import Page from './DialogPage'
+import Page from './DialogPage';
 
 export default class Navigation {
    private history: JQuery[] = [];
 
-   constructor(private rootElement: JQuery) {
-
-   }
+   constructor(private rootElement: JQuery) {}
 
    public goBack() {
       if (this.history.length === 1) {

@@ -1,12 +1,12 @@
-import { ILog } from './Log.interface'
+import { ILog } from './Log.interface';
 import Client from '../Client';
 
 enum LogLevel {
    Debug,
    Info,
    Warn,
-   Error
-};
+   Error,
+}
 
 const MAX_LOG_SIZE = 100;
 
@@ -46,15 +46,19 @@ export class Logger implements ILog {
    private log(level: LogLevel, message: string, ...data) {
       let args = [this.getPrefix(level) + message, ...data];
 
-      this.logs.push(args.map(arg => {
-         if (typeof arg === 'string') {
-            return arg;
-         } else if (arg && arg.tagName && arg.outerHTML) {
-            return arg.outerHTML;
-         } else {
-            return JSON.stringify(arg);
-         }
-      }).join(' '));
+      this.logs.push(
+         args
+            .map(arg => {
+               if (typeof arg === 'string') {
+                  return arg;
+               } else if (arg && arg.tagName && arg.outerHTML) {
+                  return arg.outerHTML;
+               } else {
+                  return JSON.stringify(arg);
+               }
+            })
+            .join(' ')
+      );
 
       if (this.logs.length > MAX_LOG_SIZE) {
          this.logs.shift();
@@ -65,8 +69,9 @@ export class Logger implements ILog {
             return;
          }
 
-         let logFunction = (level === LogLevel.Warn || level === LogLevel.Error) ? 'warn' : 'log';
+         let logFunction = level === LogLevel.Warn || level === LogLevel.Error ? 'warn' : 'log';
 
+         // eslint-disable-next-line no-console
          console[logFunction].apply(this, args);
       }
    }

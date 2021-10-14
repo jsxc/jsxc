@@ -1,10 +1,24 @@
 <div>
-   <h3 class="jsxc-max-width">{{t "OMEMO_devices"}}</h3>
+   <h2 class="jsxc-max-width">{{t "OMEMO_devices"}}</h2>
    <p class="jsxc-max-width">{{t "omemo-device-list-explanation"}}</p>
 
-   <p><strong>{{t "OMEMO_peer_devices"}}</strong></p>
+   <h3>{{t "OMEMO_peer_devices"}}</h3>
+   <div class="jsxc-qr-code">
+      <label>
+         <input type="checkbox" />
+         <img src="{{qrcodedatauri}}" class="jsxc-qr-code-peer" alt="{{t " QRCode_noqrcode"}}" />
+      </label>
+      <div class="jsxc-qr-code-desc-peer">{{t "QRCode_description"}}</div>
+   </div>
    <div class="jsxc-omemo-peerdevices">{{t "Please_wait"}}</div>
 
-   <p><strong>{{t "OMEMO_own_devices"}}</strong></p>
+   <h3>{{t "OMEMO_own_devices"}}</h3>
+   <div class="jsxc-qr-code">
+      <label>
+         <input type="checkbox" />
+         <img src="{{qrcodedatauri}}" class="jsxc-qr-code-own" alt="{{t " QRCode_noqrcode"}}" />
+      </label>
+      <div class="jsxc-qr-code-desc-own">{{t "QRCode_description"}}</div>
+   </div>
    <div class="jsxc-omemo-owndevices">{{t "Please_wait"}}</div>
 </div>

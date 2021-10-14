@@ -1,5 +1,5 @@
-import { AbstractPlugin, IMetaData } from '../plugin/AbstractPlugin'
-import PluginAPI from '../plugin/PluginAPI'
+import { AbstractPlugin, IMetaData } from '../plugin/AbstractPlugin';
+import PluginAPI from '../plugin/PluginAPI';
 import Translation from '@util/Translation';
 import showCommandHelp from '@ui/dialogs/commandHelp';
 import JID from '@src/JID';
@@ -21,8 +21,8 @@ export default class CommandPlugin extends AbstractPlugin {
    public static getMetaData(): IMetaData {
       return {
          description: Translation.t('setting-command-enable'),
-         xeps: []
-      }
+         xeps: [],
+      };
    }
 
    constructor(pluginAPI: PluginAPI) {
@@ -32,17 +32,25 @@ export default class CommandPlugin extends AbstractPlugin {
    }
 
    private register() {
-      this.pluginAPI.registerCommand('/help', async () => {
-         showCommandHelp(this.pluginAPI.getCommandRepository().getHelp());
+      this.pluginAPI.registerCommand(
+         '/help',
+         async () => {
+            showCommandHelp(this.pluginAPI.getCommandRepository().getHelp());
 
-         return true;
-      }, 'cmd_help');
+            return true;
+         },
+         'cmd_help'
+      );
 
-      this.pluginAPI.registerCommand('/clear', async (_args, contact) => {
-         contact.getChatWindow().clear();
+      this.pluginAPI.registerCommand(
+         '/clear',
+         async (_args, contact) => {
+            contact.getChatWindow().clear();
 
-         return true;
-      }, 'cmd_clear');
+            return true;
+         },
+         'cmd_clear'
+      );
 
       const subjectChangeAction = async (args: string[], contact: MultiUserContact) => {
          if (!contact.isGroupChat()) {
@@ -54,124 +62,156 @@ export default class CommandPlugin extends AbstractPlugin {
          contact.changeTopic(topic);
 
          return true;
-      }
+      };
 
       this.pluginAPI.registerCommand('/subject', subjectChangeAction, '', 'multiuser');
       this.pluginAPI.registerCommand('/topic', subjectChangeAction, 'cmd_subject', 'multiuser');
 
-      this.pluginAPI.registerCommand('/invite', async (args: string[], contact: MultiUserContact) => {
-         if (!contact.isGroupChat()) {
-            throw new OnlyGroupChatError();
-         }
+      this.pluginAPI.registerCommand(
+         '/invite',
+         async (args: string[], contact: MultiUserContact) => {
+            if (!contact.isGroupChat()) {
+               throw new OnlyGroupChatError();
+            }
 
-         if (args.length < 2) {
-            throw new ArgumentError();
-         }
+            if (args.length < 2) {
+               throw new ArgumentError();
+            }
 
-         let jid = new JID(args[1]);
-         let reason = args.slice(2).join(' ');
+            let jid = new JID(args[1]);
+            let reason = args.slice(2).join(' ');
 
-         contact.invite(jid, reason);
+            contact.invite(jid, reason);
 
-         return true;
-      }, 'cmd_invite', 'multiuser');
+            return true;
+         },
+         'cmd_invite',
+         'multiuser'
+      );
 
-      this.pluginAPI.registerCommand('/kick', async (args: string[], contact: MultiUserContact) => {
-         if (!contact.isGroupChat()) {
-            throw new OnlyGroupChatError();
-         }
+      this.pluginAPI.registerCommand(
+         '/kick',
+         async (args: string[], contact: MultiUserContact) => {
+            if (!contact.isGroupChat()) {
+               throw new OnlyGroupChatError();
+            }
 
-         if (args.length < 2) {
-            throw new ArgumentError();
-         }
+            if (args.length < 2) {
+               throw new ArgumentError();
+            }
 
-         let nickname = args[1];
-         let reason = args.slice(2).join(' ');
+            let nickname = args[1];
+            let reason = args.slice(2).join(' ');
 
-         contact.kick(nickname, reason);
+            contact.kick(nickname, reason);
 
-         return true;
-      }, 'cmd_kick', 'multiuser');
+            return true;
+         },
+         'cmd_kick',
+         'multiuser'
+      );
 
-      this.pluginAPI.registerCommand('/ban', async (args: string[], contact: MultiUserContact) => {
-         if (!contact.isGroupChat()) {
-            throw new OnlyGroupChatError();
-         }
+      this.pluginAPI.registerCommand(
+         '/ban',
+         async (args: string[], contact: MultiUserContact) => {
+            if (!contact.isGroupChat()) {
+               throw new OnlyGroupChatError();
+            }
 
-         if (args.length < 2) {
-            throw new ArgumentError();
-         }
+            if (args.length < 2) {
+               throw new ArgumentError();
+            }
 
-         let jid = new JID(args[1]);
-         let reason = args.slice(2).join(' ');
+            let jid = new JID(args[1]);
+            let reason = args.slice(2).join(' ');
 
-         contact.ban(jid, reason);
+            contact.ban(jid, reason);
 
-         return true;
-      }, 'cmd_ban', 'multiuser');
+            return true;
+         },
+         'cmd_ban',
+         'multiuser'
+      );
 
-      const affiliationChangeActionFactory = (affiliation: 'admin' | 'member' | 'owner' | 'none') => async (args: string[], contact: MultiUserContact) => {
-         if (!contact.isGroupChat()) {
-            throw new OnlyGroupChatError();
-         }
+      const affiliationChangeActionFactory =
+         (affiliation: 'admin' | 'member' | 'owner' | 'none') => async (args: string[], contact: MultiUserContact) => {
+            if (!contact.isGroupChat()) {
+               throw new OnlyGroupChatError();
+            }
 
-         if (args.length !== 2) {
-            throw new ArgumentError();
-         }
+            if (args.length !== 2) {
+               throw new ArgumentError();
+            }
 
-         let jid = new JID(args[1]);
+            let jid = new JID(args[1]);
 
-         contact.changeAffiliation(jid, affiliation);
+            contact.changeAffiliation(jid, affiliation);
 
-         return true;
-      }
+            return true;
+         };
 
       this.pluginAPI.registerCommand('/admin', affiliationChangeActionFactory('admin'), 'cmd_admin', 'multiuser');
       this.pluginAPI.registerCommand('/member', affiliationChangeActionFactory('member'), 'cmd_member', 'multiuser');
       this.pluginAPI.registerCommand('/owner', affiliationChangeActionFactory('owner'), 'cmd_owner', 'multiuser');
       this.pluginAPI.registerCommand('/revoke', affiliationChangeActionFactory('none'), 'cmd_revoke', 'multiuser');
 
-      this.pluginAPI.registerCommand('/nick', async (args: string[], contact: MultiUserContact) => {
-         if (!contact.isGroupChat()) {
-            throw new OnlyGroupChatError();
-         }
+      this.pluginAPI.registerCommand(
+         '/nick',
+         async (args: string[], contact: MultiUserContact) => {
+            if (!contact.isGroupChat()) {
+               throw new OnlyGroupChatError();
+            }
 
-         if (args.length !== 2) {
-            throw new ArgumentError();
-         }
+            if (args.length !== 2) {
+               throw new ArgumentError();
+            }
 
-         contact.changeNickname(args[1]);
+            contact.changeNickname(args[1]);
 
-         return true;
-      }, 'cmd_nick', 'multiuser');
+            return true;
+         },
+         'cmd_nick',
+         'multiuser'
+      );
 
-      this.pluginAPI.registerCommand('/destroy', async (args: string[], contact: MultiUserContact) => {
-         if (!contact.isGroupChat()) {
-            throw new OnlyGroupChatError();
-         }
+      this.pluginAPI.registerCommand(
+         '/destroy',
+         async (args: string[], contact: MultiUserContact) => {
+            if (!contact.isGroupChat()) {
+               throw new OnlyGroupChatError();
+            }
 
-         contact.destroy();
+            contact.destroy();
 
-         return true;
-      }, 'cmd_destroy', 'multiuser');
+            return true;
+         },
+         'cmd_destroy',
+         'multiuser'
+      );
 
-      const roleChangeActionFactory = (role: 'moderator' | 'participant') => async (args: string[], contact: MultiUserContact) => {
-         if (!contact.isGroupChat()) {
-            throw new OnlyGroupChatError();
-         }
+      const roleChangeActionFactory =
+         (role: 'moderator' | 'participant') => async (args: string[], contact: MultiUserContact) => {
+            if (!contact.isGroupChat()) {
+               throw new OnlyGroupChatError();
+            }
 
-         if (args.length !== 2) {
-            throw new ArgumentError();
-         }
+            if (args.length !== 2) {
+               throw new ArgumentError();
+            }
 
-         let nickname = args[1];
+            let nickname = args[1];
 
-         contact.changeRole(nickname, role);
+            contact.changeRole(nickname, role);
 
-         return true;
-      }
+            return true;
+         };
 
       this.pluginAPI.registerCommand('/moderator', roleChangeActionFactory('moderator'), 'cmd_moderator', 'multiuser');
-      this.pluginAPI.registerCommand('/participant', roleChangeActionFactory('participant'), 'cmd_participant', 'multiuser');
+      this.pluginAPI.registerCommand(
+         '/participant',
+         roleChangeActionFactory('participant'),
+         'cmd_participant',
+         'multiuser'
+      );
    }
 }

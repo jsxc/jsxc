@@ -1,45 +1,44 @@
-
 export interface ISignalBundleObject {
-   identityKey: ArrayBuffer,
-   registrationId: number,
+   identityKey: ArrayBuffer;
+   registrationId: number;
    preKey: {
-      keyId: number
-      publicKey: ArrayBuffer
-   },
+      keyId: number;
+      publicKey: ArrayBuffer;
+   };
    signedPreKey: {
-      keyId: number
-      publicKey: ArrayBuffer
-      signature: string | ArrayBuffer
-   }
+      keyId: number;
+      publicKey: ArrayBuffer;
+      signature: string | ArrayBuffer;
+   };
 }
 
 interface ISignalPreKey {
-   keyId: number
+   keyId: number;
 
-   keyPair: ISignalKeyPair
+   keyPair: ISignalKeyPair;
 }
 
 interface ISignalSignedPreKey extends ISignalPreKey {
-   signature: ArrayBuffer
+   signature: ArrayBuffer;
 }
 
 interface ISignalKeyPair {
-   privKey?: ArrayBuffer
+   privKey?: ArrayBuffer;
 
-   pubKey: ArrayBuffer
+   pubKey: ArrayBuffer;
 }
 
 interface ISignalKeyHelper {
-   generatePreKey: (keyId: number) => Promise<ISignalPreKey>
+   generatePreKey: (keyId: number) => Promise<ISignalPreKey>;
 
-   generateSignedPreKey: (identityKeyPair: ISignalKeyPair, signedKeyId: number) => Promise<ISignalSignedPreKey>
+   generateSignedPreKey: (identityKeyPair: ISignalKeyPair, signedKeyId: number) => Promise<ISignalSignedPreKey>;
 
-   generateIdentityKeyPair: () => Promise<ISignalKeyPair>
+   generateIdentityKeyPair: () => Promise<ISignalKeyPair>;
 
-   generateRegistrationId: () => number
+   generateRegistrationId: () => number;
 }
 
-let libsignal = (<any> window).libsignal || {};
+let libsignal = (<any>window).libsignal || {};
 
 export let SignalAddress = libsignal.SignalProtocolAddress;
 export let SignalKeyHelper: ISignalKeyHelper = libsignal.KeyHelper;

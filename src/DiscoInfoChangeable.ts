@@ -1,8 +1,7 @@
-import DiscoInfo from './DiscoInfo'
+import DiscoInfo from './DiscoInfo';
 import DiscoInfoVersion from './DiscoInfoVersion';
 
 export default class DiscoInfoChangeable extends DiscoInfo {
-
    constructor(id: string) {
       super(id);
    }
@@ -15,10 +14,12 @@ export default class DiscoInfoChangeable extends DiscoInfo {
       let identities = this.getIdentities();
 
       for (let identity of identities) {
-         if (identity.category === category &&
+         if (
+            identity.category === category &&
             identity.type === type &&
             identity.name === name &&
-            identity.lang === lang) {
+            identity.lang === lang
+         ) {
             return false;
          }
       }
@@ -27,7 +28,7 @@ export default class DiscoInfoChangeable extends DiscoInfo {
          category,
          type,
          name,
-         lang
+         lang,
       });
       this.data.set('identities', identities);
 

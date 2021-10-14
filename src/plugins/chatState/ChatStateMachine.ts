@@ -1,10 +1,10 @@
-import ChatStatePlugin from './ChatStatePlugin'
-import ChatStateConnection from './ChatStateConnection'
-import { STATE } from './State'
-import ChatWindow from '../../ui/ChatWindow'
-import Contact from '../../Contact'
-import * as Namespace from '../../connection/xmpp/namespace'
-import IStorage from '@src/Storage.interface'
+import ChatStatePlugin from './ChatStatePlugin';
+import ChatStateConnection from './ChatStateConnection';
+import { STATE } from './State';
+import ChatWindow from '../../ui/ChatWindow';
+import Contact from '../../Contact';
+import * as Namespace from '../../connection/xmpp/namespace';
+import IStorage from '@src/Storage.interface';
 
 const ENTER_KEY = 13;
 
@@ -30,7 +30,7 @@ export default class ChatStateMachine {
    private addInputHandler() {
       let element = this.chatWindow.getDom();
 
-      element.find('.jsxc-message-input').on('keydown', (ev) => {
+      element.find('.jsxc-message-input').on('keydown', ev => {
          if (ev.which !== ENTER_KEY) {
             this.composing();
          }
@@ -38,7 +38,7 @@ export default class ChatStateMachine {
          if (ev.which === ENTER_KEY && !ev.shiftKey) {
             this.paused();
          }
-      })
+      });
    }
 
    private composing() {
@@ -47,7 +47,7 @@ export default class ChatStateMachine {
 
    private paused = () => {
       this.setState(STATE.PAUSED);
-   }
+   };
 
    private registerHook(func: (newState: STATE, oldState: STATE) => void) {
       this.storage.registerHook(this.key, (newValue, oldValue) => {
@@ -74,7 +74,7 @@ export default class ChatStateMachine {
 
       this.storage.setItem(this.key, {
          state,
-         id: this.id
+         id: this.id,
       });
    }
 
@@ -89,7 +89,7 @@ export default class ChatStateMachine {
          let hasSupport = this.plugin.getDiscoInfoRepository().hasFeature(jid, Namespace.get('CHATSTATES'));
 
          resolve(hasSupport);
-      }).then((hasSupport) => {
+      }).then(hasSupport => {
          if (hasSupport) {
             if (oldState === STATE.COMPOSING && newState === STATE.PAUSED) {
                this.connection.sendPaused(jid, this.contact.getType());
@@ -98,5 +98,5 @@ export default class ChatStateMachine {
             }
          }
       });
-   }
+   };
 }

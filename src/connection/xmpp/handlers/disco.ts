@@ -1,6 +1,6 @@
-import * as NS from '../namespace'
-import AbstractHandler from '../AbstractHandler'
-import { $iq } from '../../../vendor/Strophe'
+import * as NS from '../namespace';
+import AbstractHandler from '../AbstractHandler';
+import { $iq } from '../../../vendor/Strophe';
 
 export class DiscoInfoHandler extends AbstractHandler {
    constructor(account) {
@@ -17,16 +17,16 @@ export class DiscoInfoHandler extends AbstractHandler {
       let iq = $iq({
          type: 'result',
          id,
-         to: from
+         to: from,
       }).c('query', {
          xmlns: NS.get('DISCO_INFO'),
-         node: (node) ? node : undefined
+         node: node ? node : undefined,
       });
 
       iq = this.addIdentitiesToStanza(iq);
       iq = this.addFeaturesToStanza(iq);
 
-      (<any> this.account.getConnection()).send(iq.tree()); //@REVIEW
+      (<any>this.account.getConnection()).send(iq.tree()); //@REVIEW
 
       return true;
    }
@@ -34,10 +34,10 @@ export class DiscoInfoHandler extends AbstractHandler {
    private addIdentitiesToStanza(iq) {
       for (let identity of this.account.getDiscoInfo().getIdentities()) {
          let attrs = {
-            'category': identity.category,
-            'type': identity.type,
-            'name': (identity.name) ? identity.name : null,
-            'xml:lang': (identity.lang) ? identity.lang : null
+            category: identity.category,
+            type: identity.type,
+            name: identity.name ? identity.name : null,
+            'xml:lang': identity.lang ? identity.lang : null,
          };
 
          iq.c('identity', attrs).up();
@@ -49,7 +49,7 @@ export class DiscoInfoHandler extends AbstractHandler {
    private addFeaturesToStanza(iq) {
       for (let feature of this.account.getDiscoInfo().getFeatures()) {
          iq.c('feature', {
-            var: feature
+            var: feature,
          }).up();
       }
 
@@ -66,15 +66,15 @@ export class DiscoItemsHandler extends AbstractHandler {
       let iq = $iq({
          type: 'result',
          id,
-         to: from
+         to: from,
       }).c('query', {
          xmlns: NS.get('DISCO_ITEMS'),
-         node: (node) ? node : undefined
+         node: node ? node : undefined,
       });
 
       //We return an empty set, because we dont support disco items
 
-      (<any> this.account.getConnection()).send(iq.tree());
+      (<any>this.account.getConnection()).send(iq.tree());
 
       return true;
    }

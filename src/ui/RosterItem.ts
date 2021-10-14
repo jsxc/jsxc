@@ -1,20 +1,21 @@
-import Menu from './util/Menu'
-import AvatarSet from './AvatarSet'
-import confirmDialog from './dialogs/confirm'
-import showVcardDialog from './dialogs/vcard'
-import { Presence } from '../connection/AbstractConnection'
-import Dialog from './Dialog'
-import { IContact } from '../Contact.interface'
-import Translation from '../util/Translation'
+import Menu from './util/Menu';
+import AvatarSet from './AvatarSet';
+import confirmDialog from './dialogs/confirm';
+import showVcardDialog from './dialogs/vcard';
+import { Presence } from '../connection/AbstractConnection';
+import Dialog from './Dialog';
+import { IContact } from '../Contact.interface';
+import Translation from '../util/Translation';
 import Client from '@src/Client';
-import Log from '@util/Log'
-import Color from '../util/Color'
-import Roster from '@ui/Roster'
-import Emoticons from '@src/Emoticons'
-import Utils from '@util/Utils'
-import { IMessage } from '@src/Message.interface'
+import Log from '@util/Log';
+import Color from '../util/Color';
+import Roster from '@ui/Roster';
+import Emoticons from '@src/Emoticons';
+import Utils from '@util/Utils';
+import { IMessage } from '@src/Message.interface';
+import MultiUserContact from '@src/MultiUserContact';
 
-let rosterItemTemplate = require('../../template/roster-item.hbs')
+let rosterItemTemplate = require('../../template/roster-item.hbs');
 
 export default class RosterItem {
    private element: JQuery;
@@ -24,7 +25,7 @@ export default class RosterItem {
       let template = rosterItemTemplate({
          jid: contact.getJid().bare,
          name: contact.getName(),
-         lastMessage: contact.getStatus()
+         lastMessage: contact.getStatus(),
       });
 
       this.element = $(template);
@@ -40,8 +41,8 @@ export default class RosterItem {
 
       this.appendTags();
 
-      this.element.on('dragstart', (ev) => {
-         (<any> ev.originalEvent).dataTransfer.setData('text/plain', contact.getJid().full);
+      this.element.on('dragstart', ev => {
+         (<any>ev.originalEvent).dataTransfer.setData('text/plain', contact.getJid().full);
 
          $('.jsxc-droppable').addClass('jsxc-drag-rosteritem');
       });
@@ -50,7 +51,7 @@ export default class RosterItem {
          $('.jsxc-droppable').removeClass('jsxc-drag-rosteritem');
       });
 
-      this.element.click(function() {
+      this.element.click(function () {
          if ($(this).hasClass('jsxc-blocked')) {
             return;
          }
@@ -64,31 +65,34 @@ export default class RosterItem {
          chatWindow.openProminently();
       });
 
-      this.element.find('.jsxc-rename').click(function(ev) {
+      this.element.find('.jsxc-rename').click(function (ev) {
          ev.stopPropagation();
 
          self.rename();
       });
 
-      this.element.find('.jsxc-delete').click((ev) => {
+      this.element.find('.jsxc-delete').click(ev => {
          ev.stopPropagation();
 
          let questionString = Translation.t('You_are_about_to_remove_', {
             bid_name: this.contact.getName(),
             bid_jid: this.contact.getJid().bare,
          });
-         confirmDialog(questionString, true).getPromise().then((dialog: Dialog) => {
-            contact.getAccount().getContactManager().delete(contact);
+         confirmDialog(questionString, true)
+            .getPromise()
+            .then((dialog: Dialog) => {
+               contact.getAccount().getContactManager().delete(contact);
 
-            //@TODO show spinner
+               //@TODO show spinner
 
-            dialog.close();
-         }).catch((err) => {
-            Log.warn('Could not delete roster entry', err);
-         });
+               dialog.close();
+            })
+            .catch(err => {
+               Log.warn('Could not delete roster entry', err);
+            });
       });
 
-      this.element.find('.jsxc-vcard').click(function(ev) {
+      this.element.find('.jsxc-vcard').click(function (ev) {
          ev.stopPropagation();
 
          showVcardDialog(self.contact);
@@ -99,7 +103,7 @@ export default class RosterItem {
       let avatar = AvatarSet.get(this.contact);
       avatar.addElement(this.element.find('.jsxc-avatar'));
 
-      this.contact.registerHook('name', (newName) => {
+      this.contact.registerHook('name', newName => {
          this.element.attr('data-name', newName?.toLowerCase());
 
          this.element.find('.jsxc-bar__caption__primary').text(newName);
@@ -109,17 +113,36 @@ export default class RosterItem {
          this.element.attr('data-presence', Presence[this.contact.getPresence()]);
       });
 
+      if (this.contact.isGroupChat()) {
+         const setMembersOnly = () =>
+            this.element.attr('data-membersonly', (this.contact as MultiUserContact).isMembersOnly().toString());
+         const setNonAnonymous = () =>
+            this.element.attr('data-nonanonymous', (this.contact as MultiUserContact).isNonAnonymous().toString());
+
+         this.contact.registerHook('features', () => {
+            setMembersOnly();
+            setNonAnonymous();
+         });
+
+         setMembersOnly();
+         setNonAnonymous();
+      }
+
       const updateLastMessage = (message: IMessage) => {
          if (!message.getPlaintextMessage() && message.hasAttachment()) {
             let attachment = message.getAttachment();
 
-            this.element.find('.jsxc-bar__caption__secondary').text(Emoticons.toUnicode(attachment.isImage() ? ':camera:' : ':paperclip:'));
+            this.element
+               .find('.jsxc-bar__caption__secondary')
+               .text(Emoticons.toUnicode(attachment.isImage() ? ':camera:' : ':paperclip:'));
             this.element.find('.jsxc-bar__caption__secondary').attr('title', '');
          } else {
-            this.element.find('.jsxc-bar__caption__secondary').text(Emoticons.toUnicode(':speech_balloon:') + ' ' + message.getPlaintextEmoticonMessage('unicode'));
+            this.element
+               .find('.jsxc-bar__caption__secondary')
+               .text(Emoticons.toUnicode(':speech_balloon:') + ' ' + message.getPlaintextEmoticonMessage('unicode'));
             this.element.find('.jsxc-bar__caption__secondary').attr('title', message.getPlaintextMessage());
          }
-      }
+      };
 
       const updateStatus = (status: string) => {
          let parsedStatus = status && Emoticons.toUnicode(Utils.escapeHTML(status));
@@ -149,7 +172,7 @@ export default class RosterItem {
          this.element.attr('data-date', this.contact.getLastMessageDate()?.toISOString());
       });
 
-      this.contact.getTranscript().registerNewMessageHook((firstMessageId) => {
+      this.contact.getTranscript().registerNewMessageHook(firstMessageId => {
          if (!firstMessageId) {
             return;
          }
@@ -198,7 +221,7 @@ export default class RosterItem {
             ev.stopPropagation();
 
             Roster.get().setFilter(group);
-         })
+         });
 
          return element;
       });
@@ -218,6 +241,10 @@ export default class RosterItem {
       return this.element.detach();
    }
 
+   public remove() {
+      return this.element.remove();
+   }
+
    private rename() {
       let self = this;
       let inputElement = $('<input type="text" name="name"/>');
@@ -227,7 +254,7 @@ export default class RosterItem {
 
       inputElement.addClass('jsxc-grow');
       inputElement.val(this.contact.getName());
-      inputElement.keypress(function(ev) {
+      inputElement.keypress(function (ev) {
          if (ev.which !== 13) {
             return;
          }
@@ -238,14 +265,14 @@ export default class RosterItem {
       });
 
       // Disable html click event, if click on input
-      inputElement.click(function(ev) {
+      inputElement.click(function (ev) {
          ev.stopPropagation();
       });
 
       this.element.find('.jsxc-bar__caption, .jsxc-menu').hide();
       this.element.find('.jsxc-avatar').after(inputElement);
 
-      $('html').one('click', function() {
+      $('html').one('click', function () {
          self.endRename();
       });
    }
@@ -253,7 +280,7 @@ export default class RosterItem {
    private endRename() {
       let inputElement = this.element.find('input');
 
-      this.contact.setName(<string> inputElement.val());
+      this.contact.setName(<string>inputElement.val());
 
       inputElement.remove();
       this.element.find('.jsxc-bar__caption, .jsxc-menu').show();

@@ -1,4 +1,4 @@
-import ByteBuffer = require('bytebuffer')
+import ByteBuffer = require('bytebuffer');
 
 let ArrayBufferUtils = {
    concat: (a: ArrayBuffer, b: ArrayBuffer) => ByteBuffer.concat([a, b]).toArrayBuffer(),
@@ -36,7 +36,9 @@ let ArrayBufferUtils = {
    },
 
    toPrettyHex: (thing: ArrayBuffer | string): string => {
-      return ArrayBufferUtils.toHex(thing).replace(/(.{8})/g, '$1 ').replace(/ $/, '');
+      return ArrayBufferUtils.toHex(thing)
+         .replace(/(.{8})/g, '$1 ')
+         .replace(/ $/, '');
    },
 
    isEqual(a: ArrayBuffer | string, b: ArrayBuffer | string) {
@@ -57,6 +59,6 @@ let ArrayBufferUtils = {
    toArray: (a: ArrayBuffer): any[] => Array.apply([], new Uint8Array(a)),
 
    fromArray: (a: any[]): ArrayBuffer => new Uint8Array(a).buffer,
-}
+};
 
 export default ArrayBufferUtils;

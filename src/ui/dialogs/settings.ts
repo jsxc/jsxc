@@ -1,18 +1,18 @@
-import Dialog from '../Dialog'
-import Client from '../../Client'
-import Page from '../DialogPage'
-import Section from '../DialogSection'
-import Navigation from '../DialogNavigation'
-import List from '../DialogList'
-import ListItem from '../DialogListItem'
-import AvatarSet from '../AvatarSet'
-import Log from '../../util/Log'
+import Dialog from '../Dialog';
+import Client from '../../Client';
+import Page from '../DialogPage';
+import Section from '../DialogSection';
+import Navigation from '../DialogNavigation';
+import List from '../DialogList';
+import ListItem from '../DialogListItem';
+import AvatarSet from '../AvatarSet';
+import Log from '../../util/Log';
 import Translation from '@util/Translation';
 import Account from '@src/Account';
 
 const ENOUGH_BITS_OF_ENTROPY = 50;
 
-export default function() {
+export default function () {
    let dialog = new Dialog('', false, 'settings');
    let dom = dialog.open();
 
@@ -27,10 +27,7 @@ class StartPage extends Page {
 
    //@REVIEW could also return Page or getDOM interface?
    protected generateContentElement(): JQuery | JQuery[] {
-      return [
-         new ClientSection(this.navigation).getDOM(),
-         new AccountOverviewSection(this.navigation).getDOM()
-      ];
+      return [new ClientSection(this.navigation).getDOM(), new AccountOverviewSection(this.navigation).getDOM()];
    }
 }
 
@@ -38,21 +35,25 @@ class ClientSection extends Section {
    protected generateContentElement(): JQuery {
       let contentElement = new List();
 
-      contentElement.append(new ListItem(
-         Translation.t('Language'),
-         Translation.t('After_changing_this_option_you_have_to_reload_the_page'),
-         undefined,
-         undefined,
-         this.getLanguageSelectionElement()
-      ));
+      contentElement.append(
+         new ListItem(
+            Translation.t('Language'),
+            Translation.t('After_changing_this_option_you_have_to_reload_the_page'),
+            undefined,
+            undefined,
+            this.getLanguageSelectionElement()
+         )
+      );
 
-      contentElement.append(new ListItem(
-         Translation.t('trusted_domains'),
-         Translation.t('one_domain_per_line'),
-         undefined,
-         undefined,
-         this.getTrustedDomainsElement()
-      ));
+      contentElement.append(
+         new ListItem(
+            Translation.t('trusted_domains'),
+            Translation.t('one_domain_per_line'),
+            undefined,
+            undefined,
+            this.getTrustedDomainsElement()
+         )
+      );
 
       return contentElement.getDOM();
    }
@@ -61,7 +62,7 @@ class ClientSection extends Section {
       let currentLang = Client.getOption('lang');
       let element = $('<select>');
       element.append('<option value=""></option>');
-      __LANGS__.forEach((lang) => {
+      __LANGS__.forEach(lang => {
          let optionElement = $('<option>');
          optionElement.text(lang);
          optionElement.appendTo(element);
@@ -71,7 +72,7 @@ class ClientSection extends Section {
          }
       });
 
-      element.on('change', (ev) => {
+      element.on('change', ev => {
          let value = $(ev.target).val();
 
          Client.setOption('lang', value ? value : undefined);
@@ -85,12 +86,15 @@ class ClientSection extends Section {
    }
 
    private getTrustedDomainsElement(): JQuery {
-
       let element = $('<textarea style="margin-left:10px;">');
 
       element.on('change', () => {
-         let value = element.val().toString().split('\n').map(line => line.trim());
-         Client.setOption('trustedDomains',value ? value : undefined);
+         let value = element
+            .val()
+            .toString()
+            .split('\n')
+            .map(line => line.trim());
+         Client.setOption('trustedDomains', value ? value : undefined);
       });
 
       let trustedDomains = Client.getOption('trustedDomains', []);
@@ -194,7 +198,9 @@ class PasswordPage extends Page {
 
       let submitElement = $(`<div class="form-group">
          <div class="col-sm-offset-4 col-sm-8">
-            <button disabled="disabled" class="jsxc-button jsxc-button--primary">${Translation.t('Change_password')}</button>
+            <button disabled="disabled" class="jsxc-button jsxc-button--primary">${Translation.t(
+               'Change_password'
+            )}</button>
          </div>
       </div>`);
 
@@ -206,41 +212,41 @@ class PasswordPage extends Page {
       contentElement.append(submitElement);
       contentElement.append(errorElement);
 
-      passwordAElement.find('input').on('input', function() {
-         let value = <string> $(this).val();
+      passwordAElement.find('input').on('input', function () {
+         let value = <string>$(this).val();
          let numberOfPossibleCharacters = 0;
 
          if (/[a-z]/.test(value)) {
-            numberOfPossibleCharacters += 26
+            numberOfPossibleCharacters += 26;
          }
 
          if (/[A-Z]/.test(value)) {
-            numberOfPossibleCharacters += 26
+            numberOfPossibleCharacters += 26;
          }
 
          if (/[0-9]/.test(value)) {
-            numberOfPossibleCharacters += 10
+            numberOfPossibleCharacters += 10;
          }
 
          if (/[^a-zA-Z0-9]/.test(value)) {
-            numberOfPossibleCharacters += 15 // most common
+            numberOfPossibleCharacters += 15; // most common
          }
 
          let entropy = Math.pow(numberOfPossibleCharacters, value.length);
          let bitsOfEntropy = Math.log2(entropy);
-         let strength = Math.min(100, Math.round(bitsOfEntropy / ENOUGH_BITS_OF_ENTROPY * 100));
+         let strength = Math.min(100, Math.round((bitsOfEntropy / ENOUGH_BITS_OF_ENTROPY) * 100));
 
          passwordAElement.find('.jsxc-inputinfo').text(`${Translation.t('Strength')}: ${strength}%`);
       });
 
-      contentElement.find('input').on('input', function() {
+      contentElement.find('input').on('input', function () {
          let passwordA = passwordAElement.find('input').val();
          let passwordB = passwordBElement.find('input').val();
 
-         submitElement.find('button').prop('disabled', passwordA !== passwordB)
+         submitElement.find('button').prop('disabled', passwordA !== passwordB);
       });
 
-      contentElement.submit((ev) => {
+      contentElement.submit(ev => {
          ev.preventDefault();
 
          let passwordA = passwordAElement.find('input').val() as string;
@@ -250,14 +256,18 @@ class PasswordPage extends Page {
             return;
          }
 
-         this.account.getConnection().changePassword(passwordA).then(() => {
-            Log.debug('Password was changed');
-         }).catch((errStanza) => {
-            //@TODO check for error 401 and form (https://xmpp.org/extensions/xep-0077.html#usecases-changepw)
+         this.account
+            .getConnection()
+            .changePassword(passwordA)
+            .then(() => {
+               Log.debug('Password was changed');
+            })
+            .catch(errStanza => {
+               //@TODO check for error 401 and form (https://xmpp.org/extensions/xep-0077.html#usecases-changepw)
 
-            errorElement.removeClass('jsxc-hidden');
-            errorElement.text('Server error. Password was not changed.');
-         });
+               errorElement.removeClass('jsxc-hidden');
+               errorElement.text('Server error. Password was not changed.');
+            });
       });
 
       return contentElement;
@@ -270,7 +280,6 @@ class MainAppSection extends Section {
    }
 
    protected generateContentElement(): JQuery {
-
       let contentElement = new List();
 
       contentElement.append(this.getListItemForData('RFC6120', 'XMPP Core', '', ''));
@@ -311,7 +320,7 @@ class MainAppSection extends Section {
       if (xepid && xepid.length) {
          let xepElement = $('<a target="_blank" rel="noreferrer noopener">');
          xepElement.addClass('jsxc-badge');
-         xepElement.text('XEP-' + xepid + (xepversion && xepversion.length > 0 ? ('@' + xepversion) : ''));
+         xepElement.text('XEP-' + xepid + (xepversion && xepversion.length > 0 ? '@' + xepversion : ''));
          xepElement.attr('title', xepname);
          xepElement.attr('href', 'https://xmpp.org/extensions/xep-' + xepid + '.html');
          xepElement.appendTo(listItemElement.find('.jsxc-list__text__primary'));
@@ -336,7 +345,8 @@ class PluginSection extends Section {
          let id = plugin.getId();
          let name = plugin.getName();
          let metaData = typeof plugin.getMetaData === 'function' ? plugin.getMetaData() : {};
-         let description = typeof (<any> plugin).getDescription === 'function' ? (<any> plugin).getDescription() : metaData.description;
+         let description =
+            typeof (<any>plugin).getDescription === 'function' ? (<any>plugin).getDescription() : metaData.description;
 
          let checkboxElement = $('<input>');
          checkboxElement.attr('type', 'checkbox');
@@ -350,7 +360,7 @@ class PluginSection extends Section {
             checkboxElement.prop('disabled', true);
          }
 
-         checkboxElement.on('change', (ev) => {
+         checkboxElement.on('change', ev => {
             let isEnabled = $(ev.target).prop('checked');
             let id = $(ev.target).attr('id');
             let disabledPlugins = this.account.getOption('disabledPlugins') || [];

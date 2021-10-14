@@ -1,10 +1,14 @@
-import { IJID as JID } from './JID.interface'
-import Attachment from './Attachment'
-import { ContactType } from './Contact.interface'
+import { IJID as JID } from './JID.interface';
+import Attachment from './Attachment';
+import { ContactType } from './Contact.interface';
 
 export enum DIRECTION {
-   IN, OUT, SYS, PROBABLY_OUT, PROBABLY_IN
-};
+   IN,
+   OUT,
+   SYS,
+   PROBABLY_OUT,
+   PROBABLY_IN,
+}
 
 export enum MessageMark {
    aborted,
@@ -12,8 +16,8 @@ export enum MessageMark {
    transferred,
    received,
    displayed,
-   acknowledged
-};
+   acknowledged,
+}
 
 export interface IMessagePayload {
    peer: JID,
@@ -34,49 +38,48 @@ export interface IMessagePayload {
    encryptedHtmlMessage?: string,
    encryptedPlaintextMessage?: string,
    sender?: {
-      name: string,
-      jid?: JID
-   },
-   chatMarkersReceived?: boolean,
-   chatMarkersDisplayed?: boolean
-   chatMarkersAcknowledged?: boolean
+      name: string;
+      jid?: JID;
+   };
+   chatMarkersReceived?: boolean;
+   chatMarkersDisplayed?: boolean;
+   chatMarkersAcknowledged?: boolean;
 }
 
 export interface IMessage {
+   registerHook(property: string, func: (newValue: any, oldValue: any) => void);
 
-   registerHook(property: string, func: (newValue: any, oldValue: any) => void)
+   getUid(): string;
 
-   getUid(): string
+   getAttrId(): string;
 
-   getAttrId(): string
+   delete();
 
-   delete()
+   getNextId(): string;
 
-   getNextId(): string
+   setNext(message: IMessage | string): void;
 
-   setNext(message: IMessage | string): void
+   getCssId(): string;
 
-   getCssId(): string
+   getDOM(): JQuery<HTMLElement>;
 
-   getDOM(): JQuery<HTMLElement>
+   getStamp(): Date;
 
-   getStamp(): Date
+   getDirection(): DIRECTION;
 
-   getDirection(): DIRECTION
+   getDirectionString(): string;
 
-   getDirectionString(): string
+   isSystem(): boolean;
 
-   isSystem(): boolean
+   isIncoming(): boolean;
 
-   isIncoming(): boolean
+   isOutgoing(): boolean;
 
-   isOutgoing(): boolean
+   getAttachment(): Attachment;
 
-   getAttachment(): Attachment
+   setAttachment(attachment: Attachment);
 
-   setAttachment(attachment: Attachment)
-
-   getPeer(): JID
+   getPeer(): JID;
 
    getType(): ContactType;
 
@@ -84,19 +87,19 @@ export interface IMessage {
 
    getHtmlMessage(): string;
 
-   setHtmlMessage(htmlMessage: string)
+   setHtmlMessage(htmlMessage: string);
 
-   getEncryptedHtmlMessage(): string
+   getEncryptedHtmlMessage(): string;
 
    getPlaintextMessage(): string;
 
-   getEncryptedPlaintextMessage(): string
+   getEncryptedPlaintextMessage(): string;
 
-   getPlaintextEmoticonMessage(emotions?: 'unicode'|'image'): string
+   getPlaintextEmoticonMessage(emotions?: 'unicode' | 'image'): string;
 
-   getSender(): { name: string, jid?: JID }
+   getSender(): { name: string; jid?: JID };
 
-   getMark(): MessageMark
+   getMark(): MessageMark;
 
    aborted();
 
@@ -128,19 +131,19 @@ export interface IMessage {
 
    read();
 
-   setDirection(direction: DIRECTION)
+   setDirection(direction: DIRECTION);
 
-   setPlaintextMessage(plaintextMessage: string)
+   setPlaintextMessage(plaintextMessage: string);
 
-   setEncryptedPlaintextMessage(encryptedPlaintextMessage: string)
+   setEncryptedPlaintextMessage(encryptedPlaintextMessage: string);
 
-   setEncrypted(encrypted: boolean)
+   setEncrypted(encrypted: boolean);
 
-   getProcessedBody(): Promise<string>
+   getProcessedBody(): Promise<string>;
 
-   setErrorMessage(error: string)
+   setErrorMessage(error: string);
 
-   getErrorMessage(): string
+   getErrorMessage(): string;
 
    updateProgress(transferred: number, complete: number)
 
@@ -149,4 +152,5 @@ export interface IMessage {
    getReplaceBody(): string//XEP - 0308
 
    getReplaceId(): string//XEP - 0308
+
 }

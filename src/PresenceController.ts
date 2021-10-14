@@ -1,7 +1,7 @@
-import { ExtensivePresence, Presence } from './connection/AbstractConnection'
-import { Strophe } from './vendor/Strophe'
-import Account from './Account'
-import Storage from './Storage'
+import { ExtensivePresence, Presence } from './connection/AbstractConnection';
+import { Strophe } from './vendor/Strophe';
+import Account from './Account';
+import Storage from './Storage';
 import Log from '@util/Log';
 
 const TARGET_KEY = 'targetPresence';
@@ -11,17 +11,15 @@ const AGGREGATE = 500;
 export default class PresenceController {
    private updateTimeout;
 
-   constructor(private storage: Storage, private getAccounts: () => Account[]) {
-
-   }
+   constructor(private storage: Storage, private getAccounts: () => Account[]) {}
 
    public setTargetPresence(presence: Presence, status: string = '') {
-      this.storage.setItem(TARGET_KEY, {presence, status});
+      this.storage.setItem(TARGET_KEY, { presence, status });
    }
 
    public getTargetPresence(): Presence {
       let extPresence = this.storage.getItem(TARGET_KEY);
-      let presence = (extPresence && typeof extPresence === 'object') ? extPresence.presence : extPresence;
+      let presence = extPresence && typeof extPresence === 'object' ? extPresence.presence : extPresence;
 
       return typeof presence === 'number' ? presence : Presence.offline;
    }
@@ -68,9 +66,9 @@ export default class PresenceController {
          this.updateTimeout = setTimeout(() => this.updateCurrentPresence(), AGGREGATE);
       });
 
-      account.registerConnectionHook((status) => {
+      account.registerConnectionHook(status => {
          if (status === Strophe.Status.DISCONNECTED) {
-            Log.info('Presence Controller: account disconnected')
+            Log.info('Presence Controller: account disconnected');
          }
       });
    }
@@ -95,7 +93,7 @@ export default class PresenceController {
          return Presence.offline;
       }
 
-      accounts.forEach((account) => {
+      accounts.forEach(account => {
          let presence = account.getPresence();
 
          if (typeof commonPresence === 'undefined') {

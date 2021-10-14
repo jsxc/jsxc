@@ -9,10 +9,15 @@ if (window.location.hostname === 'localhost') {
 }
 
 // special setup for jsxc.org/example
-if (window.location.hostname === 'www.jsxc.org') {
+if (window.location.hostname === 'www.jsxc.org' || window.location.hostname === 'jsxc.org') {
     if (!localStorage.getItem('bosh-url') && !localStorage.getItem('xmpp-domain')) {
        $('#bosh-url').val('/http-bind/');
-       $('#xmpp-domain').val('demo.jsxc.ch');
+       $('#xmpp-domain').val('jsxc.ch');
+
+       const demoUser = 'demo' + Math.round(Math.random() * 9);
+
+       $('[name="username"]').val(demoUser);
+       $('[name="password"]').val(demoUser);
     }
 
     $('.jsxc-org').show();

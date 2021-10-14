@@ -1,33 +1,10 @@
 import JingleHandler from '@connection/JingleHandler';
 import Log from '@util/Log';
 import JingleMediaSession from './JingleMediaSession';
-import Notification from './Notification';
-import Translation from '@util/Translation';
-import { SOUNDS } from './CONST';
+import { CallState } from './CallManager';
 
 export default class JingleStreamSession extends JingleMediaSession {
-
    public onOnceIncoming() {
-      Notification.notify({
-         title: Translation.t('Incoming_stream'),
-         message: Translation.t('from_sender') + this.peerContact.getName(),
-         source: this.peerContact,
-      });
-
-      Notification.playSound(SOUNDS.CALL, true, true);
-
-      this.on('terminated', () => {
-         Notification.stopSound();
-      });
-
-      this.on('aborted', () => {
-         Notification.stopSound();
-      });
-
-      this.on('adopt', () => {
-         Notification.stopSound();
-      });
-
       // send signal to partner
       this.session.ring();
    }
@@ -37,22 +14,46 @@ export default class JingleStreamSession extends JingleMediaSession {
 
       let videoDialog = JingleHandler.getVideoDialog();
 
-      videoDialog.showCallDialog(this).then(() => {
-         videoDialog.addSession(this);
-         videoDialog.showVideoWindow();
+      const callManager = this.account.getCallManager();
+      const callType = this.getCallType();
+      const peer = this.getPeer();
 
-         this.session.accept();
-      }).catch((reason) => {
+      const call = callManager.onIncomingCall(callType, this.session.sid, peer);
 
-         //@TODO hide user media request overlay
-
-         //@TODO post reason to chat window
-         if (reason !== 'aborted') {
-            Log.warn('Decline call', reason)
-
-            this.session.decline();
-         }
+      this.on('terminated', () => {
+         call.abort();
       });
+
+      this.on('aborted', () => {
+         call.abort();
+      });
+
+      call
+         .getState()
+         .then(state => {
+            if (state === CallState.Accepted) {
+               videoDialog.addSession(this);
+               videoDialog.showVideoWindow();
+
+               this.session.accept();
+
+               return;
+            }
+
+            throw state;
+         })
+         .catch(reason => {
+            //@TODO hide user media request overlay
+
+            //@TODO post reason to chat window
+            if (reason !== CallState.Aborted && reason !== CallState.Ignored) {
+               if (reason !== CallState.Declined) {
+                  Log.warn('Error on incoming call', reason);
+               }
+
+               this.session.decline();
+            }
+         });
    }
 
    public getMediaRequest() {

@@ -1,14 +1,13 @@
-import Account from '../Account'
-import Client from '../Client'
-import Storage from '../Storage'
-import Contact from '../Contact'
-import Message from '../Message'
-import JID from '../JID'
-import DiscoInfoRepository from '../DiscoInfoRepository'
-import Avatar from '../Avatar'
-import { IMessagePayload, DIRECTION, IMessage } from '../Message.interface'
-import { IPluginAPI } from './PluginAPI.interface'
-import { Logger } from '../util/Log'
+import Account from '../Account';
+import Client from '../Client';
+import Storage from '../Storage';
+import Contact from '../Contact';
+import Message from '../Message';
+import JID from '../JID';
+import DiscoInfoRepository from '../DiscoInfoRepository';
+import { IMessagePayload, DIRECTION, IMessage } from '../Message.interface';
+import { IPluginAPI } from './PluginAPI.interface';
+import { Logger } from '../util/Log';
 import ChatWindow from '@ui/ChatWindow';
 import ContactProvider from '@src/ContactProvider';
 import { IContact } from '@src/Contact.interface';
@@ -16,7 +15,9 @@ import { IJID } from '@src/JID.interface';
 import MultiUserContact from '@src/MultiUserContact';
 import ContactManager from '@src/ContactManager';
 import IStorage from '@src/Storage.interface';
-import CommandRepository, { CommandAction } from '@src/CommandRepository'
+import CommandRepository, { CommandAction } from '@src/CommandRepository';
+import { IAvatar } from '@src/Avatar.interface';
+import CallManager from '@src/CallManager';
 
 export default class PluginAPI implements IPluginAPI {
    private storage: IStorage;
@@ -29,21 +30,21 @@ export default class PluginAPI implements IPluginAPI {
       this.Log = new Logger(name);
    }
 
-   public createJID(node: string, domain: string, resource: string): IJID
-   public createJID(bare: string, resource: string): IJID
-   public createJID(full: string): IJID
+   public createJID(node: string, domain: string, resource: string): IJID;
+   public createJID(bare: string, resource: string): IJID;
+   public createJID(full: string): IJID;
    public createJID(): IJID {
       return new JID(arguments[0], arguments[1], arguments[2]);
    }
 
-   public createMessage(uid: string): Message
-   public createMessage(data: IMessagePayload): Message
+   public createMessage(uid: string): Message;
+   public createMessage(data: IMessagePayload): Message;
    public createMessage() {
       return new Message(arguments[0]);
    }
 
-   public createMultiUserContact(jid: IJID, name?: string): MultiUserContact
-   public createMultiUserContact(id: string): MultiUserContact
+   public createMultiUserContact(jid: IJID, name?: string): MultiUserContact;
+   public createMultiUserContact(id: string): MultiUserContact;
    public createMultiUserContact(): MultiUserContact {
       return new MultiUserContact(this.account, arguments[0], arguments[1]);
    }
@@ -58,8 +59,9 @@ export default class PluginAPI implements IPluginAPI {
 
    public getSessionStorage(): IStorage {
       if (typeof this.sessionStorage === 'undefined') {
-         //@REVIEW maybe also encapsulate session storage for every plugin
-         this.sessionStorage = this.account.getSessionStorage();
+         let name = this.account.getUid() + '@' + this.account.getSessionId() + '@' + this.name;
+
+         this.sessionStorage = new Storage(name);
       }
 
       return this.sessionStorage;
@@ -67,11 +69,11 @@ export default class PluginAPI implements IPluginAPI {
 
    public send = (stanzaElement: Strophe.Builder) => {
       this.getConnection().pluginOnlySend(stanzaElement);
-   }
+   };
 
    public sendIQ = (stanzaElement: Strophe.Builder): Promise<Element> => {
       return this.getConnection().pluginOnlySendIQ(stanzaElement);
-   }
+   };
 
    public getDiscoInfoRepository(): DiscoInfoRepository {
       return this.account.getDiscoInfoRepository();
@@ -89,24 +91,66 @@ export default class PluginAPI implements IPluginAPI {
       return Client.getVersion();
    }
 
-   public addPreSendMessageProcessor(processor: (contact: IContact, message: Message) => Promise<[IContact, Message]>, position?: number) {
+   public addPreSendMessageProcessor(
+      processor: (contact: IContact, message: Message) => Promise<[IContact, Message]>,
+      position?: number
+   ) {
       this.account.getPipe('preSendMessage').addProcessor(processor, position);
    }
 
-   public addAfterReceiveMessageProcessor(processor: (contact: IContact, message: IMessage, stanza: Element) => Promise<[IContact, IMessage, Element]>, position?: number) {
+   public addAfterReceiveMessageProcessor(
+      processor: (contact: IContact, message: IMessage, stanza: Element) => Promise<[IContact, IMessage, Element]>,
+      position?: number
+   ) {
       this.account.getPipe('afterReceiveMessage').addProcessor(processor, position);
    }
 
-   public addAfterReceiveGroupMessageProcessor(processor: (contact: IContact, message: IMessage, stanza: Element) => Promise<[IContact, IMessage, Element]>, position?: number) {
+   public addAfterReceiveGroupMessageProcessor(
+      processor: (contact: IContact, message: IMessage, stanza: Element) => Promise<[IContact, IMessage, Element]>,
+      position?: number
+   ) {
       this.account.getPipe('afterReceiveGroupMessage').addProcessor(processor, position);
    }
 
-   public addPreSendMessageStanzaProcessor(processor: (message: Message, xmlMsg: Strophe.Builder) => Promise<[Message, Strophe.Builder]>, position?: number) {
+   public addAfterReceiveErrorMessageProcessor(
+      processor: (contact: IContact, message: IMessage, stanza: Element) => Promise<[IContact, IMessage, Element]>,
+      position?: number
+   ) {
+      this.account.getPipe('afterReceiveErrorMessage').addProcessor(processor, position);
+   }
+
+   public addPreSendMessageStanzaProcessor(
+      processor: (message: Message, xmlMsg: Strophe.Builder) => Promise<[Message, Strophe.Builder]>,
+      position?: number
+   ) {
       this.account.getPipe('preSendMessageStanza').addProcessor(processor, position);
    }
 
-   public addAvatarProcessor(processor: (contact: IContact, avatar: Avatar) => Promise<[IContact, Avatar]>, position?: number) {
+   public addAvatarProcessor(
+      processor: (contact: IContact, avatar: IAvatar) => Promise<[IContact, IAvatar]>,
+      position?: number
+   ) {
       this.account.getPipe('avatar').addProcessor(processor, position);
+   }
+
+   public addPublishAvatarProcessor(processor: (avatar: IAvatar | null) => Promise<[IAvatar]>, position?: number) {
+      this.account.getPipe('publishAvatar').addProcessor(processor, position);
+   }
+
+   public addCallProcessor(
+      processor: (
+         contact: IContact,
+         type: 'video' | 'audio' | 'screen',
+         resources: string[],
+         sessionId: string
+      ) => Promise<[IContact, 'video' | 'audio' | 'screen', string[], string]>,
+      position?: number
+   ) {
+      this.account.getPipe('call').addProcessor(processor, position);
+   }
+
+   public addTerminateCallProcessor(processor: (sessionId?: string) => Promise<[string]>) {
+      this.account.getPipe<[sessionId?: string]>('terminateCall').addProcessor(processor);
    }
 
    public addFeature(feature: string) {
@@ -144,9 +188,22 @@ export default class PluginAPI implements IPluginAPI {
       this.account.getContactManager().registerContactProvider(source);
    }
 
-   public registerTextFormatter(formatter: (text: string, direction: DIRECTION, contact: IContact, senderName: string) => Promise<string> | string, priority?: number) {
+   public registerTextFormatter(
+      formatter: (
+         text: string,
+         direction: DIRECTION,
+         contact: IContact,
+         senderName: string
+      ) => Promise<string> | string,
+      priority?: number
+   ) {
       Message.addFormatter((text: string, direction: DIRECTION, peer: IJID, senderName: string) => {
-         return Promise.resolve(formatter(text, direction, this.account.getContact(peer), senderName)).then(text => [text, direction, peer, senderName]);
+         return Promise.resolve(formatter(text, direction, this.account.getContact(peer), senderName)).then(text => [
+            text,
+            direction,
+            peer,
+            senderName,
+         ]);
       }, priority);
    }
 
@@ -172,5 +229,9 @@ export default class PluginAPI implements IPluginAPI {
 
    public getAccountUid(): string {
       return this.account.getUid();
+   }
+
+   public getCallManager(): CallManager {
+      return this.account.getCallManager();
    }
 }

@@ -1,11 +1,11 @@
-import ChatWindow from './ChatWindow'
-import MultiUserContact, { AFFILIATION, ROLE } from '../MultiUserContact'
-import Translation from '../util/Translation'
-import JID from '../JID'
-import AvatarSet from './AvatarSet'
-import showRoomConfigurationDialog from './dialogs/multiUserRoomConfiguration'
-import showMultiUserInviteDialog from './dialogs/multiUserInvite'
-import showMultiUserMemberlistDialog from './dialogs/multiUserMemberlist'
+import ChatWindow from './ChatWindow';
+import MultiUserContact, { AFFILIATION, ROLE } from '../MultiUserContact';
+import Translation from '../util/Translation';
+import JID from '../JID';
+import AvatarSet from './AvatarSet';
+import showRoomConfigurationDialog from './dialogs/multiUserRoomConfiguration';
+import showMultiUserInviteDialog from './dialogs/multiUserInvite';
+import showMultiUserMemberlistDialog from './dialogs/multiUserMemberlist';
 
 export default class MultiUserChatWindow extends ChatWindow {
    private memberlistElement;
@@ -24,7 +24,7 @@ export default class MultiUserChatWindow extends ChatWindow {
          this.addMember(nickname);
       });
 
-      this.contact.registerRemoveMemberHook((nickname) => {
+      this.contact.registerRemoveMemberHook(nickname => {
          this.removeMember(nickname);
       });
 
@@ -42,19 +42,19 @@ export default class MultiUserChatWindow extends ChatWindow {
 
       this.contact.getNickname() ? this.enable() : this.disable();
 
-      this.contact.registerHook('subject', (newSubject) => {
+      this.contact.registerHook('subject', newSubject => {
          this.setBarText(newSubject);
       });
       this.setBarText(this.contact.getSubject());
 
-      this.contact.registerMemberHook(this.contact.getNickname(), (data) => {
+      this.contact.registerMemberHook(this.contact.getNickname(), data => {
          this.updatePermissionAttributes(data);
       });
 
       this.updatePermissionAttributes(this.contact.getMember(this.contact.getNickname()));
    }
 
-   private updatePermissionAttributes(data: {affiliation?: AFFILIATION, role?: ROLE, jid?: JID} = {}) {
+   private updatePermissionAttributes(data: { affiliation?: AFFILIATION; role?: ROLE; jid?: JID } = {}) {
       this.getDom().attr('data-role', data.role);
       this.getDom().attr('data-affiliation', data.affiliation);
    }
@@ -107,7 +107,7 @@ export default class MultiUserChatWindow extends ChatWindow {
    }
 
    public removeMember(nickname: string) {
-      let m = this.memberlistElement.find('li[data-nickname="' + nickname + '"]');
+      let m = this.memberlistElement.find('li[data-nickname="' + nickname.replace(/"/g, '\\"') + '"]');
 
       if (m.length > 0) {
          m.remove();
@@ -129,14 +129,14 @@ export default class MultiUserChatWindow extends ChatWindow {
 
       let windowElement = this.element.find('.jsxc-window');
 
-      windowElement.on('drop', (ev) => {
-         if ((<any> ev.originalEvent).dataTransfer.files.length) {
+      windowElement.on('drop', ev => {
+         if ((<any>ev.originalEvent).dataTransfer.files.length) {
             return;
          }
 
          ev.preventDefault();
 
-         let jid = new JID((<any> ev.originalEvent).dataTransfer.getData('text'));
+         let jid = new JID((<any>ev.originalEvent).dataTransfer.getData('text'));
 
          this.contact.invite(jid);
       });
@@ -145,47 +145,31 @@ export default class MultiUserChatWindow extends ChatWindow {
    private addMucElementsToChatWindow() {
       this.addMemberList();
 
-      this.addActionEntry('jsxc-members', this.toggleMemberList, $('<i class="jsxc-icon-group jsxc-icon--center"></i>'));
-
-      this.addMenuEntry(
-         'jsxc-destroy',
-         Translation.t('Destroy'),
-         () => {
-            this.contact.destroy();
-         }
+      this.addActionEntry(
+         'jsxc-members',
+         this.toggleMemberList,
+         $('<i class="jsxc-icon-group jsxc-icon--center"></i>')
       );
 
-      this.addMenuEntry(
-         'jsxc-configure',
-         Translation.t('Configure'),
-         () => {
-            showRoomConfigurationDialog(this.contact);
-         }
-      );
+      this.addMenuEntry('jsxc-destroy', Translation.t('Destroy'), () => {
+         this.contact.destroy();
+      });
 
-      this.addMenuEntry(
-         'jsxc-managememberlist',
-         Translation.t('Memberlist'),
-         () => {
-            showMultiUserMemberlistDialog(this.contact);
-         }
-      );
+      this.addMenuEntry('jsxc-configure', Translation.t('Configure'), () => {
+         showRoomConfigurationDialog(this.contact);
+      });
 
-      this.addMenuEntry(
-         'jsxc-leave',
-         Translation.t('Leave'),
-         () => {
-            this.contact.leave();
-         }
-      );
+      this.addMenuEntry('jsxc-managememberlist', Translation.t('Memberlist'), () => {
+         showMultiUserMemberlistDialog(this.contact);
+      });
 
-      this.addMenuEntry(
-         'jsxc-invite',
-         Translation.t('Invite'),
-         () => {
-            showMultiUserInviteDialog(this.contact);
-         }
-      )
+      this.addMenuEntry('jsxc-leave', Translation.t('Leave'), () => {
+         this.contact.leave();
+      });
+
+      this.addMenuEntry('jsxc-invite', Translation.t('Invite'), () => {
+         showMultiUserInviteDialog(this.contact);
+      });
    }
 
    private addMemberList() {
@@ -193,7 +177,7 @@ export default class MultiUserChatWindow extends ChatWindow {
       this.element.find('.jsxc-window-fade').prepend(this.memberlistElement);
    }
 
-   private toggleMemberList = (ev) => {
+   private toggleMemberList = ev => {
       if (ev) {
          ev.preventDefault();
       }
@@ -206,9 +190,9 @@ export default class MultiUserChatWindow extends ChatWindow {
          $('body').click();
          $('body').one('click', this.toggleMemberList);
 
-         ul.mouseleave(function() {
+         ul.mouseleave(() => {
             ul.data('timer', window.setTimeout(this.toggleMemberList, 2000));
-         }).mouseenter(function() {
+         }).mouseenter(() => {
             window.clearTimeout(ul.data('timer'));
          });
       } else {
@@ -218,10 +202,10 @@ export default class MultiUserChatWindow extends ChatWindow {
       }
 
       return false;
-   }
+   };
 
    private getMemberElementByNickname(nickname: string) {
-      return this.memberlistElement.find('.li[data-nickname="' + nickname + '"]');
+      return this.memberlistElement.find('.li[data-nickname="' + nickname.replace(/"/g, '\\"') + '"]');
    }
 
    private enable() {

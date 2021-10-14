@@ -1,13 +1,16 @@
-import IIdentifiable from './Identifiable.interface'
-import Storage from './Storage'
-import ContactDialog from './ui/dialogs/contact'
-import MultiUserInvitationDialog from './ui/dialogs/multiUserInvitation'
-import NotificationDialog from './ui/dialogs/notification'
-import UnknownSenderDialog from './ui/dialogs/unknownSender'
-import Notification from './Notification'
+import IIdentifiable from './Identifiable.interface';
+import Storage from './Storage';
+import ContactDialog from './ui/dialogs/contact';
+import MultiUserInvitationDialog from './ui/dialogs/multiUserInvitation';
+import NotificationDialog from './ui/dialogs/notification';
+import UnknownSenderDialog from './ui/dialogs/unknownSender';
+import Notification from './Notification';
 
 export enum TYPE {
-   normal, announcement, contact, invitation
+   normal,
+   announcement,
+   contact,
+   invitation,
 }
 
 export const enum FUNCTION {
@@ -33,7 +36,6 @@ export interface INoticeData {
 }
 
 export class Notice implements IIdentifiable {
-
    private storage: Storage;
 
    private data: INoticeData;

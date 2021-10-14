@@ -1,6 +1,6 @@
-import Account from '../../../Account'
-import AbstractHandler from '../AbstractHandler'
-import { STANZA_JINGLE_KEY } from '../../AbstractConnection'
+import Account from '../../../Account';
+import AbstractHandler from '../AbstractHandler';
+import { STANZA_JINGLE_KEY } from '../../AbstractConnection';
 
 const FEATURES = [
    'urn:xmpp:jingle:1',
@@ -17,7 +17,7 @@ const FEATURES = [
    'urn:xmpp:jingle:transports.dtls-sctp:1',
    'urn:ietf:rfc:3264',
    'urn:ietf:rfc:5576',
-   'urn:ietf:rfc:5888'
+   'urn:ietf:rfc:5888',
 ];
 
 export default class extends AbstractHandler {

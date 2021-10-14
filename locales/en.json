@@ -105,7 +105,7 @@
     "cmd_nick": "[nickname] Change own nickname",
     "cmd_subject": "[topic] Change topic of the group",
     "cmd_ban": "[JID] (reason) Kick and ban a user ",
-    "cmd_kick": "[nickname] (reason) Kick a userc",
+    "cmd_kick": "[nickname] (reason) Kick a user",
     "cmd_participant": "[nickname] Change role to participant ",
     "cmd_member": "[JID] Change affiliation to member",
     "cmd_moderator": "[nickname] Change role to moderator",
@@ -435,7 +435,11 @@
     "setting-version": "Returns version information about the software running this Client.",
     "setting-time": "Returns entity time on queries.",
     "Occupants": "Occupants",
-    "Occupants_not_provided": "No occupants in the room or the list is kept private."
+    "Occupants_not_provided": "No occupants in the room or the list is kept private.",
+    "Edit_avatar": "Edit avatar",
+    "Every_member_can_see_your_full_JID": "Every member can see your full JID",
+    "message_not_delivered": "Message not delivered",
+    "User_media_not_readable": "User media not readable. Is your device used by another application?"
   },
   "Notifications": "Notifications"
 }

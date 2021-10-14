@@ -1,7 +1,7 @@
 import PreKey, { IPreKeyObject } from './PreKey';
 
 interface ISignedPreKeyObject extends IPreKeyObject {
-   signature: ArrayBuffer
+   signature: ArrayBuffer;
 }
 
 export default class SignedPreKey extends PreKey {
@@ -10,6 +10,6 @@ export default class SignedPreKey extends PreKey {
    }
 
    public getSignature(): ArrayBuffer {
-      return (<ISignedPreKeyObject> this.data).signature;
+      return (<ISignedPreKeyObject>this.data).signature;
    }
 }

@@ -1,4 +1,4 @@
-import IIdentifiable from './Identifiable.interface'
+import IIdentifiable from './Identifiable.interface';
 
 abstract class Storable implements IIdentifiable {
    constructor(data: any) {

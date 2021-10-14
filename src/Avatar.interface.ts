@@ -1,8 +1,7 @@
-
 export interface IAvatar {
-   getData(): string
+   getData(): string;
 
-   getType(): string
+   getType(): string;
 
-   getHash(): string
+   getHash(): string;
 }
