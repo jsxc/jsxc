@@ -20,6 +20,7 @@ export default class extends AbstractHandler {
       let attrId = messageElement.attr('id');
       let body = bodyElement.text();
       let nickname = from.resource;
+      let replacetag =  messageElement.find('message > replace');
 
       let contact = <MultiUserContact>this.account.getContact(from);
       if (typeof contact === 'undefined') {
@@ -122,6 +123,7 @@ export default class extends AbstractHandler {
          plaintextMessage: body,
          // htmlMessage: htmlBody.html(),
          stamp: sendDate.getTime(),
+         replaceId : replacetag.length>0 ? replacetag.attr('id') : null,
          sender,
          unread,
          mark: MessageMark.transferred,

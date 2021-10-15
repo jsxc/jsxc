@@ -20,22 +20,23 @@ export enum MessageMark {
 }
 
 export interface IMessagePayload {
-   peer: JID;
-   direction: DIRECTION;
-   attrId?: string;
-   uid?: string;
-   plaintextMessage?: string;
-   htmlMessage?: string;
-   errorMessage?: string;
-   attachment?: Attachment;
-   mark?: MessageMark;
-   encrypted?: boolean;
-   forwarded?: boolean;
-   stamp?: number;
-   type?: ContactType;
-   unread?: boolean;
-   encryptedHtmlMessage?: string;
-   encryptedPlaintextMessage?: string;
+   peer: JID,
+   direction: DIRECTION,
+   attrId?: string,
+   uid?: string,
+   plaintextMessage?: string,
+   htmlMessage?: string,
+   errorMessage?: string,
+   replaceId?: string,
+   attachment?: Attachment,
+   mark?: MessageMark,
+   encrypted?: boolean,
+   forwarded?: boolean,
+   stamp?: number,
+   type?: ContactType,
+   unread?: boolean,
+   encryptedHtmlMessage?: string,
+   encryptedPlaintextMessage?: string,
    sender?: {
       name: string;
       jid?: JID;
@@ -144,5 +145,14 @@ export interface IMessage {
 
    getErrorMessage(): string;
 
-   updateProgress(transferred: number, complete: number);
+   updateProgress(transferred: number, complete: number)
+
+   setReplaceBody(val: string)//XEP - 0308
+
+   setReplaceStamp(date:Date); //XEP - 0308
+
+   getReplaceBody(): string//XEP - 0308
+
+   getReplaceId(): string//XEP - 0308
+
 }

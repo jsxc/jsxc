@@ -41,6 +41,7 @@ export default class extends AbstractHandler {
          peer: peerJid,
          direction: messageElement.getDirection(),
          plaintextMessage: messageElement.getPlaintextBody(),
+         replaceId: messageElement.getReplaceId(),
          htmlMessage: messageElement.getHtmlBody().html(),
          forwarded: messageElement.isForwarded(),
          stamp: messageElement.getTime().getTime(),

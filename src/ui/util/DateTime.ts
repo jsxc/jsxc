@@ -19,4 +19,13 @@ export default class DateTime {
          DateTime.stringify(stamp, elements);
       }, 1000 * 60);
    }
+
+   public static stringifyToString(stamp: number) {
+      let momentObject = moment(stamp);
+      var locale =  window.navigator.language;
+      momentObject.locale(locale);
+      let fromNow = momentObject.fromNow();
+
+      return fromNow;
+   }
 }

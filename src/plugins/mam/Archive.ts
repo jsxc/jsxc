@@ -168,6 +168,10 @@ export default class Archive {
 
       let stanzaIdElement = messageElement.find('stanza-id[xmlns="urn:xmpp:sid:0"]');
       let originIdElement = messageElement.find('origin-id[xmlns="urn:xmpp:sid:0"]');
+      let replaceIdElement = messageElement.find('replace[xmlns="urn:xmpp:message-correct:0"]');
+
+      let replaceId = replaceIdElement.length>0?replaceIdElement.attr('id'):null;
+
       let uid =
          direction === Message.DIRECTION.OUT && originIdElement.length
             ? originIdElement.attr('id')
@@ -188,6 +192,7 @@ export default class Archive {
          mark: MessageMark.transferred,
          unread: false,
          sender: undefined,
+         replaceId:replaceId
       };
 
       if (this.contact.isGroupChat()) {
@@ -214,12 +219,17 @@ export default class Archive {
       }
 
       let transcript = this.contact.getTranscript();
+      let replaceMessagesKeys = new Array();
 
       while (this.messageCache.length > 0) {
          let messageElement = this.messageCache.pop();
 
          try {
             let message = await this.parseForwardedMessage(messageElement);
+            if (message.getReplaceId()!==null)
+            {
+               replaceMessagesKeys.push(message.getAttrId());
+            }
 
             transcript.unshiftMessage(message);
          } catch (err) {
@@ -243,6 +253,20 @@ export default class Archive {
          transcript.unshiftMessage(archiveExhaustedMessage);
       }
 
+      if (replaceMessagesKeys.length>0)
+      {
+         let arr : {[key: string]: IMessage} = {};
+         for (let key of replaceMessagesKeys)
+         {
+            arr[key]=transcript.getMessage(key);
+         }
+         let indexedArr = transcript.convertToIndexArray(arr);
+         for (let i=0;i<indexedArr.length;i++)
+         {
+            transcript.processReplace(indexedArr[i],true);
+         }
+      }
+
       this.setExhausted(isArchiveExhausted);
       this.setFirstResultId(firstResultId);
       this.plugin.removeQueryContactRelation(queryId);
@@ -258,15 +282,34 @@ export default class Archive {
       }
 
       let transcript = this.contact.getTranscript();
+      let replaceMessagesKeys = new Array();
       while (this.messageCache.length > 0) {
          let messageElement = this.messageCache.pop();
 
          try {
             let message = await this.parseForwardedMessage(messageElement);
+            if (message.getReplaceId()!==null)
+            {
+               replaceMessagesKeys.push(message.getAttrId());
+            }
 
             transcript.insertMessage(message);
          } catch (err) {
             continue;
+         }
+      }
+
+      if (replaceMessagesKeys.length>0)
+      {
+         let arr : {[key: string]: IMessage} = {};
+         for (let key of replaceMessagesKeys)
+         {
+            arr[key]=transcript.getMessage(key);
+         }
+         let indexedArr = transcript.convertToIndexArray(arr);
+         for (let i=0;i<indexedArr.length;i++)
+         {
+            transcript.processReplace(indexedArr[i],true);
          }
       }
 

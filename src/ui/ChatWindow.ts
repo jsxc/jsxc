@@ -27,6 +27,8 @@ let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
 const ENTER_KEY = 13;
 const ESC_KEY = 27;
+const BACKSPACE_KEY = 8;
+const DELETE_KEY = 46;
 
 export enum State {
    Open,
@@ -56,6 +58,8 @@ export default class ChatWindow {
    private settingsMenu: Menu;
 
    private encryptionMenu: Menu;
+
+   private editMessage: IMessage;
 
    constructor(protected contact: Contact) {
       let template = chatWindowTemplate({
@@ -239,6 +243,22 @@ export default class ChatWindow {
             keyup.which = ENTER_KEY;
             $(e.target).closest('li.jsxc-window-item').find('.jsxc-message-input').trigger(keyup);
         });
+   }
+
+   public selectEditMessage(message: IMessage)
+   {
+       let latestReplace = this.getTranscript().getLatestReplaceMessageFromMessage(message);
+
+       if (latestReplace===null)
+       {
+         this.editMessage=message;
+       }
+       else
+       {
+         this.editMessage=latestReplace;
+       }
+
+       this.inputElement.val('> '+this.editMessage.getPlaintextMessage());
    }
 
    public getTranscript(): Transcript {
@@ -528,6 +548,12 @@ export default class ChatWindow {
       ev.stopPropagation();
       // let message = <string> $(ev.target).val();
 
+      if ((ev.which === BACKSPACE_KEY || ev.which === DELETE_KEY) && (this.inputElement.val()==='' || this.inputElement.val()==='>'))
+      {
+          this.editMessage=null;
+          this.inputElement.val('');
+      }
+
       if (ev.which === ENTER_KEY && !ev.shiftKey) {
          // message = '';
       } else {
@@ -535,6 +561,7 @@ export default class ChatWindow {
       }
 
       if (ev.which === ESC_KEY) {
+         this.editMessage=null;
          this.getController().close();
       }
 
@@ -604,7 +631,8 @@ export default class ChatWindow {
          peer: this.contact.getJid(),
          direction: Message.DIRECTION.OUT,
          type: this.contact.getType(),
-         plaintextMessage: messageString,
+         replaceId: this.editMessage!=null?this.editMessage.getAttrId():null,
+         plaintextMessage: this.editMessage!=null?messageString.substring(1).trim():messageString,
          attachment: this.attachmentDeposition,
          unread: false,
       });
@@ -615,14 +643,13 @@ export default class ChatWindow {
 
       let pipe = this.getAccount().getPipe('preSendMessage');
 
-      pipe
-         .run(this.contact, message)
-         .then(([contact, message]) => {
-            this.getAccount().getConnection().sendMessage(message);
-         })
-         .catch(err => {
-            Log.warn('Error during preSendMessage pipe', err);
-         });
+      pipe.run(this.contact, message).then(([contact, message]) => {
+         this.getAccount().getConnection().sendMessage(message);
+         this.editMessage=null;
+      }).catch(err => {
+         Log.warn('Error during preSendMessage pipe', err);
+         this.editMessage=null;
+      });
 
       if (messageString === '?' && Client.getOption('theAnswerToAnything') !== false) {
          if (typeof Client.getOption('theAnswerToAnything') === 'undefined' || (Math.random() * 100) % 42 < 1) {

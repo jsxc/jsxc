@@ -31,26 +31,7 @@ export default class Transcript {
          return;
       }
 
-      let indexMessageArray = new Array();
-
-      for (let strId in this.messages)
-      {
-         indexMessageArray.push(this.messages[strId]);
-      }
-
-      indexMessageArray.sort(function compare(a:IMessage, b:IMessage) {
-         if (a.getStamp().getTime() === b.getStamp().getTime()) {
-            return 0;
-         }
-
-         if (a.getStamp().getTime() < b.getStamp().getTime()) {
-            return -1;
-         }
-
-         if (a.getStamp().getTime() > b.getStamp().getTime()) {
-            return +1;
-         }
-      });
+      let indexMessageArray = this.convertToIndexArray(this.messages);
 
       for (let i = indexMessageArray.length-1;i>=0;i--)
       {
@@ -75,11 +56,13 @@ export default class Transcript {
 
       this.firstMessage = indexMessageArray[indexMessageArray.length-1];
 
-      this.addMessage(message);
-
       this.contact.setLastMessageDate(message.getStamp());
-
       this.properties.set('firstMessageId', this.firstMessage.getUid());
+
+      if (message.getReplaceId()===null)
+      {
+         this.addMessage(message);
+      }
    }
 
    public unshiftMessage(message: IMessage) {
@@ -96,7 +79,124 @@ export default class Transcript {
       this.lastMessage = message;
    }
 
+   public convertToIndexArray(messages:{[key: string]: IMessage}): IMessage[] {
+     
+      let indexMessageArray = new Array();
+
+      for (let strId in messages)
+      {
+         indexMessageArray.push(messages[strId]);
+      }
+
+      indexMessageArray.sort(function compare(a:IMessage, b:IMessage) {
+         if (a.getStamp().getTime() === b.getStamp().getTime()) {
+            return 0;
+         }
+
+         if (a.getStamp().getTime() < b.getStamp().getTime()) {
+            return -1;
+         }
+
+         if (a.getStamp().getTime() > b.getStamp().getTime()) {
+            return +1;
+         }
+      });
+
+      return indexMessageArray;
+   }
+
+   public processReplace(message:IMessage,mam:boolean=false)
+   {
+       let chain =  this.getReplaceMessageChainFromMessage(message);
+       let oldmessage = this.findMessageByAttrId(chain[0].getReplaceId());   
+       let latestMessage = chain[chain.length-1];   
+       if (oldmessage&&oldmessage.getReplaceId()===null)
+       {
+           //only allow corrections form same sender
+           if (latestMessage.getDirection()===DIRECTION.IN) //reset Marker to transfered on outgoing messages
+           {
+               let oldsender = oldmessage.getSender().jid!==undefined?oldmessage.getSender().jid.full:oldmessage.getPeer().full;
+               let replaceSender = latestMessage.getSender().jid!==undefined?latestMessage.getSender().jid.full:latestMessage.getPeer().full;
+               if (oldsender===replaceSender)
+               {
+                   latestMessage.getProcessedBody().then((bodyString)=> {
+                      oldmessage.setReplaceBody(bodyString);
+                      if (mam)
+                      {
+                         oldmessage.setReplaceStamp(latestMessage.getStamp());
+                      }
+                   }); 
+                   latestMessage.received(); //reset Marker to received on incoming messages
+               }
+           }
+           else
+           if (latestMessage.getDirection()===DIRECTION.OUT)
+           {
+               latestMessage.getProcessedBody().then((bodyString)=> {
+                  oldmessage.setReplaceBody(bodyString);
+                  if (mam)
+                  {
+                     oldmessage.setReplaceStamp(latestMessage.getStamp());
+                  }
+               });
+               latestMessage.transferred(); //reset Marker to transfered on outgoing messages               
+           }
+       }
+   }
+
+   public getLatestReplaceMessageFromMessage(message : IMessage) : IMessage {
+      let replacemsg = this.getReplaceMessageChainFromMessage(message);
+      if (replacemsg!==null&&replacemsg.length>0)
+      {
+         return replacemsg[replacemsg.length-1];
+      }
+      else
+         return null;
+   }
+
+   public getReplaceMessageChainFromMessage(message : IMessage) : IMessage[] {
+      let resultChain = new Array();
+      resultChain.push(message);
+
+      let recursive = (message: IMessage) :IMessage => {
+         let replacemsg = null;
+         let messages = this.getMessages();
+         for (let key in messages)
+         {
+            let tmpmessage = messages[key];
+            if (tmpmessage.getReplaceId()!==null&&tmpmessage.getReplaceId()===message.getAttrId())
+            {
+               replacemsg=tmpmessage;
+               break;
+            }
+         }
+         
+         if (replacemsg!==null)
+         {
+            resultChain.push(replacemsg);
+
+            let deep = recursive(replacemsg);
+            if (deep!==null)
+            {               
+               replacemsg=deep;
+            }
+         }
+         
+         return replacemsg;
+      };
+
+      recursive(message);
+
+      return resultChain;
+   }
+
    public pushMessage(message: IMessage) {
+
+      if (message.getReplaceId()!==null)
+      {
+         this.processReplace(message);
+      }
+
       if (!message.getNextId() && this.firstMessage) {
          message.setNext(this.firstMessage);
       }
@@ -170,6 +270,10 @@ export default class Transcript {
       }
 
       return this.messages[id];
+   }
+
+   public getMessages(): {[key: string]: IMessage} {     
+      return this.messages;
    }
 
    public *getGenerator() {

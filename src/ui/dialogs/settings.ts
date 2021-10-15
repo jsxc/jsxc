@@ -302,6 +302,7 @@ class MainAppSection extends Section {
       contentElement.append(this.getListItemForData('', 'Jabber Search', '0055', '1.3'));
       contentElement.append(this.getListItemForData('', 'Publish-Subscribe', '0060', '1.2.1'));
       contentElement.append(this.getListItemForData('', 'Personal Eventing Protocol', '0163', '1.2.1'));
+	  contentElement.append(this.getListItemForData('', 'Last Message Correction', '0308', '1.2.0'));
 
       return contentElement.getDOM();
    }
