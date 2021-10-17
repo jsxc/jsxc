@@ -158,13 +158,14 @@ export default class ChatWindow {
 
    public openContextMenu(event)
    {
+        let element = event.data.ref.element;
         event.preventDefault();
 
         // Show contextmenu
         let xoffset = 0;
-        let yoffset =  (event.pageY-$(event.target).closest('div.jsxc-message-area').offset().top+40);
-        let len = $(event.target).closest('div.jsxc-chatmessage').find('.jsxc-avatar').length;
-        xoffset =  len>0?event.offsetX+60:event.offsetX+20;
+        let yoffset =  (event.pageY-$(event.target).closest('div.jsxc-message-area').offset().top);
+        let len = element.find('.jsxc-avatar').length;
+        xoffset =  len>0?event.offsetX+60:event.offsetX;
 
         let contact = null;
 
@@ -178,7 +179,7 @@ export default class ChatWindow {
 
         if ($(event.target).closest('div.jsxc-chatmessage').hasClass('jsxc-in')||$(event.target).closest('div.jsxc-chatmessage').hasClass('jsxc-probably_in'))
         {
-            $(this).closest('.jsxc-window').find('.jsxc-custom-menu').finish().toggle().
+            element.find('.jsxc-custom-menu').finish().toggle().
             // In the right position (the mouse)
             css({
                top: yoffset + 'px',
@@ -189,61 +190,75 @@ export default class ChatWindow {
         else
         {
 
-            $(this).closest('.jsxc-window').find('.jsxc-custom-menu').finish().toggle().
+            element.find('.jsxc-custom-menu').finish().toggle().
             // In the right position (the mouse)
             css({
                top:yoffset + 'px',
-               right: event.currentTarget.clientWidth-xoffset  + 'px',
+               right: event.currentTarget.clientWidth-xoffset+10  + 'px',
                left: 'unset'
             });
         }
 
         let refmessage = $(event.target).closest('div.jsxc-chatmessage').attr('id');
-        $(this).closest('.jsxc-window').find('.jsxc-custom-menu').empty();
-        $(this).closest('.jsxc-window').find('.jsxc-custom-menu').append('<div class="jsxc-context-menu-contact">'+(contact!==null?contact:Translation.t('Myself'))+'</div>');
+        element.find('.jsxc-custom-menu').empty();
+        element.find('.jsxc-custom-menu').append('<div class="jsxc-context-menu-contact">'+(contact!==null?contact:Translation.t('Myself'))+'</div>');
 
         let liQuote = $('<li data-action="jsxc-context-menu-quote" data-refmessage="'+refmessage+'">'+Translation.t('Quote')+'</li>');
-        $(this).closest('.jsxc-window').find('.jsxc-custom-menu').append(liQuote);
+        element.find('.jsxc-custom-menu').append(liQuote);
 
         let _self : ChatWindow = event.data.ref;
         liQuote.on('click',{ref:event.data.ref},function(e)
         {
-
             $('.jsxc-custom-menu').hide(250);
             let refmessage = $(e.target).attr('data-refmessage');
             let msg : IMessage = _self.getTranscript().getMessage(refmessage);
-
-            let message = msg.getPlaintextMessage();
-            let msgarr = message.split('\n');
-            if (msgarr.join('').trim().length===0)
-            {
-               message = msg.getAttachment().getData();
-            }
-            else
-               message = msgarr.join('\n> ');
-
-            if (contact===null)
-            {
-               if (_self.contact.isGroupChat())
-               {
-                  contact = (<MultiUserContact>_self.getContact()).getNickname();
-               }
-               else
-               {
-                  contact =  _self.getAccount().getContact().getJid().bare;
-               }
-            }
-
-            setTimeout(() => e.data.ref.scrollMessageAreaToBottom(), 500);
-
-            $(e.target).closest('li.jsxc-window-item').find('.jsxc-message-input').empty().val('> '+contact+':\n> '+message+'\n');
-            $(e.target).closest('li.jsxc-window-item').find('.jsxc-message-input').focus();
-            let keyup = jQuery.Event('keyup');
-            keyup.ctrlKey = false;
-            keyup.shiftKey = true;
-            keyup.which = ENTER_KEY;
-            $(e.target).closest('li.jsxc-window-item').find('.jsxc-message-input').trigger(keyup);
+            _self.selectMessageForQuote(msg,contact);
         });
+
+        let msg : IMessage = _self.getTranscript().getMessage(refmessage);
+        if (msg.getDirection()===DIRECTION.OUT||msg.getDirection()===DIRECTION.PROBABLY_OUT)
+        {
+            let liEdit = $('<li data-action="jsxc-context-menu-quote" data-refmessage="'+refmessage+'">'+Translation.t('Edit')+'</li>');        
+            element.find('.jsxc-custom-menu').append(liEdit);
+            liEdit.on('click',{ref:event.data.ref},function(e)
+            {
+
+               $('.jsxc-custom-menu').hide(250);
+               let refmessage = $(e.target).attr('data-refmessage');
+               let msg : IMessage = _self.getTranscript().getMessage(refmessage);
+
+               _self.selectEditMessage(msg);
+            });
+        }
+   }
+
+   private selectMessageForQuote(msg:IMessage,contact:string){
+      let message = msg.getPlaintextMessage();
+      let msgarr = message.split('\n');
+      if (msgarr.join('').trim().length===0)
+      {
+         message = msg.getAttachment().getData();
+      }
+      else
+         message = msgarr.join('\n> ');
+
+      if (contact===null)
+      {
+         if (this.contact.isGroupChat())
+         {
+            contact = (<MultiUserContact>this.getContact()).getNickname();
+         }
+         else
+         {
+            contact =  this.getAccount().getContact().getJid().bare;
+         }
+      }
+
+      setTimeout(() => this.scrollMessageAreaToBottom(), 500);
+
+      this.inputElement.val('> '+contact+':\n> '+message+'\n');
+      this.inputElement.focus();
+      this.resizeInputArea();
    }
 
    private selectLatestVisibleMessageForEdit() : void {
@@ -264,6 +279,8 @@ export default class ChatWindow {
        this.editMessage=latestReplace;
 
        this.inputElement.val('> '+this.editMessage.getPlaintextMessage());
+       this.inputElement.focus();
+       this.resizeInputArea()
    }
 
    public getTranscript(): Transcript {

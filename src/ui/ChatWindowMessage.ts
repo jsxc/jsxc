@@ -9,13 +9,11 @@ import Translation from '@util/Translation';
 import showLogDialog from './dialogs/xep308log';
 
 let chatWindowMessageTemplate = require('../../template/chat-window-message.hbs')
-const LONGPRESS_TIME = 600; //how long is a long press in millis
 
 export default class ChatWindowMessage {
    private element;
 
    // holds the start time for long press
-   private longpress_start;
 
    constructor(private message: IMessage, private chatWindow: ChatWindow) {
       this.generateElement();
@@ -310,26 +308,6 @@ export default class ChatWindowMessage {
          }
       });
 
-      this.element.off('mousedown').on( 'mousedown', ()=> {
-          this.longpress_start = new Date().getTime();
-      });
-
-      this.element.off('mouseleave').on( 'mouseleave', ()=> {
-          this.longpress_start = 0;
-      });
-
-      this.element.off('mouseup').on( 'mouseup', ()=> {
-          if ( new Date().getTime() >= ( this.longpress_start + LONGPRESS_TIME )) {
-             if (this.message.getDirection()===DIRECTION.OUT) //we can only edit outging messages
-             {
-                 this.chatWindow.selectEditMessage(this.message);
-             }
-          }
-          else
-          {
-             //SHORT PRESS... not needed now!
-          }
-      });
    }
 
    private replaceBody(processBodyString:any) {
