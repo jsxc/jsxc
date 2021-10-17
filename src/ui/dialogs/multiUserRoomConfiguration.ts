@@ -11,7 +11,7 @@ export const CANCELED = 'canceled';
 
 export default function (contact: MultiUserContact) {
    //@TODO translate, maybe move to hbs
-   dialog = new Dialog('<p class="jsxc-waiting">We are loading</p>', true);
+   dialog = new Dialog('<p class="jsxc-waiting">We are loading</p>', true,contact.getJid().bare);
    dialog.open();
 
    let connection = contact.getAccount().getConnection();

@@ -103,6 +103,10 @@ export default class MultiUserStatusCodeHandler {
          .then(stanza => {
             if (stanza === CANCELED) {
                multiUserContact.addSystemMessage(Translation.t('Configuration_canceled'));
+               setTimeout(()=>{
+                  multiUserContact.getChatWindow().close();
+                  multiUserContact.getAccount().getContactManager().delete(multiUserContact);
+               },2000);
             }
          })
          .catch(() => {});
