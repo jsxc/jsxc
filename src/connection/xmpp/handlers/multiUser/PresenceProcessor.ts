@@ -55,7 +55,7 @@ export default class MultiUserPresenceProcessor {
 
          newNickname = Strophe.unescapeNode(newNickname);
 
-         this.multiUserContact.removeMember(this.nickname);
+         this.multiUserContact.removeMember(this.nickname,false);
          this.multiUserContact.addMember(newNickname);
 
          this.inform(

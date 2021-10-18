@@ -376,6 +376,16 @@ export default class ChatWindow {
       if (message.getDOM().length > 0) {
          message.getDOM().replaceWith(messageElement);
       } else {
+         if (message.getDirection()===DIRECTION.IN||message.getDirection()===DIRECTION.PROBABLY_IN)
+         {
+            let oldout=this.element.find('div[id="'+message.getAttrId()+'"]');
+            if (oldout.length>0)
+            {
+               oldout.hide();  // hide old outgoing message if > 1 client with same bare jid have same nickname
+               messageElement.removeClass('jsxc-in').addClass('jsxc-out');
+            }
+         }
+
          this.element.find('.jsxc-message-area').prepend(messageElement);
       }
 

@@ -34,7 +34,13 @@ export default class ChatWindowMessage {
       let chatWindowMessage = this.chatWindow.getChatWindowMessage(nextMessage);
       let element = chatWindowMessage.getElement();
 
+      if (!this.chatWindow.getChatWindowMessage(nextMessage))
+      {
+         element.hide(); // hide old outgoing message if > 1 client with same bare jid have same nickname
+      }
+
       this.getElement().after(element);
+
       chatWindowMessage.restoreNextMessage();
    }
 

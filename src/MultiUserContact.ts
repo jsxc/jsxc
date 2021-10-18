@@ -244,11 +244,14 @@ export default class MultiUserContact extends Contact {
       return isNewMember;
    }
 
-   public removeMember(nickname: string) {
+   public removeMember(nickname: string, shutdown:boolean=true) {
       this.getMembers().remove(nickname);
 
       if (nickname === this.getNickname()) {
-         this.shutdown();
+         if (shutdown)
+         {
+            this.shutdown();
+         }
       }
    }
 
