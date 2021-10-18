@@ -154,6 +154,19 @@ export default class ChatWindow {
       anchorElement.on('click',()=>{
          this.scrollMessageAreaToBottom();
       });
+
+      let updateUnreadMessage = () => {
+         let unreadMessages = this.contact.getTranscript().getNumberOfUnreadMessages();
+         
+         if (unreadMessages > 0 && this.element.hasClass("jsxc-minimized")) {
+            this.element.find('.jsxc-bar--window.jsxc-bar').addClass('jsxc-blink-unread-msg');
+         } else {
+            this.element.find('.jsxc-bar--window.jsxc-bar').removeClass('jsxc-blink-unread-msg');
+         }
+      };
+
+      this.contact.getTranscript().registerHook('unreadMessageIds', updateUnreadMessage);
+      updateUnreadMessage();
    }
 
    public openContextMenu(event)
