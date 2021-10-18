@@ -317,9 +317,13 @@ button.jsxc-page__subheadline {
   justify-content: center;
   margin: 2em 0;
 
-  img {
+  .jsxc-avatar-upload-placeholer {
     height: 96px;
     width: 96px;
+    background-image: url("../images/icons/placeholder.svg");
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
   }
 
   input[type="file"] {
