@@ -98,6 +98,12 @@ export default class ChatWindow {
       this.element.attr('data-type', this.contact.getType());
 
       if (this.contact.isGroupChat()) {
+         if (this.element.attr('data-presence')==='offline')
+         {
+            (<MultiUserContact>this.contact).setNickname(this.getContact().getAccount().getJID().node);
+            (<MultiUserContact>this.contact).join();
+         }
+
          const setMembersOnly = () =>
             this.element.attr('data-membersonly', (this.contact as MultiUserContact).isMembersOnly().toString());
          const setNonAnonymous = () =>

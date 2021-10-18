@@ -251,6 +251,17 @@ input.jsxc-filter-input {
       display: none;
     }
 
+    .jsxc-roster-item[data-presence="offline"].jsxc-roster-item[data-type="groupchat"] .jsxc-avatar {
+      opacity: 0.3;
+      filter: alpha(opacity=30); /* msie */
+      background-color: #000 !important;
+    }
+
+    .jsxc-roster-item[data-presence="offline"].jsxc-roster-item[data-type="groupchat"] .jsxc-bar__caption {
+      opacity: 0.5;
+      filter: alpha(opacity=50); /* msie */
+    }
+
     li.jsxc-hide-offline {
       .jsxc-hide-offline {
         display: none;

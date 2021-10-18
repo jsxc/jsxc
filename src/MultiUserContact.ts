@@ -122,6 +122,9 @@ export default class MultiUserContact extends Contact {
    }
 
    public leave() {
+      this.chatWindow.close();
+      this.chatWindow.getController().close();
+      this.chatWindow=null;
       return this.getService().leaveMultiUserRoom(this.getJid());
    }
 
