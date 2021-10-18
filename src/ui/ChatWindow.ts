@@ -389,6 +389,29 @@ export default class ChatWindow {
          this.element.find('.jsxc-message-area').prepend(messageElement);
       }
 
+      if (message.getDirection()===DIRECTION.SYS)
+      {
+         let disableJoinLeaveMessages = Client.getOption('disableJoinLeaveMessages') || false;
+         if (disableJoinLeaveMessages)
+         {
+
+            if (
+               message.getPlaintextMessage().indexOf(Translation.t('entered_the_room', {
+                  nickname: '',
+                  escapeInterpolation: true,
+               }))>-1||
+               message.getPlaintextMessage().indexOf(Translation.t('left_the_building', {
+                  nickname: '',
+                  escapeInterpolation: true,
+               }))>-1||
+               message.getPlaintextMessage().indexOf(Translation.t('You_left_the_building'))>-1
+               )
+            {
+               messageElement.hide();
+            }
+         }
+      }
+
       chatWindowMessage.restoreNextMessage();
 
       setTimeout(() => this.scrollMessageAreaToBottom(), 500);

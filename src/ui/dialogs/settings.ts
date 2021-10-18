@@ -55,6 +55,16 @@ class ClientSection extends Section {
          )
       );
 
+      contentElement.append(
+         new ListItem(
+            Translation.t('disableJoinLeaveMessages'),
+            undefined,
+            undefined,
+            undefined,
+            this.getDisableJoinLeaveMessagesElement()
+         )
+      );
+
       return contentElement.getDOM();
    }
 
@@ -81,6 +91,22 @@ class ClientSection extends Section {
       if (element.find('[selected]').length === 0) {
          element.find('option:eq(0)').attr('selected', 'selected');
       }
+
+      return element;
+   }
+
+   private getDisableJoinLeaveMessagesElement(): JQuery {
+      let element = $('<input type="checkbox" style="margin-left:10px;">');
+
+      element.on('change', () => {
+         let value = element.prop('checked');
+         element.val(value);
+         Client.setOption('disableJoinLeaveMessages', value ? value : undefined);
+      });
+
+      let disableJoinLeaveMessages = Client.getOption('disableJoinLeaveMessages') || false;
+      element.prop("checked",disableJoinLeaveMessages);
+      element.val(disableJoinLeaveMessages);
 
       return element;
    }

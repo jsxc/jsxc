@@ -154,3 +154,5 @@ export let trustedDomains: string[] = [];
 export let includeOSInVersionResponse = false;
 
 export let keepWindowSizeOnResize = false;
+
+export let disableJoinLeaveMessages = false;

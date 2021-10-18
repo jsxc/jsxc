@@ -440,7 +440,9 @@
     "Every_member_can_see_your_full_JID": "Every member can see your full JID",
     "message_not_delivered": "Message not delivered",
     "User_media_not_readable": "User media not readable. Is your device used by another application?",
-    "Myself":"Myself"
+    "Myself":"Myself",
+    "disableJoinLeaveMessages": "Disable Join/Leave messages in MUC",
+    "You_left_the_building": "You have left the room"
   },
   "Notifications": "Notifications"
 }
