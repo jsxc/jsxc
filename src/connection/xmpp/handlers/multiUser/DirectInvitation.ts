@@ -1,7 +1,8 @@
 import JID from '../../../../JID';
 import AbstractHandler from '../../AbstractHandler';
-import { TYPE as NOTICETYPE, FUNCTION as NOTICEFUNCTION } from '../../../../Notice';
+import { TYPE as NOTICETYPE, FUNCTION as NOTICEFUNCTION, Notice } from '../../../../Notice';
 import Log from '@util/Log';
+import Translation from '@util/Translation';
 
 export default class extends AbstractHandler {
    public processStanza(stanza: Element): boolean {
@@ -19,13 +20,17 @@ export default class extends AbstractHandler {
       let password = xElement.attr('password');
       let reason = xElement.attr('reason') || xElement.text(); //pidgin workaround
 
-      this.account.getNoticeManager().addNotice({
-         title: 'Invitation',
-         description: `for ${roomJid.bare}`,
-         type: NOTICETYPE.invitation,
-         fnName: NOTICEFUNCTION.multiUserInvitation,
-         fnParams: ['direct', from.bare, roomJid.bare, reason, password, this.account.getUid()],
-      });
+      let lastnoti : Notice = this.account.getNoticeManager().getNotices().getLastItem();
+      if (lastnoti===null||lastnoti.getTitle()!==Translation.t('muc_invitation')||lastnoti.getDescription()!==`for ${roomJid.bare}`||lastnoti.getType()!==NOTICETYPE.invitation||lastnoti.callFunction()!==NOTICEFUNCTION.multiUserInvitation)
+      {
+         this.account.getNoticeManager().addNotice({
+            title: Translation.t('muc_invitation'),
+            description: `for ${roomJid.bare}`,
+            type: NOTICETYPE.invitation,
+            fnName: NOTICEFUNCTION.multiUserInvitation,
+            fnParams: ['direct', from.bare, roomJid.bare, reason, password, this.account.getUid()],
+         });
+      }
 
       return this.PRESERVE_HANDLER;
    }

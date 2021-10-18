@@ -442,7 +442,9 @@
     "User_media_not_readable": null,
     "Myself":"Ich",
     "disableJoinLeaveMessages": "Betreten/Verlassen Meldungen in Räumen deaktivieren",
-    "You_left_the_building": "Sie haben den Raum verlassen"
+    "You_left_the_building": "Sie haben den Raum verlassen",
+    "muc_invitation": "Raumeinladung",
+    "muc_invitation_explanation": "Sie haben eine Einladung für das Betreten eines Raums bekommen. Sie können sie ablehnen oder annehmen."
   },
   "Notifications": "Benachrichtigungen"
 }
