@@ -105,6 +105,7 @@ export default class Message implements IIdentifiable, IMessage {
                   encryptedHtmlMessage: null,
                   encryptedPlaintextMessage: null,
                   replaceId: null,
+                  occupantId:null
                },
                data
             )
@@ -350,6 +351,14 @@ export default class Message implements IIdentifiable, IMessage {
 
    public setReplaceId(id: string) { //XEP - 0308
       this.data.set('replaceId',id);
+   }
+
+   public getOccupantId() : string{ //XEP - 0421
+      return this.data.get('occupantId');
+   }
+
+   public setOccupantId(id: string) { //XEP - 0421
+      this.data.set('occupantId',id);
    }
 
    public setPlaintextMessage(plaintextMessage: string) {

@@ -38,6 +38,7 @@ export interface IMessagePayload {
    encryptedHtmlMessage?: string;
    encryptedPlaintextMessage?: string;
    replaceId?: string;
+   occupantId?: string;
    sender?: {
       name: string;
       jid?: JID;
@@ -158,4 +159,8 @@ export interface IMessage {
    getReplaceId(): string//XEP - 0308
 
    setReplaceId(id: string)//XEP - 0308
+
+   getOccupantId(): string//XEP - 0421
+
+   setOccupantId(id: string)//XEP - 0421
 }

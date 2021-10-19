@@ -11,6 +11,7 @@ export class MessageElement {
    private forwarded = false;
    private carbon = false;
    private replaceId = null;
+   private occupantId = null;
    private direction = Message.DIRECTION.IN;
 
    constructor(stanza: Element) {
@@ -25,10 +26,8 @@ export class MessageElement {
       let from = new JID($(stanza).attr('from'));
       let to = new JID($(stanza).attr('to'));
 
-      let replacetag = $(stanza).find('message > replace');
-      if (replacetag.length>0) {
-         this.replaceId = replacetag.attr('id');
-      }
+      this.replaceId = $(stanza).find('replace[xmlns="urn:xmpp:message-correct:0"]').length>0?$(stanza).find('replace[xmlns="urn:xmpp:message-correct:0"]').attr('id'):null;
+      this.occupantId = $(stanza).find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').length>0?$(stanza).find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').attr('id'):null;
 
       if (forwardedStanza.length === 0) {
          this.element = $(stanza);
@@ -72,6 +71,11 @@ export class MessageElement {
    public getReplaceId()
    {
       return this.replaceId;
+   }
+
+   public getOccupantId()
+   {
+      return this.occupantId;
    }
 
    public isIncoming() {

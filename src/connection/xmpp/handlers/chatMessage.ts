@@ -49,6 +49,7 @@ export default class extends AbstractHandler {
       });
 
       message.setReplaceId(messageElement.getReplaceId());
+      message.setOccupantId(messageElement.getOccupantId());
 
       let pipe = this.account.getPipe('afterReceiveMessage');
 

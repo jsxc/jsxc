@@ -66,6 +66,7 @@ export default class Transcript {
    }
 
    public unshiftMessage(message: IMessage) {
+
       let lastMessage = this.getLastMessage();
 
       if (lastMessage) {
@@ -123,7 +124,10 @@ export default class Transcript {
            {
                let oldsender = oldmessage.getSender().jid!==undefined?oldmessage.getSender().jid.full:oldmessage.getPeer().full;
                let replaceSender = latestMessage.getSender().jid!==undefined?latestMessage.getSender().jid.full:latestMessage.getPeer().full;
-               if (oldsender===replaceSender)
+               //check vor occupant-id (XEP-0421) in old message > if available on old message it the replacement has to be the same!
+
+               if ((oldmessage.getOccupantId()!==null&&oldmessage.getOccupantId()===latestMessage.getOccupantId())||
+                   (oldmessage.getOccupantId()===null&&oldsender===replaceSender))
                {
                    latestMessage.getProcessedBody().then((bodyString)=> {
                      oldmessage.setReplaceTime(latestMessage.getStamp().getTime());
