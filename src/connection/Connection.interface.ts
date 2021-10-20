@@ -46,6 +46,7 @@ export interface IConnection {
    getServerJID(): IJID;
 
    sendMessage(message: Message);
+   sendRetractMessage(message: Message);
 
    sendPresence(presence?: Presence, statusText?: string): Promise<void>;
 

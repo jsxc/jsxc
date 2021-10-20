@@ -157,8 +157,12 @@ export interface IMessage {
    getReplaceTime() : number//XEP - 0308
 
    getReplaceId(): string//XEP - 0308
-
    setReplaceId(id: string)//XEP - 0308
+
+   getRetractId(): string//XEP - 0424
+   setRetractId(id: string)//XEP - 0424
+   isRetracted() : boolean//XEP - 0424
+   setRetracted(val: boolean)//XEP - 0424
 
    getOccupantId(): string//XEP - 0421
 

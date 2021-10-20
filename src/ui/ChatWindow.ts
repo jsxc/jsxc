@@ -235,7 +235,7 @@ export default class ChatWindow {
         });
 
         let msg : IMessage = _self.getTranscript().getMessage(refmessage);
-        if (msg.getDirection()===DIRECTION.OUT||msg.getDirection()===DIRECTION.PROBABLY_OUT)
+        if ((msg.getDirection()===DIRECTION.OUT||msg.getDirection()===DIRECTION.PROBABLY_OUT)&&!_self.getTranscript().getMessage(refmessage).isRetracted())
         {
             let liEdit = $('<li data-action="jsxc-context-menu-quote" data-refmessage="'+refmessage+'">'+Translation.t('Edit')+'</li>');        
             element.find('.jsxc-custom-menu').append(liEdit);
@@ -248,7 +248,47 @@ export default class ChatWindow {
 
                _self.selectEditMessage(msg);
             });
+
+            let liRemove = $('<li data-action="jsxc-context-menu-quote" data-refmessage="'+refmessage+'">'+Translation.t('Remove')+'</li>');        
+            element.find('.jsxc-custom-menu').append(liRemove);
+            liRemove.on('click',{ref:event.data.ref},function(e)
+            {
+
+               $('.jsxc-custom-menu').hide(250);
+               let refmessage = $(e.target).attr('data-refmessage');
+               let msg : IMessage = _self.getTranscript().getMessage(refmessage);
+
+               _self.selectMessageForRetract(msg);
+            });
         }
+   }
+
+   private selectMessageForRetract(msg: IMessage)
+   {
+      let message = new Message({
+         peer: this.contact.getJid(),
+         direction: Message.DIRECTION.OUT,
+         type: this.contact.getType(),
+         plaintextMessage: Translation.t('RETRACTION_BODY'),
+         unread: false,
+      });
+      msg.setPlaintextMessage(Translation.t('RETRACTION_BODY'));
+      msg.setRetracted(true);
+      message.setRetracted(false);
+      message.setRetractId(msg.getAttrId());
+      this.getTranscript().pushMessage(message);
+
+      let pipe = this.getAccount().getPipe('preSendMessage');
+
+      pipe.run(this.contact, message).then(([contact, message]) => {
+         this.getAccount().getConnection().sendRetractMessage(message);
+         this.editMessage=null;
+
+      }).catch(err => {
+         Log.warn('Error during preSendMessage pipe', err);
+         this.editMessage=null;
+      });
+      this.clearAttachment();
    }
 
    private selectMessageForQuote(msg:IMessage,contact:string){

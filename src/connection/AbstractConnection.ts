@@ -11,6 +11,7 @@ import MUCService from './services/MUC';
 import RosterService from './services/Roster';
 import VcardService from './services/Vcard';
 import DiscoService from './services/Disco';
+import Translation from '@util/Translation';
 
 export const STANZA_KEY = 'stanza';
 export const STANZA_IQ_KEY = 'stanzaIQ';
@@ -128,6 +129,49 @@ abstract class AbstractConnection {
 
    public getServerJID(): JID {
       return new JID('', this.getJID().domain, '');
+   }
+
+   public sendRetractMessage(message: Message) {
+      if (message.getDirection() !== Message.DIRECTION.OUT) {
+         return;
+      }
+
+      let xmlMsg = $msg({
+         to: message.getPeer().full,
+         type: message.getType(),
+         id: message.getAttrId(),
+      });
+
+      xmlMsg.c('body').t(Translation.t('RETRACTION_BODY')).up();
+
+      if (message.getRetractId()!=null)
+      {
+         xmlMsg.c('apply-to', {
+             xmlns: 'urn:xmpp:fasten:0',
+             id: message.getRetractId()
+          }).c('retract',{
+            xmlns: 'urn:xmpp:message-retract:0'
+          }).up().up().c('fallback',{
+            xmlns: 'urn:xmpp:fallback:0'
+          }).up().c('store',{
+            xmlns: 'urn:xmpp:hints'
+          }).up();
+      }
+
+      let pipe = this.account.getPipe('preSendMessageStanza');
+      pipe
+         .run(message, xmlMsg)
+         .then(([message, xmlMsg]: [Message, Element]) => {
+
+            this.send(xmlMsg);
+
+            message.transferred();
+         })
+         .catch(err => {
+            message.aborted();
+
+            Log.warn('Error during preSendMessageStanza pipe:', err);
+         });
    }
 
    public sendMessage(message: Message) {

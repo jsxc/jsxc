@@ -105,7 +105,9 @@ export default class Message implements IIdentifiable, IMessage {
                   encryptedHtmlMessage: null,
                   encryptedPlaintextMessage: null,
                   replaceId: null,
-                  occupantId:null
+                  occupantId:null,
+                  retractId:null,
+                  retracted:false
                },
                data
             )
@@ -346,11 +348,27 @@ export default class Message implements IIdentifiable, IMessage {
    }
 
    public getReplaceId() : string{ //XEP - 0308
-      return this.data.get('replaceId');
+      return this.data.get('replaceId')===undefined?null:this.data.get('replaceId');
    }
 
    public setReplaceId(id: string) { //XEP - 0308
       this.data.set('replaceId',id);
+   }
+
+   public isRetracted() : boolean { //XEP - 0424
+      return this.data.get('retracted')===undefined?false:this.data.get('retracted');
+   }
+
+   public setRetracted(val: boolean) { //XEP - 0424
+      this.data.set('retracted',val);
+   }
+
+   public getRetractId() : string{ //XEP - 0424
+      return this.data.get('retractId')===undefined?null:this.data.get('retractId');
+   }
+
+   public setRetractId(id: string) { //XEP - 0424
+      this.data.set('retractId',id);
    }
 
    public getOccupantId() : string{ //XEP - 0421

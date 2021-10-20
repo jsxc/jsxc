@@ -20,8 +20,14 @@ export default class extends AbstractHandler {
       let attrId = messageElement.attr('id');
       let body = bodyElement.text();
       let nickname = from.resource;
-      let replaceId = messageElement.find('replace[xmlns="urn:xmpp:message-correct:0"]').attr('id');
-      let occupantId = messageElement.find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').attr('id');
+      let replaceId = messageElement.find('replace[xmlns="urn:xmpp:message-correct:0"]').length>0?messageElement.find('replace[xmlns="urn:xmpp:message-correct:0"]').attr('id'):null;
+      let occupantId = messageElement.find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').length>0?messageElement.find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').attr('id'):null;
+      let retractId = null;
+
+      if (messageElement.find('apply-to[xmlns="urn:xmpp:fasten:0"]').length>0&&messageElement.find('apply-to[xmlns="urn:xmpp:fasten:0"]').find('retract[xmlns="urn:xmpp:message-retract:0"]').length>0)
+      {
+         retractId = messageElement.find('apply-to[xmlns="urn:xmpp:fasten:0"]').attr('id');
+      }
 
       let contact = <MultiUserContact>this.account.getContact(from);
       if (typeof contact === 'undefined') {
@@ -131,6 +137,7 @@ export default class extends AbstractHandler {
 
       message.setReplaceId(typeof replaceId ==='string'?replaceId:null);
       message.setOccupantId(typeof occupantId ==='string'?occupantId:null);
+      message.setRetractId(typeof retractId ==='string'?retractId:null);
 
       if (direction === Message.DIRECTION.OUT) {
          message.received();

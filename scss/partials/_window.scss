@@ -304,6 +304,14 @@
   }
 }
 
+.jsxc-content-retraction {
+  opacity:0.5;
+
+  .jsxc-content {
+     font-size:10px;
+  }
+}
+
 .jsxc-chatmessage {
   background-color: $chatmessage-bg;
   border-radius: 0.8em;
@@ -334,6 +342,15 @@
        background-position: center;
        height: 15px;
        width: 15px;
+    }
+
+    .jsxc-retract-icon {
+       background-image: url('../images/icons/delete.svg');
+       background-size: contain;
+       background-repeat: no-repeat;
+       background-position: center;
+       height: 11px;
+       width: 11px;
     }
 
     .jsxc-timestamp {

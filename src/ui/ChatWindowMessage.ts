@@ -145,6 +145,13 @@ export default class ChatWindowMessage {
 
       if (this.message.getDirection()!==DIRECTION.SYS)
       {
+         if (this.message.getRetractId()!==null)
+         {
+            if (!this.message.isRetracted())
+            {
+               this.element.hide();
+            }
+         }
          if (this.message.getReplaceId()!==null)
          {
             this.element.hide();
@@ -159,6 +166,16 @@ export default class ChatWindowMessage {
                timestampElement.remove(); // to kill the timer
                DateTime.stringify(this.message.getReplaceTime(),newtimestampElement);
             }
+         }
+
+         if (this.message.isRetracted())
+         {
+            this.retractBody(this.message.getPlaintextMessage());
+            let timestampElement = this.element.find('.jsxc-timestamp');
+            let newtimestampElement = $('<div class="jsxc-timestamp">');
+            newtimestampElement.insertBefore(timestampElement);
+            timestampElement.remove(); // to kill the timer
+            DateTime.stringify(this.message.getReplaceTime(),newtimestampElement);
          }
       }
       else {
@@ -333,6 +350,18 @@ export default class ChatWindowMessage {
          }
       });
 
+      this.message.registerHook('retracted', (val) => {
+         if (val) {
+            this.chatWindow.getTranscript().processRetract(this.message);
+            this.retractBody(this.message.getPlaintextMessage());
+            let timestampElement = this.element.find('.jsxc-timestamp');
+            let newtimestampElement = $('<div class="jsxc-timestamp">');
+            newtimestampElement.insertBefore(timestampElement);
+            timestampElement.remove(); // to kill the timer
+            DateTime.stringify(this.message.getReplaceTime(),newtimestampElement);
+         }
+      });
+
       this.message.registerHook('progress', (progress) => {
          this.element.find('.jsxc-attachment').attr('data-progress', Math.round(progress * 100) + '%');
       });
@@ -369,8 +398,6 @@ export default class ChatWindowMessage {
       let contentElement = this.element.find('.jsxc-content');
       contentElement.html(processBodyString);
 
-      
-
       if (!this.element.find('.jsxc-replace').hasClass('jsxc-replace-icon'))
       {
             this.element.find('.jsxc-replace').addClass('jsxc-replace-icon');
@@ -388,6 +415,25 @@ export default class ChatWindowMessage {
       if (chain!==null)
       {
          this.element.find('.jsxc-replace.jsxc-replace-icon').attr('title',this.format(chain));
+      }
+   }
+
+   private retractBody(processBodyString:any) {
+
+      let contentElement = this.element.find('.jsxc-content');
+      this.element.addClass('jsxc-content-retraction')
+      contentElement.html(processBodyString);
+
+      if (!this.element.find('.jsxc-retract').hasClass('jsxc-retract-icon'))
+      {
+         this.element.find('.jsxc-retract').addClass('jsxc-retract-icon');
+      }
+
+      if (this.element.find('.jsxc-replace').hasClass('jsxc-replace-icon'))
+      {
+         this.element.find('.jsxc-replace.jsxc-replace-icon').attr('title','');
+         this.element.find('.jsxc-replace').removeClass('jsxc-replace-icon');
+         this.element.find('.jsxc-replace').off('click');
       }
    }
 }

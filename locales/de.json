@@ -444,7 +444,8 @@
     "disableJoinLeaveMessages": "Betreten/Verlassen Meldungen in Räumen deaktivieren",
     "You_left_the_building": "Sie haben den Raum verlassen",
     "muc_invitation": "Raumeinladung",
-    "muc_invitation_explanation": "Sie haben eine Einladung für das Betreten eines Raums bekommen. Sie können sie ablehnen oder annehmen."
+    "muc_invitation_explanation": "Sie haben eine Einladung für das Betreten eines Raums bekommen. Sie können sie ablehnen oder annehmen.",
+    "RETRACTION_BODY": "Nachricht gelöscht."
   },
   "Notifications": "Benachrichtigungen"
 }

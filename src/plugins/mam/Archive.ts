@@ -171,6 +171,12 @@ export default class Archive {
 
       let replaceId = messageElement.find('replace[xmlns="urn:xmpp:message-correct:0"]').length>0?messageElement.find('replace[xmlns="urn:xmpp:message-correct:0"]').attr('id'):null;
       let occupantId = messageElement.find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').length>0?messageElement.find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').attr('id'):null;
+      let retractId = null;
+
+      if (messageElement.find('apply-to[xmlns="urn:xmpp:fasten:0"]').length>0&&messageElement.find('apply-to[xmlns="urn:xmpp:fasten:0"]').find('retract[xmlns="urn:xmpp:message-retract:0"]').length>0)
+      {
+         retractId = messageElement.find('apply-to[xmlns="urn:xmpp:fasten:0"]').attr('id');
+      }
 
       let uid =
          direction === Message.DIRECTION.OUT && originIdElement.length
@@ -208,6 +214,7 @@ export default class Archive {
       let result = new Message(messageProperties);
       result.setReplaceId(replaceId);
       result.setOccupantId(occupantId);
+      result.setRetractId(retractId);
       return result;
    }
 
@@ -222,6 +229,7 @@ export default class Archive {
 
       let transcript = this.contact.getTranscript();
       let replaceMessagesKeys = new Array();
+      let retractMessagesKeys = new Array();
 
       while (this.messageCache.length > 0) {
          let messageElement = this.messageCache.pop();
@@ -234,7 +242,13 @@ export default class Archive {
                replaceMessagesKeys.push({attrid:message.getAttrId(),uid:message.getUid()});
             }
 
+            if (message.getRetractId()!==null)
+            {
+               retractMessagesKeys.push({attrid:message.getAttrId(),uid:message.getUid()});
+            }
+
             transcript.unshiftMessage(message);
+
          } catch (err) {
             continue;
          }
@@ -282,6 +296,34 @@ export default class Archive {
          }
       }
 
+      if (retractMessagesKeys.length>0)
+      {
+         let arr : {[key: string]: IMessage} = {};
+
+         for (let key of retractMessagesKeys)
+         {
+            let tmp = transcript.getMessage(key.uid);
+            let keystr=key.uid;
+            if (tmp===undefined||tmp===null)
+            {
+               tmp = transcript.getMessage(key.attrid);
+               keystr=key.uid;
+            }
+
+            if (tmp!==undefined&&tmp!==null)
+            {
+               arr[keystr]=tmp;
+            }
+         }
+         let indexedArr = transcript.convertToIndexArray(arr);
+         for (let i=0;i<indexedArr.length;i++)
+         {
+            transcript.processRetract(indexedArr[i]);
+            let msg = transcript.findMessageByAttrId(indexedArr[i].getAttrId());
+            msg.setRetracted(true);
+         }
+      }
+
       this.setExhausted(isArchiveExhausted);
       this.setFirstResultId(firstResultId);
       this.plugin.removeQueryContactRelation(queryId);
@@ -298,6 +340,8 @@ export default class Archive {
 
       let transcript = this.contact.getTranscript();
       let replaceMessagesKeys = new Array();
+      let retractMessagesKeys = new Array();
+
       while (this.messageCache.length > 0) {
          let messageElement = this.messageCache.pop();
 
@@ -309,7 +353,13 @@ export default class Archive {
                replaceMessagesKeys.push({attrid:message.getAttrId(),uid:message.getUid()});
             }
 
+            if (message.getRetractId()!==null)
+            {
+               retractMessagesKeys.push({attrid:message.getAttrId(),uid:message.getUid()});
+            }
+
             transcript.insertMessage(message);
+
          } catch (err) {
             continue;
          }
@@ -337,6 +387,34 @@ export default class Archive {
          for (let i=0;i<indexedArr.length;i++)
          {
             transcript.processReplace(indexedArr[i]);
+         }
+      }
+
+      if (retractMessagesKeys.length>0)
+      {
+         let arr : {[key: string]: IMessage} = {};
+
+         for (let key of retractMessagesKeys)
+         {
+            let tmp = transcript.getMessage(key.uid);
+            let keystr=key.uid;
+            if (tmp===undefined||tmp===null)
+            {
+               tmp = transcript.getMessage(key.attrid);
+               keystr=key.uid;
+            }
+
+            if (tmp!==undefined&&tmp!==null)
+            {
+               arr[keystr]=tmp;
+            }
+         }
+         let indexedArr = transcript.convertToIndexArray(arr);
+         for (let i=0;i<indexedArr.length;i++)
+         {
+            transcript.processRetract(indexedArr[i]);
+            let msg = transcript.findMessageByAttrId(indexedArr[i].getAttrId());
+            msg.setRetracted(true);
          }
       }
 

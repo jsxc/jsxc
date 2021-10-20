@@ -11,6 +11,7 @@ export class MessageElement {
    private forwarded = false;
    private carbon = false;
    private replaceId = null;
+   private retractId = null;
    private occupantId = null;
    private direction = Message.DIRECTION.IN;
 
@@ -28,6 +29,11 @@ export class MessageElement {
 
       this.replaceId = $(stanza).find('replace[xmlns="urn:xmpp:message-correct:0"]').length>0?$(stanza).find('replace[xmlns="urn:xmpp:message-correct:0"]').attr('id'):null;
       this.occupantId = $(stanza).find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').length>0?$(stanza).find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').attr('id'):null;
+
+      if ($(stanza).find('apply-to[xmlns="urn:xmpp:fasten:0"]').length>0&&$(stanza).find('apply-to[xmlns="urn:xmpp:fasten:0"]').find('retract[xmlns="urn:xmpp:message-retract:0"]').length>0)
+      {
+         this.retractId = $(stanza).find('apply-to[xmlns="urn:xmpp:fasten:0"]').attr('id');
+      }
 
       if (forwardedStanza.length === 0) {
          this.element = $(stanza);
@@ -71,6 +77,11 @@ export class MessageElement {
    public getReplaceId()
    {
       return this.replaceId;
+   }
+
+   public getRetractId()
+   {
+      return this.retractId;
    }
 
    public getOccupantId()

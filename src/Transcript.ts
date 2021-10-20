@@ -109,6 +109,61 @@ export default class Transcript {
       return indexMessageArray;
    }
 
+   public processRetract(message:IMessage)
+   {
+      if (message===undefined||message.getDirection()===DIRECTION.SYS)
+         return;
+
+      let chain =  this.getReplaceMessageChainFromMessage(message);
+      if (message.getDirection()!==DIRECTION.SYS&&chain!==null)
+      {
+         let replaceSender = message.getSender().jid!==undefined?message.getSender().jid.full:message.getPeer().full;
+         for (let i=chain.length-1;i>=0;i--)
+         {
+            let oldsender = chain[i].getSender().jid!==undefined?chain[i].getSender().jid.full:chain[i].getPeer().full;
+
+            //check vor occupant-id (XEP-0421) in old message > if available on old message it the replacement has to be the same!
+
+            if ((chain[i].getOccupantId()!==null&&chain[i].getOccupantId()===message.getOccupantId())||
+               (chain[i].getOccupantId()===null&&oldsender===replaceSender))
+            {
+               chain[i].setReplaceTime(message.getStamp().getTime());
+               chain[i].setPlaintextMessage(message.getPlaintextMessage());
+               if (i>0&&chain[i].getRetractId()===null)
+               {
+                  chain[i].setRetractId(chain[i].getReplaceId());
+               }
+               if (i===0&&chain.length>1&&!chain[i].isRetracted)
+               {
+                  chain[i].setRetracted(true);
+               }
+
+               message.received(); //reset Marker to received on incoming messages
+            }
+         }
+
+         if (chain.length===1)
+         {
+            let target = this.findMessageByAttrId(message.getRetractId());
+            if (target)
+            {
+               target.setPlaintextMessage(message.getPlaintextMessage());
+               target.setRetracted(true);
+               target.setReplaceTime(message.getStamp().getTime());
+            }
+         }
+
+         if (message.getDirection()===DIRECTION.IN||message.getDirection()===DIRECTION.PROBABLY_IN)
+         {
+            message.received();
+         }
+         else
+         {
+            message.transferred();
+         }
+      }
+   }
+
    public processReplace(message:IMessage)
    {
        if (message===undefined||message.getDirection()===DIRECTION.SYS)
@@ -387,6 +442,11 @@ export default class Transcript {
       if (message!==undefined&&message.getReplaceId()!==null)
       {
          this.processReplace(message);
+      }
+
+      if (message!==undefined&&message.getRetractId()!==null)
+      {
+         this.processRetract(message);
       }
 
       if (message.getDirection() !== DIRECTION.OUT && message.isUnread()) {
