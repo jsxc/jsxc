@@ -65,6 +65,16 @@ class ClientSection extends Section {
          )
       );
 
+      contentElement.append(
+         new ListItem(
+            Translation.t('delete_on_disconnect'),
+            undefined,
+            undefined,
+            undefined,
+            this.getDeleteOnExitElement()
+         )
+      );
+
       return contentElement.getDOM();
    }
 
@@ -110,6 +120,23 @@ class ClientSection extends Section {
 
       return element;
    }
+
+   private getDeleteOnExitElement(): JQuery {
+      let element = $('<input type="checkbox" style="margin-left:10px;">');
+
+      element.on('change', () => {
+         let value = element.prop('checked');
+         element.val(value);
+         Client.setOption('delete_on_disconnect', value ? value : undefined);
+      });
+
+      let deleteonexit = Client.getOption('delete_on_disconnect') || false;
+      element.prop("checked",deleteonexit);
+      element.val(deleteonexit);
+
+      return element;
+   }
+
 
    private getTrustedDomainsElement(): JQuery {
       let element = $('<textarea style="margin-left:10px;">');

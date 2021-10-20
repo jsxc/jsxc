@@ -14,7 +14,7 @@ export function disableDebugMode() {
 }
 
 export function deleteAllData() {
-   if (!Client.isDebugMode()) {
+   if (!Client.isDebugMode()&&!(Client.getOption('delete_on_disconnect') || false)) {
       Log.warn('This action is only available in debug mode.');
 
       return 0;

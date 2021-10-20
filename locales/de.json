@@ -445,7 +445,8 @@
     "You_left_the_building": "Sie haben den Raum verlassen",
     "muc_invitation": "Raumeinladung",
     "muc_invitation_explanation": "Sie haben eine Einladung für das Betreten eines Raums bekommen. Sie können sie ablehnen oder annehmen.",
-    "RETRACTION_BODY": "Nachricht gelöscht."
+    "RETRACTION_BODY": "Nachricht gelöscht.",
+    "delete_on_disconnect": "Lokale Daten nach Abmeldung löschen"
   },
   "Notifications": "Benachrichtigungen"
 }

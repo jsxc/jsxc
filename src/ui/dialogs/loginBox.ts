@@ -30,21 +30,6 @@ export default function (username?: string) {
             onAuthFail(dom);
          });
    });
-
-   dom.find('#deleteonexit').on('click', function(e){
-
-      if ($(this).prop('checked'))
-      {
-         $(window).on('unload.jsxc', function(){
-            window.localStorage.clear();
-            window.sessionStorage.clear();
-         });
-      }
-      else
-      {
-         $(window).off('unload.jsxc');
-      }
-   });
 }
 
 function setFocus() {

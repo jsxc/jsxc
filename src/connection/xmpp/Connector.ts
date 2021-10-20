@@ -7,6 +7,8 @@ import StorageConnection from '../storage/Connection';
 import XMPPConnection from './Connection';
 import { Strophe } from '../../vendor/Strophe';
 import BaseError from '../../errors/BaseError';
+import Client from '@src/Client';
+import { deleteAllData } from '@src/api/v1';
 
 export enum TYPE {
    BOSH,
@@ -138,6 +140,10 @@ export default class Connector {
 
          if (status === Strophe.Status.DISCONNECTED) {
             this.account.connectionDisconnected();
+            if (Client.getOption('delete_on_disconnect') || false)
+            {
+               deleteAllData();
+            }
          }
       };
    }

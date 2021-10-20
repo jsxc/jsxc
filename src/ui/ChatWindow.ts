@@ -281,7 +281,7 @@ export default class ChatWindow {
       let pipe = this.getAccount().getPipe('preSendMessage');
 
       pipe.run(this.contact, message).then(([contact, message]) => {
-         this.getAccount().getConnection().sendRetractMessage(message);
+         this.getAccount().getConnection().sendRetractMessage(<Message>message);
          this.editMessage=null;
 
       }).catch(err => {
