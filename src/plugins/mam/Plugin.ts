@@ -9,6 +9,7 @@ import Archive from './Archive';
 import Contact from '@src/Contact';
 import PluginAPI from '@src/plugin/PluginAPI';
 import { IContact } from '@src/Contact.interface';
+import Client from '@src/Client';
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '99.0.0';
@@ -60,20 +61,9 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
 
       pluginAPI.registerConnectionHook((status:number, condition: string)=>{
 
-         if (status===8)
+         if (status===Strophe.Status.ATTACHED)
          {
-            let interval = setInterval(()=>{ //check for contacts. if contacts were found we dont need to synchronize a second time.
-               let contacts = pluginAPI.getContactManager().getContacts();
-               if (contacts)
-               {
-                  for (let strcontact in contacts)
-                  {
-                     let archive = this.getArchive(contacts[strcontact].getJid());
-                     archive.lastMessages();
-                  }
-                  clearInterval(interval);
-               }
-            },1000);
+            this.syncConversations();
          }
       });
 
@@ -88,6 +78,29 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       });
 
       this.pluginAPI.getConnection().registerHandler(this.onMamMessage, null, 'message', null);
+   }
+
+   private syncConversations(){
+      let account = Client.getAccountManager().getAccount();
+      let storage = account.getStorage();
+      let cachedRoster = storage.getItem('roster','cache') || [];
+
+      for (let id of cachedRoster) {
+         let jid = new JID(id);
+         try
+         {
+            let contact = account.getContact(jid);
+            while (contact===undefined)
+            {
+               setTimeout(()=>{this.syncConversations();},50);
+               return;
+            }
+            let archive = this.getArchive(jid);
+            archive.lastMessages();
+         } catch (err) {
+            console.error('Error while syncing conversation with user: '+id,err);
+         }
+      }
    }
 
    public getStorage() {

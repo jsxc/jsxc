@@ -403,13 +403,13 @@ abstract class AbstractConnection {
          .up()
          .up();
 
-      iq.c('field', {
+     /* iq.c('field', {
          var: 'with',
       })
          .c('value')
          .t(withJID)
          .up()
-         .up();
+         .up();*/
 
       iq.up()
          .c('set', {

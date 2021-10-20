@@ -66,7 +66,7 @@ export default class Archive {
       let connection = this.plugin.getConnection();
 
       let firstMessage = this.contact.getTranscript().getFirstMessage();
-      if (firstMessage)
+      if (firstMessage!==undefined&&firstMessage!==null)
       {
          let startDate = firstMessage.getStamp();
          startDate.setSeconds(startDate.getSeconds() + 1);
