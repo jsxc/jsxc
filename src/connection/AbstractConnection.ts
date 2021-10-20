@@ -61,6 +61,7 @@ abstract class AbstractConnection {
       NS.register('VCARD', 'vcard-temp');
       NS.register('FORWARD', 'urn:xmpp:forward:0');
       NS.register('LMC', 'urn:xmpp:message-correct:0');
+      NS.register('MR', 'urn:xmpp:message-retract:0');
    }
 
    public getPubSubService = (): PubSubService => {
