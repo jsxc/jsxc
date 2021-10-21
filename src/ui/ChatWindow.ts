@@ -237,17 +237,22 @@ export default class ChatWindow {
         let msg : IMessage = _self.getTranscript().getMessage(refmessage);
         if ((msg.getDirection()===DIRECTION.OUT||msg.getDirection()===DIRECTION.PROBABLY_OUT)&&!_self.getTranscript().getMessage(refmessage).isRetracted())
         {
-            let liEdit = $('<li data-action="jsxc-context-menu-quote" data-refmessage="'+refmessage+'">'+Translation.t('Edit')+'</li>');        
-            element.find('.jsxc-custom-menu').append(liEdit);
-            liEdit.on('click',{ref:event.data.ref},function(e)
+            let firstMessage = _self.getTranscript().getLatestOutgoingMessageForEdit();
+
+            if (firstMessage.getAttrId()===msg.getAttrId()||Client.getOption("allowAllMessagesCorrection")|| false)
             {
+               let liEdit = $('<li data-action="jsxc-context-menu-quote" data-refmessage="'+refmessage+'">'+Translation.t('Edit')+'</li>');        
+               element.find('.jsxc-custom-menu').append(liEdit);
+               liEdit.on('click',{ref:event.data.ref},function(e)
+               {
 
-               $('.jsxc-custom-menu').hide(250);
-               let refmessage = $(e.target).attr('data-refmessage');
-               let msg : IMessage = _self.getTranscript().getMessage(refmessage);
+                  $('.jsxc-custom-menu').hide(250);
+                  let refmessage = $(e.target).attr('data-refmessage');
+                  let msg : IMessage = _self.getTranscript().getMessage(refmessage);
 
-               _self.selectEditMessage(msg);
-            });
+                  _self.selectEditMessage(msg);
+               });
+            }
 
             let liRemove = $('<li data-action="jsxc-context-menu-quote" data-refmessage="'+refmessage+'">'+Translation.t('Remove')+'</li>');        
             element.find('.jsxc-custom-menu').append(liRemove);
@@ -320,26 +325,14 @@ export default class ChatWindow {
       this.resizeInputArea();
    }
 
-   private selectLatestVisibleMessageForEdit() : void {
-      
-      let messagearr : IMessage[]= this.getTranscript().convertToIndexArray(this.getTranscript().getMessages());
-      for (let i = messagearr.length-1;i>=0;i--){
-         if (messagearr[i].getReplaceId()===null&&(messagearr[i].getDirection()===DIRECTION.OUT||messagearr[i].getDirection()===DIRECTION.PROBABLY_OUT))
-         {
-            this.selectEditMessage(messagearr[i]);
-            break;
-         }
-      }
-   }
-
    public selectEditMessage(message: IMessage)
    {
-       let latestReplace = this.getTranscript().getLatestReplaceMessageFromMessage(message);
-       this.editMessage=latestReplace;
+      let chain = this.getTranscript().getReplaceMessageChainFromMessage(message);
+      this.editMessage=message.getReplaceId()!==null?this.getTranscript().findMessageByAttrId(message.getReplaceId()):message;
 
-       this.inputElement.val('> '+this.editMessage.getPlaintextMessage());
-       this.inputElement.focus();
-       this.resizeInputArea()
+      this.inputElement.val('> '+chain[chain.length-1].getPlaintextMessage());
+      this.inputElement.focus();
+      this.resizeInputArea()
    }
 
    public getTranscript(): Transcript {
@@ -680,7 +673,8 @@ export default class ChatWindow {
       }
 
       if (ev.which === UP_KEY && (this.inputElement.val()===null||this.inputElement.val().toString().trim().length===0)) {
-         this.selectLatestVisibleMessageForEdit();
+         let firstMessage = this.getTranscript().getLatestOutgoingMessageForEdit();
+         this.selectEditMessage(firstMessage);
       }
 
       let selectionStart = ev.target.selectionStart;

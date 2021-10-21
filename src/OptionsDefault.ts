@@ -156,3 +156,5 @@ export let includeOSInVersionResponse = false;
 export let keepWindowSizeOnResize = false;
 
 export let disableJoinLeaveMessages = false;
+
+export let allowAllMessagesCorrection = false;

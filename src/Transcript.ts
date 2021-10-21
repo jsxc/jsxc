@@ -169,38 +169,59 @@ export default class Transcript {
        if (message===undefined||message.getDirection()===DIRECTION.SYS)
          return;
 
-       let chain =  this.getReplaceMessageChainFromMessage(message);
-       let oldmessage = chain[0];
-       let latestMessage = chain[chain.length-1];   
+       let oldmessage = this.findMessageByAttrId(message.getReplaceId());
+
        if (oldmessage)
        {
            //only allow corrections from same sender
-           if (latestMessage.getDirection()===DIRECTION.IN||latestMessage.getDirection()===DIRECTION.PROBABLY_IN) //reset Marker to transfered on outgoing messages
+           if (message.getDirection()===DIRECTION.IN||message.getDirection()===DIRECTION.PROBABLY_IN) //reset Marker to transfered on outgoing messages
            {
                let oldsender = oldmessage.getSender().jid!==undefined?oldmessage.getSender().jid.full:oldmessage.getPeer().full;
-               let replaceSender = latestMessage.getSender().jid!==undefined?latestMessage.getSender().jid.full:latestMessage.getPeer().full;
+               let replaceSender = message.getSender().jid!==undefined?message.getSender().jid.full:message.getPeer().full;
                //check vor occupant-id (XEP-0421) in old message > if available on old message it the replacement has to be the same!
 
-               if ((oldmessage.getOccupantId()!==null&&oldmessage.getOccupantId()===latestMessage.getOccupantId())||
+               if ((oldmessage.getOccupantId()!==null&&oldmessage.getOccupantId()===message.getOccupantId())||
                    (oldmessage.getOccupantId()===null&&oldsender===replaceSender))
                {
-                   latestMessage.getProcessedBody().then((bodyString)=> {
-                     oldmessage.setReplaceTime(latestMessage.getStamp().getTime());
+                  message.getProcessedBody().then((bodyString)=> {
+                     oldmessage.setReplaceTime(message.getStamp().getTime());
                      oldmessage.setReplaceBody(bodyString);
                    }); 
-                   latestMessage.received(); //reset Marker to received on incoming messages
+                   message.received(); //reset Marker to received on incoming messages
                }
            }
            else
-           if (latestMessage.getDirection()===DIRECTION.OUT||latestMessage.getDirection()===DIRECTION.PROBABLY_OUT)
+           if (message.getDirection()===DIRECTION.OUT||message.getDirection()===DIRECTION.PROBABLY_OUT)
            {
-               latestMessage.getProcessedBody().then((bodyString)=> {
-                  oldmessage.setReplaceTime(latestMessage.getStamp().getTime());
+               message.getProcessedBody().then((bodyString)=> {
+                  oldmessage.setReplaceTime(message.getStamp().getTime());
                   oldmessage.setReplaceBody(bodyString);
                });
-               latestMessage.transferred(); //reset Marker to transfered on outgoing messages               
+               message.transferred(); //reset Marker to transfered on outgoing messages
            }
        }
+   }
+
+   public getLatestOutgoingMessageForEdit() : IMessage {
+
+      let firstMessage = this.getFirstMessage();
+
+      do {
+         if (!firstMessage.isRetracted())
+         {
+            if (firstMessage.getDirection()===DIRECTION.OUT||
+               firstMessage.getDirection()===DIRECTION.PROBABLY_OUT)
+            {
+               if (firstMessage.getReplaceId()===null&&firstMessage.getRetractId()===null)
+               {
+                  return firstMessage;
+               }
+            }
+         }
+
+      } while ((firstMessage=this.getMessage(firstMessage.getNextId()))!==null&&firstMessage!==undefined);
+
+      return null;
    }
 
    public getLatestReplaceMessageFromMessage(message : IMessage) : IMessage {
@@ -218,6 +239,37 @@ export default class Transcript {
    }
 
    public getReplaceMessageChainFromMessage(message : IMessage) : IMessage[] {
+
+      let result :IMessage[] = [];
+
+      let firstMessage;
+      if (message.getReplaceId()!==null)
+      {
+         let result = this.getReplaceMessageChainFromMessage(this.getMessage(message.getReplaceId()));
+         result.push(message);
+         return result;
+      }
+      else
+      {
+         firstMessage = this.getFirstMessage();
+         do
+         {
+            if (firstMessage.getReplaceId()===message.getAttrId())
+            {
+               result.push(firstMessage);
+            }
+         } while ((firstMessage=this.getMessage(firstMessage.getNextId()))!==null&&firstMessage!==undefined);
+         result.push(message);
+
+         return result.reverse();
+      }
+
+      /*
+      following is not neccessary anymore, cause xep 308 says:
+
+      "If the same message is to be corrected several times, the id of the original message is
+       used in each case (e.g. If a message of id 1 is corrected by a message of id 2,
+       a subsequent correction should correct 1, not 2)."
 
       let sortedArray = this.convertToIndexArray(this.messages);
       for (let i=sortedArray.length-1;i>=0;i--)
@@ -246,7 +298,7 @@ export default class Transcript {
          }
       }
 
-      return [message];
+      return [message];*/
    }
 
    public pushMessage(message: IMessage) {
