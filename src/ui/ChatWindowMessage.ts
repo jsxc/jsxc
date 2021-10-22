@@ -170,7 +170,7 @@ export default class ChatWindowMessage {
 
          if (this.message.isRetracted())
          {
-            this.retractBody(this.message.getPlaintextMessage());
+            this.retractBody();
             let timestampElement = this.element.find('.jsxc-timestamp');
             let newtimestampElement = $('<div class="jsxc-timestamp">');
             newtimestampElement.insertBefore(timestampElement);
@@ -353,7 +353,7 @@ export default class ChatWindowMessage {
       this.message.registerHook('retracted', (val) => {
          if (val) {
             this.chatWindow.getTranscript().processRetract(this.message);
-            this.retractBody(this.message.getPlaintextMessage());
+            this.retractBody();
             let timestampElement = this.element.find('.jsxc-timestamp');
             let newtimestampElement = $('<div class="jsxc-timestamp">');
             newtimestampElement.insertBefore(timestampElement);
@@ -418,11 +418,11 @@ export default class ChatWindowMessage {
       }
    }
 
-   private retractBody(processBodyString:any) {
+   private retractBody() {
 
       let contentElement = this.element.find('.jsxc-content');
       this.element.addClass('jsxc-content-retraction')
-      contentElement.html(processBodyString);
+      contentElement.html(Translation.t('RETRACTION_BODY'));
 
       if (!this.element.find('.jsxc-retract').hasClass('jsxc-retract-icon'))
       {

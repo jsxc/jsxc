@@ -5,6 +5,7 @@ import Storage from './Storage';
 import PersistentMap from './util/PersistentMap';
 import Log from '@util/Log';
 import Client from './Client';
+import Translation from '@util/Translation';
 
 export default class Transcript {
    private properties: PersistentMap;
@@ -70,6 +71,10 @@ export default class Transcript {
       let lastMessage = this.getLastMessage();
 
       if (lastMessage) {
+         if (lastMessage.getUid()===message.getUid())
+         {
+            return;
+         }
          lastMessage.setNext(message);
       } else {
          this.pushMessage(message);
@@ -128,7 +133,7 @@ export default class Transcript {
                (chain[i].getOccupantId()===null&&oldsender===replaceSender))
             {
                chain[i].setReplaceTime(message.getStamp().getTime());
-               chain[i].setPlaintextMessage(message.getPlaintextMessage());
+               chain[i].setPlaintextMessage(Translation.t('RETRACTION_BODY'));
                if (i>0&&chain[i].getRetractId()===null)
                {
                   chain[i].setRetractId(chain[i].getReplaceId());
@@ -147,7 +152,7 @@ export default class Transcript {
             let target = this.findMessageByAttrId(message.getRetractId());
             if (target)
             {
-               target.setPlaintextMessage(message.getPlaintextMessage());
+               target.setPlaintextMessage(Translation.t('RETRACTION_BODY'));
                target.setRetracted(true);
                target.setReplaceTime(message.getStamp().getTime());
             }
@@ -252,53 +257,20 @@ export default class Transcript {
       else
       {
          firstMessage = this.getFirstMessage();
-         do
+         if (firstMessage!==undefined)
          {
-            if (firstMessage.getReplaceId()===message.getAttrId())
+            do
             {
-               result.push(firstMessage);
-            }
-         } while ((firstMessage=this.getMessage(firstMessage.getNextId()))!==null&&firstMessage!==undefined);
+               if (firstMessage.getReplaceId()===message.getAttrId())
+               {
+                  result.push(firstMessage);
+               }
+            } while ((firstMessage=this.getMessage(firstMessage.getNextId()))!==null&&firstMessage!==undefined);
+         }
          result.push(message);
 
          return result.reverse();
       }
-
-      /*
-      following is not neccessary anymore, cause xep 308 says:
-
-      "If the same message is to be corrected several times, the id of the original message is
-       used in each case (e.g. If a message of id 1 is corrected by a message of id 2,
-       a subsequent correction should correct 1, not 2)."
-
-      let sortedArray = this.convertToIndexArray(this.messages);
-      for (let i=sortedArray.length-1;i>=0;i--)
-      {
-         if (sortedArray[i].getReplaceId()!==null)
-         {
-            let foundMessage = false;
-            let resultChain = new Array();
-
-            let replacedMsg = sortedArray[i];
-            do {
-
-               if (replacedMsg.getAttrId()===message.getAttrId())
-               {
-                  foundMessage=true;
-               }
-           
-               resultChain.push(replacedMsg);
-               replacedMsg = replacedMsg.getReplaceId()!==null?this.findMessageByAttrId(replacedMsg.getReplaceId()):null;
-            } while(replacedMsg!==null&&replacedMsg!==undefined);
-
-            if (foundMessage)
-            {
-               return resultChain.reverse();
-            }
-         }
-      }
-
-      return [message];*/
    }
 
    public pushMessage(message: IMessage) {
@@ -461,7 +433,7 @@ export default class Transcript {
       for (let id of unreadMessageIds) {
          let message = this.messages[id];
 
-         if (message) {
+         if (message!==undefined&&message!==null) {
             message.read();
          }
       }

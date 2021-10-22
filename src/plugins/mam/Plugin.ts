@@ -167,10 +167,13 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
    }
 
    private addLoadButton(chatWindowElement: JQuery<HTMLElement>, contact: Contact) {
+      let fadeElement = chatWindowElement.find('.jsxc-window-fade');
+      if (fadeElement.find('.jsxc-mam-load-more').length>0){
+         return;
+      }
       let classNameShow = 'jsxc-show';
       let classNameMamEnable = 'jsxc-mam-enabled';
       let messageAreaElement = chatWindowElement.find('.jsxc-message-area');
-      let fadeElement = chatWindowElement.find('.jsxc-window-fade');
 
       let archive = this.getArchive(contact.getJid());
 

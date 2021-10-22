@@ -29,6 +29,11 @@ export default class extends AbstractHandler {
          retractId = messageElement.find('apply-to[xmlns="urn:xmpp:fasten:0"]').attr('id');
       }
 
+      if (retractId!==null)
+      {
+         replaceId=null;
+      }
+
       let contact = <MultiUserContact>this.account.getContact(from);
       if (typeof contact === 'undefined') {
          Log.info('Sender is not in our contact list');

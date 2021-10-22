@@ -11,7 +11,6 @@ import MUCService from './services/MUC';
 import RosterService from './services/Roster';
 import VcardService from './services/Vcard';
 import DiscoService from './services/Disco';
-import Translation from '@util/Translation';
 
 export const STANZA_KEY = 'stanza';
 export const STANZA_IQ_KEY = 'stanzaIQ';
@@ -143,7 +142,7 @@ abstract class AbstractConnection {
          id: message.getAttrId(),
       });
 
-      xmlMsg.c('body').t(Translation.t('RETRACTION_BODY')).up();
+      xmlMsg.c('body').t("This person attempted to retract a previous message, but it's unsupported by your client.").up();
 
       if (message.getRetractId()!=null)
       {

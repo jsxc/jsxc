@@ -178,6 +178,11 @@ export default class Archive {
          retractId = messageElement.find('apply-to[xmlns="urn:xmpp:fasten:0"]').attr('id');
       }
 
+      if (retractId!==null)
+      {
+         replaceId=null;
+      }
+
       let uid =
          direction === Message.DIRECTION.OUT && originIdElement.length
             ? originIdElement.attr('id')
@@ -320,7 +325,10 @@ export default class Archive {
          {
             transcript.processRetract(indexedArr[i]);
             let msg = transcript.findMessageByAttrId(indexedArr[i].getAttrId());
-            msg.setRetracted(true);
+            if (msg!==null&&msg!==undefined)
+            {
+               msg.setRetracted(true);
+            }
          }
       }
 

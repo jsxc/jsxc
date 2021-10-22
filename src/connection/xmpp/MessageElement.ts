@@ -35,6 +35,11 @@ export class MessageElement {
          this.retractId = $(stanza).find('apply-to[xmlns="urn:xmpp:fasten:0"]').attr('id');
       }
 
+      if (this.retractId!==null)
+      {
+         this.replaceId=null;
+      }
+
       if (forwardedStanza.length === 0) {
          this.element = $(stanza);
 
