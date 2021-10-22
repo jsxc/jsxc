@@ -353,7 +353,7 @@ abstract class AbstractConnection {
             xmlns: 'http://jabber.org/protocol/rsm',
          })
          .c('max')
-         .t('20')
+         .t('50')
          .up();
 
       if (typeof beforeResultId === 'string' || typeof beforeResultId === 'number') {
