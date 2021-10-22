@@ -181,12 +181,17 @@ export default class ChatWindow {
         event.preventDefault();
 
         // Show contextmenu
-        let xoffset = 0;
+        let xoffset = event.currentTarget.offsetLeft+event.offsetX;
         let yoffset =  (event.pageY-$(event.target).closest('div.jsxc-message-area').offset().top);
-        let len = element.find('.jsxc-avatar').length;
-        xoffset =  len>0?event.offsetX+60:event.offsetX;
 
         let contact = null;
+        let _self : ChatWindow = event.data.ref;
+        let refmessage = $(event.target).closest('div.jsxc-chatmessage').attr('id');
+        let msg : IMessage = _self.getTranscript().getMessage(refmessage);
+        if (msg.isRetracted())
+        {
+           return;
+        }
 
         if (!$(event.currentTarget).hasClass('jsxc-out'))
         {
@@ -208,24 +213,21 @@ export default class ChatWindow {
         }
         else
         {
-
             element.find('.jsxc-custom-menu').finish().toggle().
             // In the right position (the mouse)
             css({
                top:yoffset + 'px',
-               right: event.currentTarget.clientWidth-xoffset+10  + 'px',
+               right: event.currentTarget.offsetWidth-event.offsetX-10 + 'px',
                left: 'unset'
             });
         }
 
-        let refmessage = $(event.target).closest('div.jsxc-chatmessage').attr('id');
         element.find('.jsxc-custom-menu').empty();
         element.find('.jsxc-custom-menu').append('<div class="jsxc-context-menu-contact">'+(contact!==null?contact:Translation.t('Myself'))+'</div>');
 
         let liQuote = $('<li data-action="jsxc-context-menu-quote" data-refmessage="'+refmessage+'">'+Translation.t('Quote')+'</li>');
         element.find('.jsxc-custom-menu').append(liQuote);
 
-        let _self : ChatWindow = event.data.ref;
         liQuote.on('click',{ref:event.data.ref},function(e)
         {
             $('.jsxc-custom-menu').hide(250);
@@ -234,7 +236,6 @@ export default class ChatWindow {
             _self.selectMessageForQuote(msg,contact);
         });
 
-        let msg : IMessage = _self.getTranscript().getMessage(refmessage);
         if ((msg.getDirection()===DIRECTION.OUT||msg.getDirection()===DIRECTION.PROBABLY_OUT)&&!_self.getTranscript().getMessage(refmessage).isRetracted())
         {
             let firstMessage = _self.getTranscript().getLatestOutgoingMessageForEdit();
@@ -245,7 +246,6 @@ export default class ChatWindow {
                element.find('.jsxc-custom-menu').append(liEdit);
                liEdit.on('click',{ref:event.data.ref},function(e)
                {
-
                   $('.jsxc-custom-menu').hide(250);
                   let refmessage = $(e.target).attr('data-refmessage');
                   let msg : IMessage = _self.getTranscript().getMessage(refmessage);
@@ -258,7 +258,6 @@ export default class ChatWindow {
             element.find('.jsxc-custom-menu').append(liRemove);
             liRemove.on('click',{ref:event.data.ref},function(e)
             {
-
                $('.jsxc-custom-menu').hide(250);
                let refmessage = $(e.target).attr('data-refmessage');
                let msg : IMessage = _self.getTranscript().getMessage(refmessage);
