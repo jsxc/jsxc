@@ -49,7 +49,8 @@ export default class FileTransferHandler {
          if (!file) {
             return;
          }
-
+         fileElement.off('change');
+         fileElement.val('');
          this.fileSelected(file);
       });
    }
