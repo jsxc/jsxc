@@ -15,6 +15,7 @@ import ChatWindow from './ui/ChatWindow';
 import ContactProvider from './ContactProvider';
 import DiscoInfo from './DiscoInfo';
 import { IJID } from './JID.interface';
+import Geoloc from './Geoloc';
 
 export default class Contact implements IIdentifiable, IContact {
    protected storage: Storage;
@@ -332,6 +333,10 @@ export default class Contact implements IIdentifiable, IContact {
 
    public setLastMessageDate(lastMessage: Date) {
       this.data.set('lastMessage', lastMessage.toISOString());
+   }
+
+   public setPosition(geoloc: Geoloc) {
+      this.data.set('geoloc', geoloc);
    }
 
    public registerHook(property: string, func: (newValue: any, oldValue: any) => void) {

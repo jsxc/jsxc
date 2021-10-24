@@ -153,6 +153,10 @@ export let trustedDomains: string[] = [];
 
 export let includeOSInVersionResponse = false;
 
+export let nominatimurl = 'https://nominatim.openstreetmap.org';
+
+export let enableGeocode = true;
+
 export let keepWindowSizeOnResize = false;
 
 export let disableJoinLeaveMessages = false;
