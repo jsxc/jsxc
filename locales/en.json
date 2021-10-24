@@ -446,7 +446,8 @@
     "muc_invitation": "Invitation",
     "muc_invitation_explanation": "You have got a room invitation and you have the choice to deny or accept.",
     "RETRACTION_BODY": "Message retracted.",
-    "delete_on_disconnect": "Delete local data after logout"
+    "delete_on_disconnect": "Delete local data after logout",
+    "Open_window":"Open chat window"
 
   },
   "Notifications": "Notifications"

@@ -7,6 +7,7 @@ import { Presence } from '../../AbstractConnection';
 import 'jquery';
 import AbstractHandler from '../AbstractHandler';
 import { ContactSubscription as SUBSCRIPTION } from '../../../Contact.interface';
+import Translation from '@util/Translation';
 
 const PRESENCE = {
    ERROR: 'error',
@@ -100,8 +101,8 @@ export default class extends AbstractHandler {
       }
 
       this.account.getNoticeManager().addNotice({
-         title: 'Friendship_request',
-         description: 'from ' + jid.bare,
+         title: Translation.t('Friendship_request'),
+         description: Translation.t('from')+': ' + jid.bare,
          type: NOTICETYPE.contact,
          fnName: NOTICEFUNCTION.contactRequest,
          fnParams: [jid.bare],
