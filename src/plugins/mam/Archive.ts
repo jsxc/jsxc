@@ -324,11 +324,6 @@ export default class Archive {
          for (let i=0;i<indexedArr.length;i++)
          {
             transcript.processRetract(indexedArr[i]);
-            let msg = transcript.findMessageByAttrId(indexedArr[i].getAttrId());
-            if (msg!==null&&msg!==undefined)
-            {
-               msg.setRetracted(true);
-            }
          }
       }
 
@@ -421,8 +416,6 @@ export default class Archive {
          for (let i=0;i<indexedArr.length;i++)
          {
             transcript.processRetract(indexedArr[i]);
-            let msg = transcript.findMessageByAttrId(indexedArr[i].getAttrId());
-            msg.setRetracted(true);
          }
       }
 

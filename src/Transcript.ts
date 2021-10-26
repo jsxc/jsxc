@@ -248,9 +248,13 @@ export default class Transcript {
       let result :IMessage[] = [];
 
       let firstMessage;
-      if (message.getReplaceId()!==null)
+      if (message.getReplaceId()!==null&&message.getReplaceId()!==undefined)
       {
-         let result = this.getReplaceMessageChainFromMessage(this.getMessage(message.getReplaceId()));
+         let msg = this.getMessage(message.getReplaceId());
+         if (msg!==undefined)
+         {
+            result = this.getReplaceMessageChainFromMessage(msg);
+         }
          result.push(message);
          return result;
       }

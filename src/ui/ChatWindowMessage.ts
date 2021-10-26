@@ -392,29 +392,35 @@ export default class ChatWindowMessage {
 
    private replaceBody(processBodyString:any) {
 
-      let bodyElement :JQuery<HTMLElement> = $(processBodyString);
-      LinkHandlerGeo.get().detect(bodyElement);
-
-      let contentElement = this.element.find('.jsxc-content');
-      contentElement.html(processBodyString);
-
-      if (!this.element.find('.jsxc-replace').hasClass('jsxc-replace-icon'))
+      if (!this.element.find('.jsxc-retract').hasClass('jsxc-retract-icon'))
       {
-            this.element.find('.jsxc-replace').addClass('jsxc-replace-icon');
-            this.element.find('.jsxc-replace').on('click',()=>{
-               let chain = this.chatWindow.getTranscript().getReplaceMessageChainFromMessage(this.message);
-               if (chain!==null)
-               {
-                  showLogDialog(this.chatWindow.getContact().getAccount().getContact(),this.chatWindow.getContact(),chain);
-               }
-            });
+         let bodyElement :JQuery<HTMLElement> = $(processBodyString);
+         LinkHandlerGeo.get().detect(bodyElement);
+
+         let contentElement = this.element.find('.jsxc-content');
+         contentElement.html(processBodyString);
+
+         if (!this.element.find('.jsxc-replace').hasClass('jsxc-replace-icon'))
+         {
+               this.element.find('.jsxc-replace').addClass('jsxc-replace-icon');
+               this.element.find('.jsxc-replace').on('click',()=>{
+                  let chain = this.chatWindow.getTranscript().getReplaceMessageChainFromMessage(this.message);
+                  if (chain!==null)
+                  {
+                     showLogDialog(this.chatWindow.getContact().getAccount().getContact(),this.chatWindow.getContact(),chain);
+                  }
+               });
+         }
+
+         let chain = this.chatWindow.getTranscript().getReplaceMessageChainFromMessage(this.message);
+
+         if (chain!==null)
+         {
+            this.element.find('.jsxc-replace.jsxc-replace-icon').attr('title',this.format(chain));
+         }
       }
-
-      let chain = this.chatWindow.getTranscript().getReplaceMessageChainFromMessage(this.message);
-     
-      if (chain!==null)
-      {
-         this.element.find('.jsxc-replace.jsxc-replace-icon').attr('title',this.format(chain));
+      else {
+         this.retractBody();
       }
    }
 

@@ -61,6 +61,7 @@ abstract class AbstractConnection {
       NS.register('FORWARD', 'urn:xmpp:forward:0');
       NS.register('LMC', 'urn:xmpp:message-correct:0');
       NS.register('MR', 'urn:xmpp:message-retract:0');
+      NS.register('GELOC+', 'http://jabber.org/protocol/geoloc+notify');
    }
 
    public getPubSubService = (): PubSubService => {
