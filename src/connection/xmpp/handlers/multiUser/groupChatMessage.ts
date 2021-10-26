@@ -57,12 +57,26 @@ export default class extends AbstractHandler {
 
          contact.setSubject(subject);
 
-         let translatedMessage = Translation.t('changed_subject_to', {
-            nickname,
-            subject,
-         });
+         let translatedMessage = null;
 
-         contact.addSystemMessage(':page_with_curl: ' + translatedMessage);
+         if (subject!=='') //if room was created with standard configuration, then there is no topic at all
+         {
+            if (nickname!=='') //if the message comes from the muc service instead of the user, then its a bare jid without nickname
+            {
+               translatedMessage = Translation.t('changed_subject_to', {
+                  nickname: nickname,
+                  subject: subject,
+               });
+            }
+            else
+            {
+               translatedMessage = Translation.t('subject_was_changed', {
+                  subject: subject,
+               });
+            }
+
+            contact.addSystemMessage(':page_with_curl: ' + translatedMessage);
+         }
 
          return this.PRESERVE_HANDLER;
       }

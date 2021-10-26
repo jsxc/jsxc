@@ -29,6 +29,7 @@ class MultiUserJoinDialog {
    private roomInputElement: JQuery<HTMLElement>;
    private passwordInputElement: JQuery<HTMLElement>;
    private nicknameInputElement: JQuery<HTMLElement>;
+   private autojoinInputElement: JQuery<HTMLElement>;
 
    constructor(private server?: string, private room?: string) {
       let content = multiUserJoinTemplate({
@@ -48,6 +49,7 @@ class MultiUserJoinDialog {
       this.roomInputElement = dom.find('input[name="room"]');
       this.passwordInputElement = dom.find('input[name="password"]');
       this.nicknameInputElement = dom.find('input[name="nickname"]');
+      this.autojoinInputElement = dom.find('input[name="autojoin"]');
 
       if (server && room) {
          this.serverInputElement.val(server);
@@ -439,7 +441,7 @@ class MultiUserJoinDialog {
       let multiUserContact = new MultiUserContact(this.account, jid, name);
       multiUserContact.setNickname(nickname);
       multiUserContact.setBookmark(true);
-      multiUserContact.setAutoJoin(true);
+      multiUserContact.setAutoJoin(this.autojoinInputElement.prop('checked'));
       multiUserContact.setPassword(password);
       multiUserContact.setSubject(subject);
 

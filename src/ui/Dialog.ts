@@ -12,6 +12,7 @@ export default class Dialog {
 
    // @REVIEW name is maybe unnecessary
    public constructor(content: string, private unclosable: boolean = false, readonly name: string = '') {
+      $('body').find('.jsxc-dialog-wrapper.jsxc-root-container').remove();
       this.id = Dialog.generateId();
 
       this.src = dialogTemplate({

@@ -447,7 +447,9 @@
     "muc_invitation_explanation": "Sie haben eine Einladung für das Betreten eines Raums bekommen. Sie können sie ablehnen oder annehmen.",
     "RETRACTION_BODY": "Nachricht gelöscht.",
     "delete_on_disconnect": "Lokale Daten nach Abmeldung löschen",
-    "Open_window":"Chat öffnen"
+    "Open_window":"Chat öffnen",
+    "Configuration_canceled":"Raumkonfiguration abgebrochen",
+    "subject_was_changed": "Das Thema wurde auf __subject__ geändert."
   },
   "Notifications": "Benachrichtigungen"
 }

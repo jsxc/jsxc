@@ -116,7 +116,11 @@ export default class MultiUserContact extends Contact {
       this.data.set('memberListComplete', false);
       this.removeAllMembers();
 
-      this.refreshFeatures();
+      try {
+         this.refreshFeatures();
+      }catch (e){
+         console.log('Features not received, cause room was not found.', e)
+      }
 
       return this.getService().joinMultiUserRoom(new JID(this.jid.bare, this.getNickname()), this.data.get('password'));
    }
@@ -147,6 +151,7 @@ export default class MultiUserContact extends Contact {
    }
 
    public async refreshFeatures(): Promise<string[]> {
+
       const stanza = await this.account.getConnection().getDiscoService().getDiscoInfo(new JID(this.jid.bare));
 
       const features = $(stanza)
