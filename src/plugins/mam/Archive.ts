@@ -154,6 +154,11 @@ export default class Archive {
          return;
       }
 
+      if (this.contact.getJid().bare !== to.bare && this.contact.getJid().bare !== from.bare)
+      {
+         return;
+      }
+
       let delayElement = forwardedElement.find('delay[xmlns="urn:xmpp:delay"]');
       let stamp = delayElement.length > 0 ? new Date(delayElement.attr('stamp')) : new Date();
 
