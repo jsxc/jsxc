@@ -76,7 +76,7 @@ export default function (contact: IContact) {
       .then(vcardSuccessCallback)
       .then(function (vcardData) {
          let content = $(vcardBodyTemplate({
-            properties: vcardData,
+            properties: !contact.isGroupChat()?vcardData:undefined,
          }));
 
          content.addClass('jsxc-vcard-data')
@@ -105,8 +105,14 @@ function vcardSuccessCallback(vCardData): Promise<any> {
    }
 
    delete vCardData.PHOTO;
-
-   return Promise.resolve(convertToTemplateData(vCardData));
+   let result = convertToTemplateData(vCardData);
+   if (result!==undefined&&result!==null&&result.length>0)
+   {
+      return Promise.resolve(result);
+   }
+   else{
+      return Promise.resolve([]);
+   }
 }
 
 function vcardErrorCallback() {
