@@ -7,7 +7,7 @@ import Utils from '../../util/Utils';
 import Log from '../../util/Log';
 import Translation from '../../util/Translation';
 import * as Namespace from '../../connection/xmpp/namespace';
-import { IMessage, MessageMark } from '@src/Message.interface';
+import { DIRECTION, IMessage, MessageMark } from '@src/Message.interface';
 import { IJID } from '@src/JID.interface';
 import MultiUserContact from '@src/MultiUserContact';
 
@@ -66,6 +66,10 @@ export default class Archive {
       let connection = this.plugin.getConnection();
 
       let firstMessage = this.contact.getTranscript().getFirstMessage();
+      while (firstMessage!==undefined&&firstMessage.getDirection()===DIRECTION.SYS)
+      {
+         firstMessage = this.contact.getTranscript().getMessage(firstMessage.getNextId());
+      }
       if (firstMessage!==undefined&&firstMessage!==null)
       {
          let startDate = firstMessage.getStamp();
