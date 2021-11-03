@@ -52,7 +52,7 @@ export async function startCall(contact: IContact, account: Account, type: 'vide
 
       contact.addSystemMessage(
          ':checkered_flag: ' +
-            Translation.t(type === 'screen' ? 'Stream_terminated' : 'Call_terminated') +
+            Translation.t(type === 'screen' ? 'Stream_terminated' : 'Call_terminated') +' - '+
             Translation.t('Aborted')
       );
    } else if (callState === CallState.Declined) {

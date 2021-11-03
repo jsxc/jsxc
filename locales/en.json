@@ -449,8 +449,12 @@
     "delete_on_disconnect": "Delete local data after logout",
     "Open_window":"Open chat window",
     "Configuration_canceled":"Room configuration canceled",
-    "subject_was_changed": "The subject was changed to: __subject__"
-
+    "subject_was_changed": "The subject was changed to: __subject__",
+    "Aborted": "Canceled by user",
+    "QRCode_description": "Scan QR-Code with mobile client to verify the key",
+    "QRCode_noqrcode": "QR-Code not available",
+    "setting-jmi-enable":"Enable the ability to initiate jingle messages",
+    "Account": "Account"
   },
   "Notifications": "Notifications"
 }
