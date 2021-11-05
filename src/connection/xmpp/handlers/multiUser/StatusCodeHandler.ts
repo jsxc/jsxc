@@ -2,6 +2,7 @@ import Translation from '../../../../util/Translation';
 import MultiUserContact from '../../../../MultiUserContact';
 import showSelectionDialog from '../../../../ui/dialogs/selection';
 import showRoomConfigurationDialog, { CANCELED } from '../../../../ui/dialogs/multiUserRoomConfiguration';
+import { DIRECTION } from '@src/Message.interface';
 
 export default class MultiUserStatusCodeHandler {
    public static processCodes(codes: string[], multiUserContact: MultiUserContact, nickname?: string) {
@@ -11,7 +12,17 @@ export default class MultiUserStatusCodeHandler {
          let msg = statusCodeHandler.processCode(code);
 
          if (typeof msg === 'string') {
-            multiUserContact.addSystemMessage(msg);
+            let firstmsg = multiUserContact.getTranscript().getFirstMessage();
+            if (firstmsg.getDirection()==DIRECTION.SYS)
+            {
+               if (firstmsg.getPlaintextMessage()!==msg)
+               {
+                  multiUserContact.addSystemMessage(msg);
+               }
+            }
+            else {
+               multiUserContact.addSystemMessage(msg);
+            }
          }
       }
    }
