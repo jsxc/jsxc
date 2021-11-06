@@ -260,8 +260,10 @@ export default class Archive {
             {
                retractMessagesKeys.push({attrid:message.getAttrId(),uid:message.getUid()});
             }
-
-            transcript.unshiftMessage(message);
+            if (!transcript.isDuplicatate(message))
+            {
+               transcript.unshiftMessage(message);
+            }
 
          } catch (err) {
             continue;
@@ -369,8 +371,10 @@ export default class Archive {
             {
                retractMessagesKeys.push({attrid:message.getAttrId(),uid:message.getUid()});
             }
-
-            transcript.insertMessage(message);
+            if (!transcript.isDuplicatate(message))
+            {
+               transcript.insertMessage(message);
+            }
 
          } catch (err) {
             continue;

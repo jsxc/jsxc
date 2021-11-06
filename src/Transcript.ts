@@ -462,7 +462,28 @@ export default class Transcript {
       }
    }
 
+   public isDuplicatate(message: IMessage)
+   {
+      if (message.getAttrId()===null||message.getAttrId()===undefined)
+      {
+         return false;
+      }
+
+      let findmsg = this.findMessageByAttrId(message.getAttrId());
+      if (findmsg===null||findmsg===undefined)
+      {
+         return false;
+      }
+
+      return true;
+   }
+
    private addMessage(message: IMessage) {
+
+      if (this.isDuplicatate(message))
+      {
+         return;
+      }
       let id = message.getUid();
 
       this.messages[id] = message;
