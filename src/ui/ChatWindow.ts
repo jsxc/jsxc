@@ -630,7 +630,58 @@ export default class ChatWindow {
             self.inputElement.focus();
          }
       });
+
+      this.element.find('.jsxc-messagesearch-input').on('keyup',this.searchMessage);
+      elementHandler.add(this.element.find('.jsxc-message-search-off')[0], ev => {
+         this.clearSearch(ev);
+      });
    }
+
+   private clearSearch(ev) : void {
+      ev.stopPropagation();
+      this.element.find('.jsxc-message-search').removeClass('jsxc-hidden');
+      this.element.find('.jsxc-message-search-off').addClass('jsxc-hidden');
+      this.element.find('.jsxc-search-negativeresult').removeClass('jsxc-search-negativeresult');
+      this.element.find('.jsxc-search-positiveresult').each(function(){
+         $(this).parent().text($(this).parent().text());
+      });
+   }
+
+   private searchMessage = ev => {
+      ev.stopPropagation();
+
+      if (ev.which === ENTER_KEY && !ev.shiftKey
+         && $(ev.target).val()!==undefined
+         && $(ev.target).val().toString().trim()!==''
+         && $(ev.target).val().toString().trim().length>=3 ) {
+         let messages = this.element.find(".jsxc-chatmessage");
+         for (let message of messages) {
+                    
+            if ($(message).text().indexOf($(ev.target).val().toString())===-1)
+            {
+               $(message).addClass('jsxc-search-negativeresult');
+            }   
+            else 
+            {
+               if ($(message).find('.jsxc-content').find('.jsxc-attachment.jsxc-text').length>0)
+               {
+                  let text = $(message).find('.jsxc-content').find('.jsxc-attachment.jsxc-text').text();
+                  text = text.replace($(ev.target).val().toString(),'<span class="jsxc-search-positiveresult">'+$(ev.target).val().toString()+'</span>');
+                  $(message).find('.jsxc-content').find('.jsxc-attachment.jsxc-text').html(text);
+               }
+               if ($(message).find('.jsxc-content').find('p').text().indexOf($(ev.target).val().toString())>=0)
+               {
+                  let text = $(message).find('.jsxc-content').find('p').text();
+                  text = text.replace($(ev.target).val().toString(),'<span class="jsxc-search-positiveresult">'+$(ev.target).val().toString()+'</span>');
+                  $(message).find('.jsxc-content').find('p').html(text);
+               }
+            }   
+         }
+
+         this.element.find('.jsxc-message-search').addClass('jsxc-hidden');
+         this.element.find('.jsxc-message-search-off').removeClass('jsxc-hidden');
+      }
+   };
 
    private registerInputHandler() {
       let self = this;

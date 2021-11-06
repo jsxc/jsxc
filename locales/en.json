@@ -454,7 +454,9 @@
     "QRCode_description": "Scan QR-Code with mobile client to verify the key",
     "QRCode_noqrcode": "QR-Code not available",
     "setting-jmi-enable":"Enable the ability to initiate jingle messages",
-    "Account": "Account"
+    "Account": "Account",
+    "Clear_search": "Clear Search",
+    "Search_message": "Search in messages"
   },
   "Notifications": "Notifications"
 }

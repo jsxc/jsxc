@@ -928,3 +928,28 @@
     background-color: #222;
   }
 }
+
+.jsxc-search-negativeresult {
+  display: none;
+}
+
+.jsxc-search-positiveresult {
+  background: var(--jsxc-color-error);
+  color: white;
+}
+
+.jsxc-message-search {
+  &-icon {
+    background-image: url('../images/icons/msgsearch.svg');
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 20px 20px;
+  }
+
+  &-off-icon {
+    background-image: url('../images/icons/msgsearch_off.svg');
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 20px 20px;
+  }
+}
