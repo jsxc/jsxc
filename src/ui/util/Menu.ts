@@ -71,6 +71,11 @@ export default class Menu {
          this.element.toggleClass(CLASSNAME_OPENED);
       }
 
+      if ($(ev.currentTarget).find('.jsxc-input-search').length>0)
+      {
+         setTimeout(()=>{$(ev.currentTarget).find('.jsxc-input-search').focus();},50);
+      }
+
       if (this.element.hasClass(CLASSNAME_OPENED)) {
          $('body').on('click', this.closeMenu);
       }

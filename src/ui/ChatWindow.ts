@@ -643,45 +643,59 @@ export default class ChatWindow {
       this.element.find('.jsxc-message-search-off').addClass('jsxc-hidden');
       this.element.find('.jsxc-search-negativeresult').removeClass('jsxc-search-negativeresult');
       this.element.find('.jsxc-search-positiveresult').each(function(){
-         $(this).parent().text($(this).parent().text());
+         $(this).parent().html($(this).parent()[0].innerText.replace(/(?:(https?\:\/\/[^\s]+))/m, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'));
       });
    }
 
    private searchMessage = ev => {
       ev.stopPropagation();
 
-      if (ev.which === ENTER_KEY && !ev.shiftKey
-         && $(ev.target).val()!==undefined
-         && $(ev.target).val().toString().trim()!==''
-         && $(ev.target).val().toString().trim().length>=3 ) {
-         let messages = this.element.find(".jsxc-chatmessage");
-         for (let message of messages) {
-                    
-            if ($(message).text().indexOf($(ev.target).val().toString())===-1)
-            {
-               $(message).addClass('jsxc-search-negativeresult');
-            }   
-            else 
-            {
-               if ($(message).find('.jsxc-content').find('.jsxc-attachment.jsxc-text').length>0)
-               {
-                  let text = $(message).find('.jsxc-content').find('.jsxc-attachment.jsxc-text').text();
-                  text = text.replace($(ev.target).val().toString(),'<span class="jsxc-search-positiveresult">'+$(ev.target).val().toString()+'</span>');
-                  $(message).find('.jsxc-content').find('.jsxc-attachment.jsxc-text').html(text);
-               }
-               if ($(message).find('.jsxc-content').find('p').text().indexOf($(ev.target).val().toString())>=0)
-               {
-                  let text = $(message).find('.jsxc-content').find('p').text();
-                  text = text.replace($(ev.target).val().toString(),'<span class="jsxc-search-positiveresult">'+$(ev.target).val().toString()+'</span>');
-                  $(message).find('.jsxc-content').find('p').html(text);
-               }
-            }   
-         }
+      let inputtext = $(ev.target).val();
+      if (ev.which === ENTER_KEY && !ev.shiftKey && inputtext!==undefined)
+      {
+         inputtext = inputtext.toString().trim();
+         if (inputtext!=='' && inputtext.length >= 3) {
+            let messages = this.element.find(".jsxc-chatmessage");
+            let iCaseInput = inputtext.toLocaleLowerCase();
+            for (let message of messages) {
 
-         this.element.find('.jsxc-message-search').addClass('jsxc-hidden');
-         this.element.find('.jsxc-message-search-off').removeClass('jsxc-hidden');
+               if ($(message).text().toLocaleLowerCase().indexOf(iCaseInput)===-1)
+               {
+                  $(message).addClass('jsxc-search-negativeresult');
+               }
+               else
+               {
+                  if ($(message).find('.jsxc-content').find('.jsxc-attachment.jsxc-text').length>0)
+                  {
+                     let text = this.replaceWithSpan($(message).find('.jsxc-content').find('.jsxc-attachment.jsxc-text'),inputtext);
+                     $(message).find('.jsxc-content').find('.jsxc-attachment.jsxc-text').html(text);
+                  }
+                  if ($(message).find('.jsxc-content').find('p').text().toLocaleLowerCase().indexOf(iCaseInput)>=0)
+                  {
+                     let text = this.replaceWithSpan($(message).find('.jsxc-content').find('p'),inputtext);
+                     $(message).find('.jsxc-content').find('p').html(text);
+                  }
+               }
+            }
+
+            this.element.find('.jsxc-message-search').addClass('jsxc-hidden');
+            this.element.find('.jsxc-message-search-off').removeClass('jsxc-hidden');
+         }
       }
    };
+
+   private replaceWithSpan(el: JQuery<HTMLElement>, replacetext: string): string {
+      let cText = el[0].innerText; //jquery.text() removes line breaks
+      let pattern = new RegExp('('+replacetext.toLocaleLowerCase()+')','gmi')
+      let results = cText.match(pattern);
+      let resultset = new Set(results);
+      for (let replace of resultset)
+      {
+         cText = cText.replace(replace,'<span class="jsxc-search-positiveresult">'+replace+'</span>');
+      }
+
+      return cText;
+   }
 
    private registerInputHandler() {
       let self = this;
