@@ -162,3 +162,7 @@ export let keepWindowSizeOnResize = false;
 export let disableJoinLeaveMessages = false;
 
 export let allowAllMessagesCorrection = false;
+
+export let showTwoColumnPreference = false;
+
+export let useTwoColumnLayout = false;

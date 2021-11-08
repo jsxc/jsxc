@@ -3,9 +3,31 @@ body.jsxc-fullscreen {
 
   #jsxc-roster {
     border: 0;
-    border-top: 62px solid #2a4163;
+    border-top: 1px solid #2a4163;
     width: 100%;
     z-index: 50;
+  }
+
+  .jsxc-fullscreen-active-conversations {
+    background-color: #2a4163;
+    color: white;
+    display: block !important;
+    height: 61px;
+    min-height: 61px;
+    padding: 3px;
+
+    .jsxc-fullscreen-active-conversations-select {
+      color: black;
+      font-size: 12px;
+      height: 30px;
+      margin-top: 12px;
+      width: 100%;
+
+      option[disabled] {
+        background-color: var(--jsxc-color-placeholder-dark);
+        color: black;
+      }
+    }
   }
 
   #jsxc-window-list {
@@ -172,6 +194,14 @@ body.jsxc-fullscreen {
     border: 0;
     min-width: auto;
     padding-top: 45px;
+  }
+}
+
+.jsxc-fullscreen-active-conversations {
+  display: none;
+
+  .jsxc-fullscreen-active-conversations-select:empty {
+    display: none;
   }
 }
 

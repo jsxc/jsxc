@@ -456,7 +456,9 @@
     "setting-jmi-enable":"Erlaubt die Verwendung von Jingle Messages",
     "Account": "Konto",
     "Clear_search": "Suche zurücksetzen",
-    "Search_message": "Durchsuche Nachrichten"
+    "Search_message": "Durchsuche Nachrichten",
+    "show_two_column_pref": "Zwei-Spalten-Layout",
+    "show_two_column_description": "Der Client verwendet ein Zweispaltenvollbildlayout"
   },
   "Notifications": "Benachrichtigungen"
 }

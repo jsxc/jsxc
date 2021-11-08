@@ -75,7 +75,74 @@ class ClientSection extends Section {
          )
       );
 
+      let showTwoColumnPreference = Client.getOption('showTwoColumnPreference') || false;
+      if (showTwoColumnPreference)
+      {
+         contentElement.append(
+            new ListItem(
+               Translation.t('show_two_column_pref'),
+               Translation.t('show_two_column_description'),
+               undefined,
+               undefined,
+               this.toggleTwoColumnLayout()
+            )
+         );
+      }
+
       return contentElement.getDOM();
+   }
+
+   private toggleTwoColumnLayout() {
+      let element = $('<input type="checkbox" style="margin-left:10px;">');
+
+      element.on('change', () => {
+         let value = element.prop('checked');
+         element.val(value);
+         Client.setOption('useTwoColumnLayout', value ? value : undefined);
+         if (value)
+         {
+            $(document.body).find('.jsxc-window-fade').each(function(){
+               $(this).css('width','');
+               $(this).css('height','');
+            });
+            $(document.body).find('.jsxc-bar--window.jsxc-bar').each(function(){
+               $(this).css('width','');
+               $(this).css('height','');
+            });
+            
+            $(document.body).addClass('jsxc-fullscreen');
+            $(document.body).addClass('jsxc-two-columns');
+         }
+         else
+         {
+            $(document.body).removeClass('jsxc-fullscreen');
+            $(document.body).removeClass('jsxc-two-columns');
+         }
+      });
+
+      let useTwoColumnLayout = Client.getOption('useTwoColumnLayout') || false;
+      element.prop("checked",useTwoColumnLayout);
+      element.val(useTwoColumnLayout);
+      if (useTwoColumnLayout)
+      {
+         $(document.body).find('.jsxc-window-fade').each(function(){
+            $(this).css('width','');
+            $(this).css('height','');
+         });
+         $(document.body).find('.jsxc-bar--window.jsxc-bar').each(function(){
+            $(this).css('width','');
+            $(this).css('height','');
+         });
+         $(document.body).addClass('jsxc-fullscreen');
+         $(document.body).addClass('jsxc-two-columns');
+      }
+      else
+      {
+         $(document.body).removeClass('jsxc-fullscreen');
+         $(document.body).removeClass('jsxc-two-columns');
+      }
+
+      return element;
    }
 
    private getLanguageSelectionElement() {

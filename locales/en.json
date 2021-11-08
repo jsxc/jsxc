@@ -456,7 +456,9 @@
     "setting-jmi-enable":"Enable the ability to initiate jingle messages",
     "Account": "Account",
     "Clear_search": "Clear Search",
-    "Search_message": "Search in messages"
+    "Search_message": "Search in messages",
+    "show_two_column_pref": "Two Column Layout",
+    "show_two_column_description": "The Client will use a two column fullscreen layout"
   },
   "Notifications": "Notifications"
 }

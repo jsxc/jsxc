@@ -49,6 +49,18 @@ export default class Client {
 
       Migration.run(Client.getVersion(), storage);
 
+      let useTwoColumnLayout = Client.getOption('useTwoColumnLayout') || false;
+      if (useTwoColumnLayout)
+      {
+         $(document.body).addClass('jsxc-fullscreen');
+         $(document.body).addClass('jsxc-two-columns');
+      }
+      else
+      {
+         $(document.body).removeClass('jsxc-fullscreen');
+         $(document.body).removeClass('jsxc-two-columns');
+      }
+
       return Options.getDefault('automaticallyRestoreAccounts') ? Client.accountManager.restoreAccounts() : 0;
    }
 

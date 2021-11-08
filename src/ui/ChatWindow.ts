@@ -907,9 +907,17 @@ export default class ChatWindow {
             },
          })
          .on('resizestart', () => {
+            if ($('.jsxc-fullscreen.jsxc-two-columns').length>0)
+            {
+               return;
+            }
             fadeElement.addClass('jsxc-window-fade--resizing');
          })
          .on('resizemove', ev => {
+            if ($('.jsxc-fullscreen.jsxc-two-columns').length>0)
+            {
+               return;
+            }
             let barHeight = element.find('.jsxc-bar--window').height();
             let windowHeight = $(window).height();
 
