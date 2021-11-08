@@ -13,7 +13,7 @@ export default class MultiUserStatusCodeHandler {
 
          if (typeof msg === 'string') {
             let firstmsg = multiUserContact.getTranscript().getFirstMessage();
-            if (firstmsg.getDirection()==DIRECTION.SYS)
+            if (firstmsg!==undefined&&firstmsg.getDirection()==DIRECTION.SYS)
             {
                if (firstmsg.getPlaintextMessage()!==msg)
                {
