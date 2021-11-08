@@ -61,7 +61,7 @@
     "@types/mocha": "^8.2.2",
     "@types/node": "^14.14.9",
     "@types/sinon": "^9.0.9",
-    "@types/strophe.js": "^1.2.0",
+    "@types/strophe.js": "^1.2.32",
     "@typescript-eslint/eslint-plugin": "^4.14.0",
     "@typescript-eslint/parser": "^4.14.0",
     "archiver": "^5.1.0",
@@ -144,7 +144,7 @@
     "sass": "^1.32.8",
     "screenfull": "^5.0.2",
     "sha1": "^1.1.1",
-    "strophe.js": "^1.4.0",
+    "strophe.js": "^1.4.2",
     "util": "^0.12.3",
     "webrtc-adapter": "^7.7.0"
   }
