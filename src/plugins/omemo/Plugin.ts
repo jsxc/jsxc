@@ -70,7 +70,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
             return;
          }
 
-         chatWindow.addMenuEntry('omemo-devices', 'OMEMO devices', () => this.openDeviceDialog(chatWindow));
+         chatWindow.addMenuEntry('omemo-devices', Translation.t('OMEMO_devices'), () => this.openDeviceDialog(chatWindow));
       });
    }
 
