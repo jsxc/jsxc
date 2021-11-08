@@ -13,6 +13,7 @@ export default class DateTime {
 
       elements.each(function () {
          $(this).text(fromNow);
+         $(this).attr('title',new Date(stamp).toISOString()+' (UTC)');
       });
 
       setTimeout(function () {
