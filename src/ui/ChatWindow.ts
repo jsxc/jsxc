@@ -177,6 +177,10 @@ export default class ChatWindow {
 
    public openContextMenu(event)
    {
+        if ($(event.target).prop('tagName').toLowerCase()==='a')
+        {
+           return;
+        }
         let element = event.data.ref.element;
         event.preventDefault();
 
