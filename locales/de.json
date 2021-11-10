@@ -459,7 +459,8 @@
     "Search_message": "Durchsuche Nachrichten",
     "show_two_column_pref": "Zwei-Spalten-Layout",
     "show_two_column_description": "Der Client verwendet ein Zweispaltenvollbildlayout",
-    "subject": "Thema"
+    "subject": "Thema",
+    "Not_available": "Nicht verfügbar"
   },
   "Notifications": "Benachrichtigungen"
 }
