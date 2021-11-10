@@ -458,7 +458,8 @@
     "Clear_search": "Clear Search",
     "Search_message": "Search in messages",
     "show_two_column_pref": "Two Column Layout",
-    "show_two_column_description": "The Client will use a two column fullscreen layout"
+    "show_two_column_description": "The Client will use a two column fullscreen layout",
+    "subject": "Subject"
   },
   "Notifications": "Notifications"
 }

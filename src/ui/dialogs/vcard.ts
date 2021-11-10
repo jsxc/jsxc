@@ -3,6 +3,7 @@ import { IContact } from '../../Contact.interface';
 import Translation from '@util/Translation';
 import { Presence } from '@connection/AbstractConnection';
 import Color from '@util/Color';
+import MultiUserContact from '@src/MultiUserContact';
 
 let vcardTemplate = require('../../../template/vcard.hbs');
 let vcardBodyTemplate = require('../../../template/vcard-body.hbs');
@@ -25,6 +26,7 @@ export default function (contact: IContact) {
       jid: contact.getJid().bare,
       name: contact.getName(),
       basic: basicData,
+      roomfeatures : contact.isGroupChat()?getRoomInfos((<MultiUserContact>contact)):undefined
    });
 
    dialog = new Dialog(content);
@@ -85,6 +87,17 @@ export default function (contact: IContact) {
          dialog.getDom().find('.jsxc-waiting').remove();
       })
       .catch(vcardErrorCallback);
+}
+
+function getRoomInfos(contact : MultiUserContact) : any[] {
+
+   let result = new Array();
+   result.push({label: Translation.t('subject'), description: contact.getSubject()});
+   for (let item of contact.getFeatures()) {
+      let itemname = 'muc_'+item;
+      result.push({label: '> ', description: Translation.t(`${itemname}.keyword`)+' ('+Translation.t(`${itemname}.description`)+')'});
+   }
+   return result;
 }
 
 function vcardSuccessCallback(vCardData): Promise<any> {

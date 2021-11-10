@@ -1,6 +1,14 @@
 <h3>{{t "Info_about"}} {{name}} ({{jid}})</h3>
 <div class="jsxc-vcard-tags"></div>
 
+<ul class="jsxc-mucinfos">
+   {{#each roomfeatures}}
+   <li>
+      <strong>{{label}}</strong> {{description}}
+   </li>
+   {{/each}}
+</ul>
+
 <ul class="jsxc-vcard">
    {{#each basic}}
    <li>
