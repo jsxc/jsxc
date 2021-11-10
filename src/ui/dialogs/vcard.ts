@@ -16,6 +16,7 @@ export default function (contact: IContact) {
       let presence = Presence[contact.getPresence(resource)];
 
       return {
+         resourcetype: contact.isGroupChat()?Translation.t('Nickname'):Translation.t('Resource'),
          resource,
          client: Translation.t('loading'),
          presence: Translation.t(presence),
