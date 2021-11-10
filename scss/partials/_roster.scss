@@ -1,15 +1,35 @@
+.jsxc-list-container {
+  display: flex;
+  flex-flow: row wrap;
+}
+
+.jsxc-roster-buttons {
+  background-color: var(--jsxc-color-background-darker);
+  text-align: center;
+
+  button {
+    border: 0px solid transparent;
+    background: transparent;
+    height: 100%;
+
+    &:hover {
+      background-color: var(--jsxc-color-background-hover);
+    }
+  }
+}
+
 button.jsxc-collapsible {
   background-color: var(--jsxc-color-background-darker);
   border: 0;
   border-radius: 0;
   color: var(--jsxc-color-main-text);
   cursor: pointer;
+  flex-grow: 1;
   font-size: 12px;
   font-weight: normal;
   outline: none;
   padding: 5px;
   text-align: left;
-  width: 100%;
 
   &:hover {
     background-color: var(--jsxc-color-background-hover);
@@ -279,15 +299,21 @@ input.jsxc-filter-input {
   }
 
   &[data-presence="offline"] {
-    .jsxc-contact-list::after,
-    .jsxc-group-list::after {
+    .jsxc-contact-list-wrapper::after {
       content: attr(data-presence-offline-label);
+      display: block;
+      font-size: 0.8em;
+      font-style: italic;
+      line-height: 44px;
+      opacity: 0.6;
+      text-align: center;
     }
 
     .jsxc-bottom .jsxc-avatar {
       background-image: url("../images/icons/placeholder.svg");
     }
 
+    .jsxc-list-container,
     .jsxc-filter-wrapper,
     .jsxc-collapsible,
     .jsxc-group-list {

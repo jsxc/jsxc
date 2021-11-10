@@ -1,5 +1,5 @@
 <div id="jsxc-roster" class="jsxc-root-container">
-   <div class="jsxc-contact-list-wrapper">
+   <div class="jsxc-contact-list-wrapper" data-presence-offline-label="{{t "You_are_currently_offline"}}">
       <div class="jsxc-filter-wrapper">
          <i class="jsxc-icon-search jsxc-icon--center"></i>
          <input type='text' class="jsxc-filter-input" placeholder='{{t "contactfilter"}}' />
@@ -8,14 +8,23 @@
          </button>
       </div>
 
-      <button class="jsxc-collapsible jsxc-active">{{t "groups"}}</button>
-      <ul class="jsxc-group-list" data-empty-list-label="{{t "Your_group_list_is_empty"}}"
-         data-presence-offline-label="{{t "You_are_currently_offline"}}"></ul>
-
-      <button class="jsxc-collapsible jsxc-active">{{t "contacts"}}</button>
-      <ul class="jsxc-contact-list" data-empty-list-label="{{t "Your_contact_list_is_empty"}}"
-         data-offline-hidden-label="{{t "Offline_contacts_are_hidden"}}"
-         data-presence-offline-label="{{t "You_are_currently_offline"}}"></ul>
+      <div class="jsxc-list-container">
+         <div class="jsxc-roster-buttons">
+            <button class="jsxc-join-muc-button jsxc-icon-groupcontact" title="{{t "Join_chat"}}"></button>
+         </div>
+         <button class="jsxc-collapsible jsxc-active">{{t "groups"}}</button>
+         <ul class="jsxc-group-list" data-empty-list-label="{{t "Your_group_list_is_empty"}}"
+            ></ul>
+      </div>
+      <div class="jsxc-list-container">
+         <div class="jsxc-roster-buttons">
+            <button class="jsxc-add-contact-button jsxc-icon-contact" title="{{t "Add_buddy"}}"></button>
+            <button class="jsxc-search-contact-button jsxc-icon-search" title="{{t "contact_search"}}"></button>
+         </div>
+         <button class="jsxc-collapsible jsxc-active">{{t "contacts"}}</button>
+         <ul class="jsxc-contact-list" data-empty-list-label="{{t "Your_contact_list_is_empty"}}"
+            data-offline-hidden-label="{{t "Offline_contacts_are_hidden"}}"></ul>
+      </div>
    </div>
    <div class="jsxc-roster-status"></div>
    <div class="jsxc-bottom jsxc-presence jsxc-roster-item jsxc-bar" data-bid="own">

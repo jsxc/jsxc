@@ -340,6 +340,7 @@ export default class Roster {
          handler: showAboutDialog,
          label: Translation.t('About'),
          offlineAvailable: true,
+         icon: 'info',
       });
 
       let onlineHelpUrl = Client.getOption(HELP_KEY);
@@ -388,7 +389,7 @@ export default class Roster {
       this.addMenuEntry({
          id: 'mute-notification',
          handler: this.toggleMuteNotification,
-         label: Translation.t('Mute'),
+         label: Translation.t('Mute')
       });
 
       this.addMenuEntry({
@@ -410,6 +411,7 @@ export default class Roster {
          id: 'add-avatar',
          handler: showAddAvatarDialog,
          label: Translation.t('Edit_avatar'),
+         icon: 'smiley'
       });
    }
 
@@ -618,5 +620,9 @@ export default class Roster {
       this.element.find('.jsxc-collapsible').on('click', function () {
          $(this).toggleClass('jsxc-active');
       });
+
+      this.element.find('.jsxc-join-muc-button').on('click',()=>{showMultiUserJoinDialog();}); 
+      this.element.find('.jsxc-add-contact-button').on('click',()=>{showContactDialog();});
+      this.element.find('.jsxc-search-contact-button').on('click',()=>{showContactSearchDialog();});
    }
 }
