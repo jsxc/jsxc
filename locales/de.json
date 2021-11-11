@@ -460,7 +460,9 @@
     "show_two_column_pref": "Zwei-Spalten-Layout",
     "show_two_column_description": "Der Client verwendet ein Zweispaltenvollbildlayout",
     "subject": "Thema",
-    "Not_available": "Nicht verfügbar"
+    "Not_available": "Nicht verfügbar",
+    "Connection_interrupted": "Verbindung unterbrochen",
+    "Declined": "abgelehnt"
   },
   "Notifications": "Benachrichtigungen"
 }

@@ -7,7 +7,7 @@ import Utils from '../../util/Utils';
 import Log from '../../util/Log';
 import Translation from '../../util/Translation';
 import * as Namespace from '../../connection/xmpp/namespace';
-import { DIRECTION, IMessage, MessageMark } from '@src/Message.interface';
+import { IMessage, MessageMark } from '@src/Message.interface';
 import { IJID } from '@src/JID.interface';
 import MultiUserContact from '@src/MultiUserContact';
 
@@ -60,19 +60,31 @@ export default class Archive {
          return false;
       }
 
+      let messages = this.contact.getTranscript().getMessages();
+      if (messages===undefined||messages===null)
+         return;
+
       let queryId = UUID.v4();
 
       this.plugin.addQueryContactRelation(queryId, this.contact);
       let connection = this.plugin.getConnection();
 
-      let firstMessage = this.contact.getTranscript().getFirstMessage();
-      while (firstMessage!==undefined&&firstMessage.getDirection()===DIRECTION.SYS)
+      let indexMessageArray = this.contact.getTranscript().convertToIndexArray(messages);
+
+      if (indexMessageArray===undefined||indexMessageArray===null)
+         return;
+
+      if (indexMessageArray.length===0)
       {
-         firstMessage = this.contact.getTranscript().getMessage(firstMessage.getNextId());
+         this.nextMessages();
+         return;
       }
-      if (firstMessage!==undefined&&firstMessage!==null)
+
+      let lastMessage = indexMessageArray[indexMessageArray.length-1];
+
+      if (lastMessage!==undefined&&lastMessage!==null)
       {
-         let startDate = firstMessage.getStamp();
+         let startDate = lastMessage.getStamp();
          startDate.setSeconds(startDate.getSeconds() + 1);
          this.plugin
             .determineServerSupport(this.archiveJid)
@@ -87,9 +99,6 @@ export default class Archive {
             .catch(stanza => {
                Log.warn('Error while requesting archive', stanza);
             });
-      }
-      else {
-         this.nextMessages();
       }
    }
 
@@ -274,18 +283,6 @@ export default class Archive {
       let firstResultId = finElement.find('first').text();
       let queryId = finElement.attr('queryid');
 
-      if (isArchiveExhausted) {
-         let archiveExhaustedMessage = new Message({
-            peer: this.contact.getJid(),
-            direction: Message.DIRECTION.SYS,
-            plaintextMessage: Translation.t('Archive_exhausted'),
-            mark: MessageMark.transferred,
-            unread: false,
-         });
-
-         transcript.unshiftMessage(archiveExhaustedMessage);
-      }
-
       if (replaceMessagesKeys.length>0)
       {
          let arr : {[key: string]: IMessage} = {};
@@ -336,6 +333,18 @@ export default class Archive {
          {
             transcript.processRetract(indexedArr[i]);
          }
+      }
+
+      if (isArchiveExhausted&&!this.isExhausted()) {
+         let archiveExhaustedMessage = new Message({
+            peer: this.contact.getJid(),
+            direction: Message.DIRECTION.SYS,
+            plaintextMessage: Translation.t('Archive_exhausted'),
+            mark: MessageMark.transferred,
+            unread: false,
+         });
+
+         transcript.unshiftMessage(archiveExhaustedMessage);
       }
 
       this.setExhausted(isArchiveExhausted);

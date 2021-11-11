@@ -56,7 +56,7 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       this.queryContactRelation = new PersistentMap(pluginAPI.getStorage(), 'mam', 'query');
 
       pluginAPI.registerChatWindowInitializedHook((chatWindow: ChatWindow, contact: Contact) => {
-         this.addLoadButtonIfEnabled(chatWindow, contact);
+         this.addLoadButtonIfEnabled(chatWindow, contact, true);
       });
 
       pluginAPI.registerConnectionHook((status:number, condition: string)=>{
@@ -70,11 +70,23 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       pluginAPI.registerChatWindowClearedHook((chatWindow: ChatWindow, contact: Contact) => {
          let archiveJid = this.getArchiveJid(contact);
 
+         let fadeElement = chatWindow.getDom().find('.jsxc-window-fade');
+         if (fadeElement.find('.jsxc-mam-load-more').length>0){
+            fadeElement.find('.jsxc-mam-load-more').remove();
+         }
+
+         console.log('OFF');
+         let messageAreaElement =  chatWindow.getDom().find('.jsxc-message-area');
+         messageAreaElement.off('scroll');
+
          if (this.supportCache[archiveJid.bare]) {
             this.getArchive(contact.getJid()).clear();
          }
 
-         this.addLoadButtonIfEnabled(chatWindow, contact);
+         setTimeout(()=>{
+            this.addLoadButtonIfEnabled(chatWindow, contact,false);
+         },500);
+
       });
 
       this.pluginAPI.getConnection().registerHandler(this.onMamMessage, null, 'message', null);
@@ -156,17 +168,17 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       return new JID(jid.bare);
    }
 
-   private addLoadButtonIfEnabled(chatWindow: ChatWindow, contact: Contact) {
+   private addLoadButtonIfEnabled(chatWindow: ChatWindow, contact: Contact, loadNow : boolean) {
       let archivingJid = this.getArchiveJid(contact);
 
       this.determineServerSupport(archivingJid).then(version => {
          if (version) {
-            this.addLoadButton(chatWindow.getDom(), contact);
+            this.addLoadButton(chatWindow.getDom(), contact, loadNow);
          }
       });
    }
 
-   private addLoadButton(chatWindowElement: JQuery<HTMLElement>, contact: Contact) {
+   private addLoadButton(chatWindowElement: JQuery<HTMLElement>, contact: Contact, loadNow : boolean) {
       let fadeElement = chatWindowElement.find('.jsxc-window-fade');
       if (fadeElement.find('.jsxc-mam-load-more').length>0){
          return;
@@ -186,21 +198,35 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       });
       element.append(spanElement);
 
-      messageAreaElement.on('scroll', function () {
+      messageAreaElement.on('scroll', function() {
+
          let scrollHeight: number   = messageAreaElement[0].scrollHeight;
          let clientHeight : number  = messageAreaElement[0].clientHeight;
          let scrollTop : number     = messageAreaElement[0].scrollTop;
          if (scrollTop<0)
             scrollTop=scrollTop*(-1);
 
+         let autoLoadOnScrollToTop = Client.getOption('autoLoadOnScrollToTop') || false;
+
          if (((clientHeight + 42 > scrollHeight - scrollTop) && !archive.isExhausted())||messageAreaElement.text().trim().length===0) {
+            if (autoLoadOnScrollToTop)
+            {
+               archive.nextMessages();
+            }
+
             element.addClass(classNameShow);
          } else {
             element.removeClass(classNameShow);
          }
+
       });
 
-      messageAreaElement.trigger('scroll');
+      if (loadNow) {
+         messageAreaElement.trigger('scroll');
+      }
+      else {
+         element.addClass(classNameShow);
+      }
 
       if (!archive.isExhausted()) {
          chatWindowElement.addClass(classNameMamEnable);
