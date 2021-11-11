@@ -57,6 +57,10 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
 
       pluginAPI.registerChatWindowInitializedHook((chatWindow: ChatWindow, contact: Contact) => {
          this.addLoadButtonIfEnabled(chatWindow, contact, true);
+         if (contact.isGroupChat())
+         {
+            this.syncMUCConversation(contact);
+         }
       });
 
       pluginAPI.registerConnectionHook((status:number, condition: string)=>{
@@ -89,6 +93,12 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       });
 
       this.pluginAPI.getConnection().registerHandler(this.onMamMessage, null, 'message', null);
+   }
+
+   private syncMUCConversation(contact: IContact)
+   {
+      let archive = this.getArchive(contact.getJid());
+      archive.lastMessages();
    }
 
    private syncConversations(){

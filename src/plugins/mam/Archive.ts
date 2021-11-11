@@ -7,7 +7,7 @@ import Utils from '../../util/Utils';
 import Log from '../../util/Log';
 import Translation from '../../util/Translation';
 import * as Namespace from '../../connection/xmpp/namespace';
-import { IMessage, MessageMark } from '@src/Message.interface';
+import { DIRECTION, IMessage, MessageMark } from '@src/Message.interface';
 import { IJID } from '@src/JID.interface';
 import MultiUserContact from '@src/MultiUserContact';
 
@@ -69,20 +69,16 @@ export default class Archive {
       this.plugin.addQueryContactRelation(queryId, this.contact);
       let connection = this.plugin.getConnection();
 
-      let indexMessageArray = this.contact.getTranscript().convertToIndexArray(messages);
-
-      if (indexMessageArray===undefined||indexMessageArray===null)
-         return;
-
-      if (indexMessageArray.length===0)
+      let lastMessage = this.contact.getTranscript().getLastMessage();
+      while (lastMessage!==undefined&&(<any>lastMessage).data!==undefined&&lastMessage.getDirection()===DIRECTION.SYS)
       {
-         this.nextMessages();
-         return;
+         lastMessage = this.contact.getTranscript().getMessage(lastMessage.getNextId());
+         if (lastMessage===undefined)
+         {
+            break;
+         }
       }
-
-      let lastMessage = indexMessageArray[indexMessageArray.length-1];
-
-      if (lastMessage!==undefined&&lastMessage!==null)
+      if (lastMessage!==undefined&&lastMessage!==null&&(<any>lastMessage).data!==undefined)
       {
          let startDate = lastMessage.getStamp();
          startDate.setSeconds(startDate.getSeconds() + 1);
@@ -122,9 +118,20 @@ export default class Archive {
 
       if (!firstResultId) {
          let lastMessage = this.contact.getTranscript().getLastMessage();
-         if (lastMessage) {
-            endDate = lastMessage.getStamp();
-            endDate.setSeconds(endDate.getSeconds() - 1);
+         if (lastMessage!==undefined&&(<any>lastMessage).data!==undefined) {
+            while (lastMessage.getDirection()===DIRECTION.SYS)
+            {
+               lastMessage = this.contact.getTranscript().getBefore(lastMessage);
+               if (lastMessage===undefined||(<any>lastMessage).data===undefined)
+               {
+                  endDate = undefined;
+                  break;
+               }
+            }
+            if (lastMessage!==undefined&&(<any>lastMessage).data!==undefined) {
+               endDate = lastMessage.getStamp();
+               endDate.setSeconds(endDate.getSeconds() - 1);
+            }
          } else {
             endDate = undefined;
          }
@@ -182,7 +189,7 @@ export default class Archive {
          return;
       }
 
-      let direction = this.contact.getJid().bare === to.bare ? Message.DIRECTION.OUT : Message.DIRECTION.IN;
+      let direction = this.contact.getJid().bare === to.bare ? Message.DIRECTION.PROBABLY_OUT : Message.DIRECTION.PROBABLY_IN;
 
       let stanzaIdElement = messageElement.find('stanza-id[xmlns="urn:xmpp:sid:0"]');
       let originIdElement = messageElement.find('origin-id[xmlns="urn:xmpp:sid:0"]');
@@ -202,7 +209,7 @@ export default class Archive {
       }
 
       let uid =
-         direction === Message.DIRECTION.OUT && originIdElement.length
+         direction === Message.DIRECTION.PROBABLY_OUT && originIdElement.length
             ? originIdElement.attr('id')
             : stanzaIdElement.attr('id');
 
@@ -231,7 +238,7 @@ export default class Archive {
          let contact = <MultiUserContact>this.contact;
 
          messageProperties.direction =
-            contact.getNickname() === from.resource ? Message.DIRECTION.OUT : Message.DIRECTION.IN;
+            contact.getNickname() === from.resource ? Message.DIRECTION.PROBABLY_OUT : Message.DIRECTION.PROBABLY_IN;
       }
 
       let result = new Message(messageProperties);

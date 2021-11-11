@@ -66,6 +66,20 @@ export default class Transcript {
       }
    }
 
+   public getBefore(message: IMessage)
+   {
+      let before = this.getFirstMessage();
+      if (before===undefined||(<any>before).data===undefined)
+         return undefined;
+      while(before.getNextId()!==undefined&&before.getNextId()!==message.getAttrId()&&before.getNextId()!==message.getUid())
+      {
+         before = this.getMessage(before.getNextId());
+         if (before===undefined||(<any>before).data===undefined)
+            return undefined;
+      }
+      return before.getDirection()===DIRECTION.SYS?undefined:before;
+   }
+
    public unshiftMessage(message: IMessage) {
 
       let lastMessage = this.getLastMessage();
