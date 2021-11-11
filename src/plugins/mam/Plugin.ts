@@ -75,7 +75,6 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
             fadeElement.find('.jsxc-mam-load-more').remove();
          }
 
-         console.log('OFF');
          let messageAreaElement =  chatWindow.getDom().find('.jsxc-message-area');
          messageAreaElement.off('scroll');
 

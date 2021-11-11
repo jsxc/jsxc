@@ -394,8 +394,6 @@ export default class ChatWindowMessage {
 
       if (!this.element.find('.jsxc-retract').hasClass('jsxc-retract-icon'))
       {
-         let bodyElement :JQuery<HTMLElement> = $(processBodyString);
-         LinkHandlerGeo.get().detect(bodyElement);
 
          let contentElement = this.element.find('.jsxc-content');
          contentElement.html(processBodyString);

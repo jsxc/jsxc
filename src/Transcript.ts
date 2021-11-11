@@ -171,12 +171,12 @@ export default class Transcript {
 
    public processReplace(message:IMessage)
    {
-       if (message===undefined||message.getDirection()===DIRECTION.SYS)
+       if (message===undefined||(<any>message).data===undefined||message.getDirection()===DIRECTION.SYS)
          return;
 
        let oldmessage = this.findMessageByAttrId(message.getReplaceId());
 
-       if (oldmessage)
+       if (oldmessage!==undefined && (<any>oldmessage).data!==undefined)
        {
            //only allow corrections from same sender
            if (message.getDirection()===DIRECTION.IN||message.getDirection()===DIRECTION.PROBABLY_IN) //reset Marker to transfered on outgoing messages
@@ -188,10 +188,17 @@ export default class Transcript {
                if ((oldmessage.getOccupantId()!==null&&oldmessage.getOccupantId()===message.getOccupantId())||
                    (oldmessage.getOccupantId()===null&&oldsender===replaceSender))
                {
-                  message.getProcessedBody().then((bodyString)=> {
-                     oldmessage.setReplaceTime(message.getStamp().getTime());
+                  oldmessage.setReplaceBody(message.getPlaintextMessage().replace(/(?:(https?\:\/\/[^\s]+))/m, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'));
+                  oldmessage.setReplaceTime(message.getStamp().getTime());
+                  /*message.getProcessedBody().then((bodyString)=> {
+                     try {
+                        oldmessage.setReplaceTime(message.getStamp().getTime());
+                     }
+                     catch (e) {
+                        console.warn('This should not happen!? in Message.ts > getStamp() this.data.get() failed because this.data was not defined',e);
+                     }
                      oldmessage.setReplaceBody(bodyString);
-                   }); 
+                   }); */
                    message.received(); //reset Marker to received on incoming messages
                }
            }
@@ -199,7 +206,7 @@ export default class Transcript {
            if (message.getDirection()===DIRECTION.OUT||message.getDirection()===DIRECTION.PROBABLY_OUT)
            {
                message.getProcessedBody().then((bodyString)=> {
-                  oldmessage.setReplaceTime(message.getStamp().getTime());
+                  oldmessage.setReplaceTime(message.getStamp().getTime());                  
                   oldmessage.setReplaceBody(bodyString);
                });
                message.transferred(); //reset Marker to transfered on outgoing messages
