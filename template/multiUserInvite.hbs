@@ -1,6 +1,12 @@
 <h3>{{t "Invite_user"}}</h3>
 <p class="jsxc-explanation">{{t "muc_invite_explanation"}}</p>
 <form class="form-horizontal">
+   <div class="form-group jsxc-hidden jsxc-mucs-choice">
+      <label class="col-sm-4 control-label" for="jsxc-mucs">{{t "groups"}}</label>
+      <div class="col-sm-8">
+         <select class="form-control" name="groups" id="jsxc-groups"></select>
+      </div>
+   </div>
    <div class="form-group">
       <label class="col-sm-4 control-label" for="jsxc-jid">{{t "Username"}}</label>
       <div class="col-sm-8">

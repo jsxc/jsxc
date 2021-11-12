@@ -16,6 +16,7 @@ import { IMessage } from '@src/Message.interface';
 import MultiUserContact from '@src/MultiUserContact';
 import Location from '@util/Location';
 import Geoloc from '@src/Geoloc';
+import showMultiUserInviteDialog from './dialogs/multiUserInvite';
 
 let rosterItemTemplate = require('../../template/roster-item.hbs');
 
@@ -99,6 +100,11 @@ export default class RosterItem {
          ev.stopPropagation();
 
          showVcardDialog(self.contact);
+      });
+
+      this.element.find('.jsxc-invite').click(function (ev) {
+         ev.stopPropagation();
+         showMultiUserInviteDialog(self.contact.isGroupChat()?(<MultiUserContact>self.contact):self.contact);
       });
 
       Menu.init(this.element.find('.jsxc-menu'));
