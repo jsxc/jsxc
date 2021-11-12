@@ -89,7 +89,7 @@ export default class {
 
       let contact = new MultiUserContact(this.account, jid, displayName);
 
-      contact.setNickname(nickname);
+      contact.setNickname(nickname===undefined||nickname===null?this.account.getDefaultNickname():nickname);
       contact.setBookmark(true);
       contact.setAutoJoin(true);
       contact.setRoomConfiguration(ROOMCONFIG.INSTANT);

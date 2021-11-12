@@ -65,7 +65,7 @@ class MultiUserJoinDialog {
       this.account = Client.getAccountManager().getAccount(id);
 
       this.connection = this.account.getConnection();
-      this.defaultNickname = this.connection.getJID().node;
+      this.defaultNickname = this.account.getDefaultNickname()===undefined?this.connection.getJID().node:this.account.getDefaultNickname();
 
       this.nicknameInputElement.attr('placeholder', this.defaultNickname);
 

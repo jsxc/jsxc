@@ -100,7 +100,7 @@ export default class ChatWindow {
       if (this.contact.isGroupChat()) {
          if (this.element.attr('data-presence')==='offline')
          {
-            (<MultiUserContact>this.contact).setNickname(this.getContact().getAccount().getJID().node);
+            (<MultiUserContact>this.contact).setNickname(this.getContact().getAccount().getDefaultNickname()===undefined?this.getContact().getAccount().getJID().node:this.getContact().getAccount().getDefaultNickname());
             (<MultiUserContact>this.contact).join();
          }
 
