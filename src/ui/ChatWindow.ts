@@ -885,8 +885,10 @@ export default class ChatWindow {
       }
 
       if (inputElement.val()) {
+         this.element.find('.jsxc-textinput-length').empty().text(Translation.t('message_length')+': '+inputElement.val().toString().length);
          inputElement.parent().addClass('jsxc-contains-val');
       } else {
+         this.element.find('.jsxc-textinput-length').empty();
          inputElement.parent().removeClass('jsxc-contains-val');
       }
 

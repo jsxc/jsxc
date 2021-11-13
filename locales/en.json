@@ -463,7 +463,8 @@
     "subject": "Subject",
     "Not_available": "Not available",
     "Connection_interrupted": "Connection interrupted",
-    "Declined": "declined"
+    "Declined": "declined",
+    "message_length": "Message length"
   },
   "Notifications": "Notifications"
 }

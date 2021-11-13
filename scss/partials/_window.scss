@@ -955,3 +955,16 @@
     background-size: 20px 20px;
   }
 }
+
+.jsxc-textinput-length {
+  background-color: $chatmessage-bg;
+  border: 1px solid $window-border;
+  border-bottom: 0;
+  border-top: 0;
+  color: var(--jsxc-color-text-maxcontrast);
+  font-size: 10px;
+  font-style: italic;
+  padding-right: 5px;
+  text-align: right;
+  width: 100%;
+}

@@ -463,7 +463,8 @@
     "subject": "Thema",
     "Not_available": "Nicht verfügbar",
     "Connection_interrupted": "Verbindung unterbrochen",
-    "Declined": "abgelehnt"
+    "Declined": "abgelehnt",
+    "message_length": "Nachrichtenlänge"
   },
   "Notifications": "Benachrichtigungen"
 }
