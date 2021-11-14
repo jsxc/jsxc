@@ -367,7 +367,7 @@ export default class Roster {
 
       this.addMenuEntry({
          id: 'search-contact',
-         handler: showContactSearchDialog,
+         handler: ()=> showContactSearchDialog(),
          label: Translation.t('contact_search'),
          icon: 'search',
       });

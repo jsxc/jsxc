@@ -8,6 +8,7 @@ import Account from '../../Account';
 import JID from '../../JID';
 import { IJID } from '@src/JID.interface';
 import FormField from '@connection/FormField';
+import showMultiUserJoinDialog from './multiUserJoin';
 
 export const CANCELED = 'canceled';
 
@@ -15,7 +16,7 @@ const possibleSearchFields = ['first', 'last', 'nick', 'email'];
 
 let contactSearchTemplate = require('../../../template/contactsearch.hbs');
 
-export default function () {
+export default function (jid? : IJID) {
    let content = contactSearchTemplate();
 
    let dialog = new Dialog(content);
@@ -34,10 +35,70 @@ export default function () {
       .on('change', ev => {
          let uid = $(ev.target).val().toString();
 
-         loadForm(Client.getAccountManager().getAccount(uid), dialog);
+         if (jid===undefined)
+         {
+            loadForm(Client.getAccountManager().getAccount(uid), dialog);
+         }
+         else
+         {
+            loadFormFromMucService(Client.getAccountManager().getAccount(uid), jid, dialog);
+         }
+
       });
 
-   loadForm(accounts[0], dialog);
+   if (jid===undefined)
+   {
+      loadForm(accounts[0], dialog);
+   }
+   else
+   {
+      dialog.getDom().find('h3').hide();
+      dialog.getDom().find('h3').before(`<h4>${jid.toString()}</h4>`);
+      dialog.getDom().find('.jsxc-account-choice').hide();
+      loadFormFromMucService(accounts[0], jid, dialog);
+   }
+}
+
+function loadFormFromMucService(account: Account, jid: IJID, dialog: Dialog) {
+   let searchService = account.getConnection().getSearchService();
+
+   searchService.getSearchForm(jid).then((searchFormElement)=>{
+
+      let formElement = generateForm(searchFormElement);
+
+      dialog.getDom().find('.jsxc-content').empty().append(formElement);
+      dialog.getDom().find('.jsxc-results').empty();
+
+      formElement.find('.jsxc-js-close').on('click', () => dialog.close());
+
+      formElement.on('submit', ev => {
+         ev.preventDefault();
+
+         formElement.find('input, button').prop('disabled', true);
+
+         let form;
+
+         if (formElement.hasClass('jsxc-simple-form')) {
+            form = {};
+
+            possibleSearchFields.forEach(name => {
+               form[name] = formElement.find(`input[name="${name}"]`).val();
+            });
+         } else {
+            form = Form.fromHTML(formElement.get(0));
+         }
+
+         searchService
+            .executeSearchForm(jid, form)
+            .then(resultStanza => {
+               appendSearchResults(resultStanza, dialog, true);
+            })
+            .catch(err => {})
+            .then(() => {
+               formElement.find('input, button').prop('disabled', false);
+            });
+      });
+   });
 }
 
 function loadForm(account: Account, dialog: Dialog) {
@@ -169,7 +230,7 @@ function generateSimpleForm(element: Element) {
    return formElement;
 }
 
-function appendSearchResults(resultStanza: Element, dialog: Dialog) {
+function appendSearchResults(resultStanza: Element, dialog: Dialog, mucsearch: boolean = false) {
    let table: JQuery;
    let items = $(resultStanza).find('query>item');
 
@@ -197,7 +258,7 @@ function appendSearchResults(resultStanza: Element, dialog: Dialog) {
 
    dom.find('.jsxc-results form').append(`<div class="form-group">
    <div class="col-sm-offset-4 col-sm-8">
-      <button class="jsxc-button jsxc-button--primary" type="submit">${Translation.t('Add')}</button>
+      <button class="jsxc-button jsxc-button--primary" type="submit">${mucsearch===false?Translation.t('Add'):Translation.t('Continue')}</button>
    </div>
  </div>`);
 
@@ -221,10 +282,21 @@ function appendSearchResults(resultStanza: Element, dialog: Dialog) {
             alias = simpleItem.find('first').text() + ' ' + simpleItem.find('last').text();
          }
       }
-
+         
       dialog.close();
 
-      openContactDialog(bareJid, alias);
+      if (bareJid!=='')
+      {
+         if (!mucsearch)
+         {
+            openContactDialog(bareJid, alias);
+         }
+         else 
+         {
+            let bjid = new JID(bareJid);            
+            showMultiUserJoinDialog(bjid.domain, bjid.node);
+         }
+      }
    });
 
    dom.find('.jsxc-js-close').on('click', () => {

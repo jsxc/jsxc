@@ -178,17 +178,27 @@ export default class Form {
       let tableBody = $('<tbody>');
 
       this.reportedFields.forEach(field => {
-         headerRow.append($('<th>').text(field.getName()));
+         let title = field.getLabel();
+         if (title===undefined||title===null||title==='')
+            title = field.getName();
+         headerRow.append($('<th>').text(title));
       });
 
       tableHeader.append(headerRow).appendTo(tableElement);
 
+      let reportedFieldsArray = this.reportedFields.map(rfield => rfield.getName());
       this.items.forEach(fieldRow => {
          let tableRow = $('<tr>');
 
-         fieldRow.forEach(field => {
-            $('<td>').text(field.getValues()[0]).appendTo(tableRow);
-         });
+         for (let item_name of reportedFieldsArray)
+         {
+            fieldRow.forEach(field => {
+               if (field.getName()===item_name)
+               {
+                  $('<td>').text(field.getValues()[0]).appendTo(tableRow);
+               }
+            });
+         }
 
          tableRow.appendTo(tableBody);
       });

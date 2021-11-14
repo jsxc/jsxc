@@ -8,13 +8,14 @@ import Log from '../../util/Log';
 import Account from '@src/Account';
 import MultiUserContact from '@src/MultiUserContact';
 import Form from '@connection/Form';
+import showSearchDialog from './contactsearch';
 
 let multiUserJoinTemplate = require('../../../template/multiUserJoin.hbs');
 
 const ENTER_KEY = 13;
 
-export default function (server?: string, room?: string) {
-   new MultiUserJoinDialog(server, room);
+export default function (server?: string, room?: string) : MultiUserJoinDialog {
+   return new MultiUserJoinDialog(server, room);
 }
 
 class MultiUserJoinDialog {
@@ -54,6 +55,8 @@ class MultiUserJoinDialog {
       if (server && room) {
          this.serverInputElement.val(server);
          this.roomInputElement.val(room);
+         this.updateAccount(Client.getAccountManager().getAccount().getUid(),false);
+         this.testAndLoadRoomInfo();
       } else {
          this.updateAccount(Client.getAccountManager().getAccount().getUid());
       }
@@ -61,7 +64,7 @@ class MultiUserJoinDialog {
       this.initializeInputElements();
    }
 
-   private updateAccount(id: string) {
+   private updateAccount(id: string, initMucLists : boolean=true) {
       this.account = Client.getAccountManager().getAccount(id);
 
       this.connection = this.account.getConnection();
@@ -69,16 +72,19 @@ class MultiUserJoinDialog {
 
       this.nicknameInputElement.attr('placeholder', this.defaultNickname);
 
-      this.getMultiUserServices().then((services: JID[]) => {
-         this.serverInputElement.val(services[0].full);
-         this.serverInputElement.trigger('change');
+      if (initMucLists)
+      {
+         this.getMultiUserServices().then((services: JID[]) => {
+            this.serverInputElement.val(services[0].full);
+            this.serverInputElement.trigger('change');
 
-         $('#jsxc-serverlist select').empty();
+            $('#jsxc-serverlist select').empty();
 
-         services.forEach(service => {
-            $('#jsxc-serverlist select').append($('<option>').text(service.domain));
+            services.forEach(service => {
+               $('#jsxc-serverlist select').append($('<option>').text(service.domain));
+            });
          });
-      });
+      }
    }
 
    private initializeInputElements() {
@@ -96,6 +102,25 @@ class MultiUserJoinDialog {
          this.dom.find('.jsxc-inputinfo.jsxc-server').text('').hide();
 
          let jid = new JID(<string>this.serverInputElement.val(), '');
+
+         this.account.getDiscoInfoRepository().hasFeature(jid,'jabber:iq:search').then((result: boolean)=>{
+            if (result)
+            {
+               this.dom.find('button.jsxc-search').removeClass('jsxc-hidden');
+               this.dom.find('button.jsxc-search').off('click').on('click',()=>{
+                  this.dialog.close();
+                  showSearchDialog(jid);
+               });
+            }
+            else
+            {
+               this.dom.find('button.jsxc-search').addClass('jsxc-hidden');
+               this.dom.find('button.jsxc-search').off('click');
+            }
+         }).catch((e)=>{
+            this.dom.find('button.jsxc-search').addClass('jsxc-hidden');
+            this.dom.find('button.jsxc-search').off('click');
+         });
 
          this.getMultiUserRooms(jid);
       });
