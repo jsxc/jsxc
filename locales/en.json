@@ -464,7 +464,8 @@
     "Not_available": "Not available",
     "Connection_interrupted": "Connection interrupted",
     "Declined": "declined",
-    "message_length": "Message length"
+    "message_length": "Message length",
+    "Active_conversations": "Active Conversations"
   },
   "Notifications": "Notifications"
 }

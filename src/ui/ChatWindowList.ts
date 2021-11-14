@@ -155,7 +155,7 @@ export default class ChatWindowList {
       this.listElement.css('right', right + 'px');
    }
 
-   private getChatWindowIds() {
+   public getChatWindowIds() {
       return Object.keys(this.windows || {});
    }
 }
