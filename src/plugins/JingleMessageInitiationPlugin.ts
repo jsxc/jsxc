@@ -8,7 +8,7 @@ import JID from '@src/JID';
 import { Call } from '@src/Call';
 import { CallState, CallType } from '@src/CallManager';
 import { IJID } from '@src/JID.interface';
-
+import * as NS from '../connection/xmpp/namespace';
 /**
  * XEP-0353: Jingle Message Initiation
  *
@@ -121,6 +121,26 @@ export default class JingleMessageInitiationPlugin extends AbstractPlugin {
       const fromJid = new JID(fromAttribute);
       const sessionId = element.attr('id');
       const contact = this.pluginAPI.getContact(fromJid);
+      const toAttribute = stanzaElement.attr('to');
+      const toJid = new JID(toAttribute);
+      if (toJid.bare===fromJid.bare)
+      {
+         let forwardedStanza = $(stanza).find('forwarded' + NS.getFilter('FORWARD'));
+         let carbonStanza = $(stanza).find('> ' + NS.getFilter('CARBONS'));
+
+         if (forwardedStanza.length>0&&carbonStanza.length>0) {
+
+            if (carbonStanza.get(0) !== forwardedStanza.parent().get(0)) {
+               console.warn('Forwarded message is not part of carbon copy');
+               return true;
+            }
+
+            let carbonTagName = <string>carbonStanza.prop('tagName') || '';
+            if (carbonTagName.toLowerCase() === 'sent') {
+               return true; //dont accept message here, cause we dont want to ring on carbons sent out to others
+            }
+         }
+      }
 
       if (!contact || !sessionId) {
          return true;
