@@ -64,7 +64,7 @@
     "Continue_without_chat": "Doorgaan zonder chat",
     "Please_wait": "Even geduld",
     "Login_failed": "Chat login mislukt",
-    "Sorry_we_cant_authentikate_": "Verificatie is mislukt met de chatserver. Is het paswoord fout?",
+    "Sorry_we_cant_authentikate_": "Verificatie is mislukt met de chatserver. Is het wachtwoord fout?",
     "Retry": "Terug",
     "clear_history": "Geschiedenis leegmaken",
     "New_message_from": "Nieuw bericht van __name__",
