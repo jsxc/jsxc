@@ -93,7 +93,9 @@ function loadFormFromMucService(account: Account, jid: IJID, dialog: Dialog) {
             .then(resultStanza => {
                appendSearchResults(resultStanza, dialog, true);
             })
-            .catch(err => {})
+            .catch(err => {
+               dialog.getDom().find('.jsxc-results').empty();
+            })
             .then(() => {
                formElement.find('input, button').prop('disabled', false);
             });
@@ -142,7 +144,9 @@ function loadForm(account: Account, dialog: Dialog) {
             .then(resultStanza => {
                appendSearchResults(resultStanza, dialog);
             })
-            .catch(err => {})
+            .catch(err => {
+               dialog.getDom().find('.jsxc-results').empty();
+            })
             .then(() => {
                formElement.find('input, button').prop('disabled', false);
             });
