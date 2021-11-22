@@ -28,7 +28,7 @@ export default class ChatWindowMessage {
    public restoreNextMessage() {
       let nextMessage = this.getNextMessage();
 
-      if (!nextMessage || nextMessage.getDOM().length > 0) {
+      if (nextMessage===undefined || nextMessage.getDOM().length > 0) {
          return;
       }
 
@@ -71,15 +71,15 @@ export default class ChatWindowMessage {
    private getNextMessage() {
       let nextId = this.message.getNextId();
 
-      if (!nextId) {
-         return;
+      if (nextId===undefined||nextId===null) {
+         return undefined;
       }
 
       let nextMessage = this.chatWindow.getTranscript().getMessage(nextId);
 
-      if (!nextMessage) {
+      if (nextMessage===undefined||nextMessage===null||(<any>nextMessage).data===undefined) {
          Log.warn('Couldnt find next message.');
-         return;
+         return undefined;
       }
 
       return nextMessage;
