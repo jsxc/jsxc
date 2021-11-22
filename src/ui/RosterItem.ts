@@ -148,8 +148,8 @@ export default class RosterItem {
          } else {
             this.element
                .find('.jsxc-bar__caption__secondary')
-               .text(Emoticons.toUnicode(':speech_balloon:') + ' ' + message.getPlaintextEmoticonMessage('unicode'));
-            this.element.find('.jsxc-bar__caption__secondary').attr('title', message.getPlaintextMessage());
+               .text(Emoticons.toUnicode(':speech_balloon:') + ' ' +  (!message.getRetractId() ? message.getPlaintextEmoticonMessage('unicode') : Translation.t('RETRACTION_BODY')));
+            this.element.find('.jsxc-bar__caption__secondary').attr('title', !message.getRetractId() ? message.getPlaintextMessage()  :Translation.t('RETRACTION_BODY'));
          }
       };
 
