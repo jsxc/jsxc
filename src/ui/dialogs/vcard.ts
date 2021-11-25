@@ -4,6 +4,10 @@ import Translation from '@util/Translation';
 import { Presence } from '@connection/AbstractConnection';
 import Color from '@util/Color';
 import MultiUserContact from '@src/MultiUserContact';
+import Avatar from '@src/Avatar';
+import AvatarUI from '@src/ui/AvatarSet';
+import Hash from '@util/Hash';
+import { IAvatar } from '@src/Avatar.interface';
 
 let vcardTemplate = require('../../../template/vcard.hbs');
 let vcardBodyTemplate = require('../../../template/vcard-body.hbs');
@@ -76,7 +80,21 @@ export default function (contact: IContact) {
 
    contact
       .getVcard()
-      .then(vcardSuccessCallback)
+      .then((vcard:any)=>{
+         if (vcard.PHOTO)
+         {
+            let avatar : IAvatar = new Avatar(Hash.SHA1FromBase64((<any>vcard.PHOTO).src), (<any>vcard.PHOTO).type, (<any>vcard.PHOTO).src);
+            let hash = avatar.getHash();        
+            
+            let storedHash = contact.getAccount().getStorage().getItem(contact.getJid().bare);
+            if (storedHash === undefined || hash !== storedHash) {
+               let avatarUI = AvatarUI.get(contact);
+               contact.getAccount().getStorage().setItem(contact.getJid().bare, hash);
+               avatarUI.reload();
+            }
+         }
+         return Promise.resolve(vcardSuccessCallback(vcard));
+      })
       .then(function (vcardData) {
          let content = $(vcardBodyTemplate({
             properties: !contact.isGroupChat()?vcardData:undefined,

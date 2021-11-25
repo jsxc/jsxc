@@ -465,7 +465,12 @@
     "Connection_interrupted": "Connection interrupted",
     "Declined": "declined",
     "message_length": "Message length",
-    "Active_conversations": "Active Conversations"
+    "Active_conversations": "Active Conversations",
+    "command-selection" : "Select Command",
+    "AdHocCommands" : "AdHoc Commands",
+    "setting-adhoc-command-enable": "Enables AdHoc Commands feature",
+    "addhoc_cmd_not_supported" : "AdHoc Commands are not supported",
+    "No_commands_available" : "AdHoc Commands are not available"
   },
   "Notifications": "Notifications"
 }

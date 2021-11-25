@@ -43,14 +43,43 @@ export default class Form {
       let reportedElement = xElement.find('>reported');
       let reportedFieldElements = reportedElement.find('>field');
       let reportedFields = reportedFieldElements.get().map(element => ReportField.fromXML($(element)));
-
+    
       let itemElements = xElement.find('>item');
       let items = itemElements.get().map(itemElement => {
-         let itemFieldElements = $(itemElement).find('>field');
-         return itemFieldElements.get().map(itemFieldElement => ItemField.fromXML($(itemFieldElement)));
+            let itemFieldElements = $(itemElement).find('>field');
+            return itemFieldElements.get().map(itemFieldElement => ItemField.fromXML($(itemFieldElement)));
       });
-
+      
       return new Form(type, fields, instructions, title, reportedFields, items);
+   }
+
+   public static fromXMLCommand(stanza) {
+      let stanzaElement = $(stanza);
+      let xElement =
+         stanzaElement.attr('xmlns') === NAMESPACE && stanzaElement[0].tagName.toUpperCase() === 'X'
+            ? stanzaElement
+            : stanzaElement.find('x[xmlns="jabber:x:data"]');
+      let type = xElement.attr('type');
+      let instructions = xElement.find('>instructions').text();
+      let title = xElement.find('>title').text();
+
+      let fieldElements = xElement.find('>field');
+      let fields = fieldElements.get().map(element => Field.fromXML($(element)));
+
+      let reportedFields = new Array();
+      for (let i=1;i<fields.length;i++)
+      {
+         let rfield = ReportField.fromXML($(`<field var="${fields[i].getName()}" type="${fields[i].getType()}" label="${fields[i].getLabel()}" />`));
+         reportedFields.push(rfield);
+      }
+
+      let items = new Array();
+      
+      reportedFields.forEach(itemElement => {
+            items.push(ItemField.fromXML($(xElement.find(`field[var="${itemElement.getName()}"]`))));            
+      });
+      
+      return new Form(type, fields, instructions, title, reportedFields, items, true);
    }
 
    public static fromJSON(data: IFormJSONData) {
@@ -82,7 +111,8 @@ export default class Form {
       private instructions?: string,
       private title?: string,
       private reportedFields?: ReportField[],
-      private items?: Field[][]
+      private items?: Field[][],
+      private force: boolean = false
    ) {
       if (this.ALLOWED_TYPES.indexOf(type) < 0) {
          throw new InvalidParameterError(
@@ -91,7 +121,10 @@ export default class Form {
       }
 
       if (items && items.length > 0) {
-         this.checkItems();
+         if (!this.force)
+         {
+            this.checkItems();
+         }
       }
    }
 
@@ -205,6 +238,36 @@ export default class Form {
 
       tableBody.appendTo(tableElement);
 
+      return tableElement;
+   }
+
+   public toHTMLCommand () {
+      let tableElement = $('<table>');
+      let tableHeader = $('<thead>');
+      let headerRow = $('<tr>');
+      let tableBody = $('<tbody>');
+      this.reportedFields.forEach(field => {
+         let title = field.getLabel();
+         if (title===undefined||title===null||title==='')
+            title = field.getName();
+         headerRow.append($('<th>').text(title));
+      });
+
+      tableHeader.append(headerRow).appendTo(tableElement);
+
+      let reportedFieldsArray = this.reportedFields.map(rfield => rfield.getName());
+      let rowcount = (<any>this.items[0]).getValues().length;
+      for (let i=0;i<rowcount;i++)
+      {
+         let tableRow = $('<tr>');
+         for (let n=0;n<reportedFieldsArray.length;n++)
+         {
+            tableRow.append('<td>'+(<any>this.items[n]).getValues()[i]+'</td>');            
+         }
+         
+         tableRow.appendTo(tableBody);   
+      }
+      tableBody.appendTo(tableElement);
       return tableElement;
    }
 

@@ -465,7 +465,12 @@
     "Connection_interrupted": "Verbindung unterbrochen",
     "Declined": "abgelehnt",
     "message_length": "Nachrichtenlänge",
-    "Active_conversations": "Aktive Unterhaltungen"
+    "Active_conversations": "Aktive Unterhaltungen",
+    "command-selection" : "Funktionsauswahl",
+    "AdHocCommands" : "Zusatzfunktionen",
+    "setting-adhoc-command-enable": "Aktiviert Zusatzfunktionen / Befehle",
+    "addhoc_cmd_not_supported" : "Zusatzfunktionen werde nicht unterstützt",
+    "No_commands_available" : "Es sind keine Zusatzfunktionen verfügbar"
   },
   "Notifications": "Benachrichtigungen"
 }

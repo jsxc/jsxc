@@ -17,6 +17,7 @@ import CommandPlugin from '@src/plugins/CommandPlugin';
 import VersionPlugin from '@src/plugins/VersionPlugin';
 import TimePlugin from '../plugins/TimePlugin';
 import JingleMessageInitiationPlugin from '../plugins/JingleMessageInitiationPlugin';
+import AdHocCommandPlugin from '@src/plugins/AdHocCommand';
 
 Client.addPlugin(OTRPlugin);
 Client.addPlugin(OMEMOPlugin);
@@ -36,3 +37,4 @@ Client.addPlugin(CommandPlugin);
 Client.addPlugin(VersionPlugin);
 Client.addPlugin(TimePlugin);
 Client.addPlugin(JingleMessageInitiationPlugin);
+Client.addPlugin(AdHocCommandPlugin);
