@@ -18,7 +18,7 @@ export default class extends AbstractHandler {
          return this.PRESERVE_HANDLER;
       }
 
-      if (!messageElement.getPeer()) {
+      if (!messageElement.getPeer()||messageElement.isCarbon()&&new JID(messageElement.getForwardedFrom()).bare===new JID(messageElement.getForwardedTo()).bare) {
          return this.PRESERVE_HANDLER;
       }
 

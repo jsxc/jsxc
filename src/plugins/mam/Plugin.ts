@@ -274,6 +274,18 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
 
       let jid = new JID(bareJid);
 
+      let msg = forwardedElement.find('message');
+      if (msg)
+      {
+         let to = new JID(msg.attr('to'));
+         let from = new JID(msg.attr('from'));
+
+         if (jid.bare!==to.bare&&jid.bare!==from.bare) //filter messages to himself
+         {
+            return true;
+         }
+      }
+
       this.getArchive(jid).onForwardedMessage(forwardedElement);
 
       return true;

@@ -134,6 +134,14 @@ export class MessageElement {
       return this.originalElement.attr('to');
    }
 
+   public getForwardedFrom() {
+      return this.originalElement.find('forwarded > message').attr('from');
+   }
+
+   public getForwardedTo() {
+      return this.originalElement.find('forwarded > message').attr('to');
+   }
+
    public getId() {
       return this.element.attr('id');
    }
