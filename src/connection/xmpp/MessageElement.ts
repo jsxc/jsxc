@@ -14,6 +14,7 @@ export class MessageElement {
    private retractId = null;
    private occupantId = null;
    private direction = Message.DIRECTION.IN;
+   private styled = true;
 
    constructor(stanza: Element) {
       this.originalElement = $(stanza);
@@ -34,6 +35,8 @@ export class MessageElement {
       {
          this.retractId = $(stanza).find('apply-to[xmlns="urn:xmpp:fasten:0"]').attr('id');
       }
+
+      this.styled = $(stanza).find('unstyled[xmlns="urn:xmpp:styling:0"]').length>0?false:true;
 
       if (this.retractId!==null)
       {
@@ -92,6 +95,11 @@ export class MessageElement {
    public getOccupantId()
    {
       return this.occupantId;
+   }
+
+   public isStyled()
+   {
+      return this.styled;
    }
 
    public isIncoming() {

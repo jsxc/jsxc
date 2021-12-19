@@ -424,6 +424,7 @@ class MainAppSection extends Section {
       contentElement.append(this.getListItemForData('', 'Personal Eventing Protocol', '0163', '1.2.1'));
 	   contentElement.append(this.getListItemForData('', 'Last Message Correction', '0308', '1.2.0'));
       contentElement.append(this.getListItemForData('', 'Message Retraction', '0424', '0.3.0'));
+      contentElement.append(this.getListItemForData('', 'Message Styling', '0393', '1.1.1'));
 
       return contentElement.getDOM();
    }

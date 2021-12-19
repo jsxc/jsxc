@@ -39,6 +39,7 @@ export default class XMPPHandler {
       account.getDiscoInfo().addFeature('http://jabber.org/protocol/nick+notify');
       account.getDiscoInfo().addFeature('urn:xmpp:message-correct:0');
       account.getDiscoInfo().addFeature('urn:xmpp:message-retract:0');
+      account.getDiscoInfo().addFeature('urn:xmpp:styling:0');
    }
 
    public registerHandler() {

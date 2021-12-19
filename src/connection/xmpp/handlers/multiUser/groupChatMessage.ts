@@ -29,6 +29,8 @@ export default class extends AbstractHandler {
          retractId = messageElement.find('apply-to[xmlns="urn:xmpp:fasten:0"]').attr('id');
       }
 
+      let styled = messageElement.find('unstyled[xmlns="urn:xmpp:styling:0"]').length>0?false:true;
+
       if (retractId!==null)
       {
          replaceId=null;
@@ -157,6 +159,7 @@ export default class extends AbstractHandler {
       message.setReplaceId(typeof replaceId ==='string'?replaceId:null);
       message.setOccupantId(typeof occupantId ==='string'?occupantId:null);
       message.setRetractId(typeof retractId ==='string'?retractId:null);
+      message.setStyled(styled);
 
       if (direction === Message.DIRECTION.OUT) {
          message.received();

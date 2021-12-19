@@ -107,7 +107,8 @@ export default class Message implements IIdentifiable, IMessage {
                   replaceId: null,
                   occupantId:null,
                   retractId:null,
-                  retracted:false
+                  retracted:false,
+                  styled:true
                },
                data
             )
@@ -371,6 +372,14 @@ export default class Message implements IIdentifiable, IMessage {
       this.data.set('retractId',id);
    }
 
+   public setStyled(styled : boolean) {//XEP - 0393
+      this.data.set('styled',styled);
+   }
+
+   public isStyled() : boolean { //XEP - 0393
+      return this.data.get('styled')===undefined?true:this.data.get('styled');
+   }
+
    public getOccupantId() : string{ //XEP - 0421
       return this.data.get('occupantId');
    }
@@ -395,7 +404,10 @@ export default class Message implements IIdentifiable, IMessage {
       let body = this.getPlaintextMessage();
 
       body = Utils.escapeHTML(body);
-      body = await Message.formatText(body, this.getDirection(), this.getPeer(), this.getSender().name);
+      if (this.isStyled())
+      {
+         body = await Message.formatText(body, this.getDirection(), this.getPeer(), this.getSender().name);
+      }
 
       return `<p dir="auto">${body}</p>`;
    }
@@ -451,14 +463,96 @@ function convertGeoToLink(text: string) {
 }
 
 function markQuotation(text: string) {
+   let inpre=0;
    return text
       .split(/(?:\n|\r\n|\r)/)
       .map(line => {
-         return line.indexOf('&gt;') === 0
-            ? '<span class="jsxc-quote">' + line.replace(/^&gt; ?/, '') + '</span>'
-            : line;
+         inpre = line.indexOf('<pre>')>=0||line.indexOf('</pre>')>=0?(inpre+1):inpre;
+         if (inpre===0)
+         {
+            if (line.indexOf('&gt;')===0)
+            {
+               line='<span class="jsxc-quote">'+line.replace(/^&gt; ?/, '')+'</span>';
+            }
+         }
+         else
+         if (inpre===1)
+         {
+            if (line.indexOf('&gt;') === 0) {
+               line='<span class="jsxc-quote">'+line.replace(/^&gt; ?/, '').replace(/<pre>/,'<span class="jsxc-pre">');
+               inpre++;
+            }
+         }
+         else
+         if (inpre===2)
+         {
+            line=line.replace(/^&gt; ?/, '');
+         }
+         else
+         if (inpre===3)
+         {
+            line=line.replace(/^&gt; ?/, '').replace(/<\/pre>/, '</span>')+'</span>';
+            inpre=0;
+         }
+
+         return line;
       })
       .join('\n');
+}
+
+function regexIndexOf(text: string, regex: RegExp, startpos:number) : number{
+   var indexOf = text.substring(startpos || 0).search(regex);
+   return (indexOf >= 0) ? (indexOf + (startpos || 0)) : indexOf;
+}
+
+function transformBold(text: string): string {
+   return transformText(text,/\*(?=[\S])/,/(?<=[^\*\s])(\*)/,'<b>','</b>');
+}
+
+function transformItalic(text: string): string {
+   return transformText(text,/\_(?=[\S])/,/(?<=[^\_\s])(\_)/,'<i>','</i>');
+}
+
+function transformStrike(text: string): string {
+   return transformText(text,/\~(?=[\S])/,/(?<=[^\~\s])(\~)/,'<s>','</s>');
+}
+
+function transformPre(text: string): string {
+   return transformText(text,/\`(?=[\S])/,/(?<=[^\`\s]|&gt; |\n)(\`)/,'<pre>','</pre>');
+}
+
+function transformText(text: string, startkey: RegExp, endkey: RegExp, replaceStart: string, replaceEnd: string ): string {
+
+   let pos1 = 0;
+   let found = false;
+   do {
+      found=false;
+      pos1 = regexIndexOf(text,startkey,pos1);
+      if (pos1!=-1)
+      {
+         let pos2 = regexIndexOf(text,endkey,pos1);
+         if (pos2!=-1)
+         {
+            let styledpart = text.substring(pos1+1,pos2);
+            if (text.substring(pos1,pos2).indexOf('\\n')==-1)
+            {
+               let result = text.substring(0,pos1)+replaceStart+styledpart+replaceEnd+text.substring(pos2+1);
+               text=result;
+               found=true;
+            }
+         }
+      }
+   } while(found);
+
+   return text;
+}
+
+function textStyling(plaintext : string) {
+      plaintext = transformBold(plaintext);
+      plaintext = transformItalic(plaintext);
+      plaintext = transformStrike(plaintext);
+      plaintext = transformPre(plaintext);
+      return plaintext;
 }
 
 function replaceLineBreaks(text: string) {
@@ -469,5 +563,6 @@ Message.addFormatter(convertUrlToLink);
 Message.addFormatter(convertEmailToLink);
 Message.addFormatter(convertGeoToLink);
 Message.addFormatter(Emoticons.toImage.bind(Emoticons));
+Message.addFormatter(textStyling);
 Message.addFormatter(markQuotation);
 Message.addFormatter(replaceLineBreaks);

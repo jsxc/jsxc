@@ -203,6 +203,8 @@ export default class Archive {
          retractId = messageElement.find('apply-to[xmlns="urn:xmpp:fasten:0"]').attr('id');
       }
 
+      let styled = messageElement.find('unstyled[xmlns="urn:xmpp:styling:0"]').length>0?false:true;
+
       if (retractId!==null)
       {
          replaceId=null;
@@ -245,6 +247,7 @@ export default class Archive {
       result.setReplaceId(replaceId);
       result.setOccupantId(occupantId);
       result.setRetractId(retractId);
+      result.setStyled(styled);
       return result;
    }
 
