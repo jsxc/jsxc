@@ -55,7 +55,7 @@ export default class MeCommandPlugin extends AbstractPlugin {
             name = name.slice(0, name.indexOf('@'));
          }
 
-         plaintext = plaintext.replace(meRegex, `<i title="/me">${name}</i> `);
+         plaintext = plaintext.replace(meRegex, `<i title="/me" style="font-weight: bold;">${name}</i> `);
       }
 
       return plaintext;
