@@ -518,7 +518,7 @@ function transformStrike(text: string): string {
 }
 
 function transformPre(text: string): string {
-   return transformText(text,/\`(?=[\S])/,/(?<=[^\`\s]|&gt; |\n)(\`)/,'<pre>','</pre>');
+   return transformText(text,/\`(?=[\S])/,/(?<=[^\`\s(\\`)]|&gt; |\n)(\`)/,'<pre>','</pre>');
 }
 
 function transformText(text: string, startkey: RegExp, endkey: RegExp, replaceStart: string, replaceEnd: string ): string {
@@ -534,7 +534,13 @@ function transformText(text: string, startkey: RegExp, endkey: RegExp, replaceSt
          if (pos2!=-1)
          {
             let styledpart = text.substring(pos1+1,pos2);
-            if (text.substring(pos1,pos2).indexOf('\\n')==-1)
+            if (replaceStart==='<pre>'&&replaceEnd==='</pre>')
+            {
+               styledpart=styledpart.replace('<b>','').replace('</b>','');
+               styledpart=styledpart.replace('<s>','').replace('</s>','');
+               styledpart=styledpart.replace('<i>','').replace('</i>','');
+            }
+            if (text.substring(pos1,pos2).indexOf('\\n')==-1||replaceStart==='<pre>'&&replaceEnd==='</pre>')
             {
                let result = text.substring(0,pos1)+replaceStart+styledpart+replaceEnd+text.substring(pos2+1);
                text=result;

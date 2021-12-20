@@ -323,7 +323,7 @@ export default class ChatWindow {
 
       setTimeout(() => this.scrollMessageAreaToBottom(), 500);
 
-      this.inputElement.val('> '+contact+':\n> '+message+'\n');
+      this.inputElement.val('> '+contact+':\n> '+message+'\n\n');
       this.inputElement.focus();
       this.resizeInputArea();
    }
