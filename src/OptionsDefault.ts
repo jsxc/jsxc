@@ -168,3 +168,5 @@ export let showTwoColumnPreference = false;
 export let useTwoColumnLayout = false;
 
 export let autoLoadOnScrollToTop = false;
+
+export let useFormatTools = true;

@@ -22,6 +22,8 @@ import interact from 'interactjs';
 import Translation from '../util/Translation';
 import MultiUserContact from '@src/MultiUserContact';
 import UUID from '@util/UUID';
+import alertDialog from './dialogs/AlertDialog'
+import confirmDialog from './dialogs/confirm';
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
@@ -171,8 +173,109 @@ export default class ChatWindow {
          }
       };
 
+      this.initFormatTools();
+
       this.contact.getTranscript().registerHook('unreadMessageIds', updateUnreadMessage);
       updateUnreadMessage();
+   }
+
+   private initFormatTools() :void {
+      let formatTools = this.element.find('.jsxc-format-input');
+      let useFormatTools = Client.getOption('useFormatTools') || false;
+      if (useFormatTools)
+      {
+         formatTools.removeClass('jsxc-hidden');
+      }
+      else 
+      {
+         formatTools.addClass('jsxc-hidden');
+      }
+
+      formatTools.find('.jsxc-format-bold').on('click',()=>{this.insertFormatedText('bold');});
+      formatTools.find('.jsxc-format-italic').on('click',()=>{this.insertFormatedText('italic');});
+      formatTools.find('.jsxc-format-code').on('click',()=>{this.insertFormatedText('code');});
+      formatTools.find('.jsxc-format-strike').on('click',()=>{this.insertFormatedText('strike');});
+
+      formatTools.find('.jsxc-format-help').on('click',()=>{
+         alertDialog(Translation.t('show_format_pref'),Translation.t('help_format_tools'),Translation.t('Close'));
+      });
+
+      formatTools.find('.jsxc-format-close').on('click',()=>{
+         confirmDialog(Translation.t('close_toolbar_message')).getPromise().then(()=>{
+            Client.setOption('useFormatTools',false);
+            formatTools.addClass('jsxc-hidden');
+         }).catch(()=>{
+            console.debug('confirm canceled');
+         });
+      });
+   }
+
+   private insertFormatedText(type: string):void {
+
+      let BOLD : string = "*";
+      let ITALIC : string  = "_";
+      let CODE : string  = "`";
+      let STRIKE : string  = "~";
+
+      let selStart = (<HTMLInputElement>this.inputElement[0]).selectionStart;
+      let selEnd =  (<HTMLInputElement>this.inputElement[0]).selectionEnd;
+      
+      let selected = selStart===selEnd?false:true;
+
+      let selectedText = selected ? this.inputElement.val().toString().substring(selStart, selEnd) : '';
+
+      if (selectedText.trim().length<selectedText.length)
+      {
+         selectedText=selectedText.trim();
+         selEnd=selStart+selectedText.length;
+      }
+
+      switch (type) {
+         case "bold":
+               if (selectedText.length != 0) {
+               let text = this.inputElement.val().toString();
+               text = text.substring(0,selStart)+BOLD+text.substring(selStart,selEnd)+BOLD+text.substring(selEnd);
+               this.inputElement.val(text);
+               } else {
+                  let text = this.inputElement.val().toString();
+                  text = [text.slice(0, (<HTMLInputElement>this.inputElement[0]).selectionStart), BOLD, text.slice((<HTMLInputElement>this.inputElement[0]).selectionStart)].join('')
+                  this.inputElement.val(text);
+               }
+               return;
+         case "italic":
+               if (selectedText.length!= 0) {
+               let text = this.inputElement.val().toString();
+               text = text.substring(0,selStart)+ITALIC+text.substring(selStart,selEnd)+ITALIC+text.substring(selEnd);
+               this.inputElement.val(text);
+               } else {
+               let text = this.inputElement.val().toString();
+               text = [text.slice(0, (<HTMLInputElement>this.inputElement[0]).selectionStart), ITALIC, text.slice((<HTMLInputElement>this.inputElement[0]).selectionStart)].join('')
+               this.inputElement.val(text);
+               }
+               return;
+         case "code":
+               if (selectedText.length != 0) {
+               let text = this.inputElement.val().toString();
+               text = text.substring(0,selStart)+CODE+text.substring(selStart,selEnd)+CODE+text.substring(selEnd);
+               this.inputElement.val(text);
+               } else {
+                  let text = this.inputElement.val().toString();
+                  text = [text.slice(0, (<HTMLInputElement>this.inputElement[0]).selectionStart), CODE, text.slice((<HTMLInputElement>this.inputElement[0]).selectionStart)].join('')
+                  this.inputElement.val(text);
+               }
+               return;
+         case "strike":
+               if (selectedText.length != 0) {
+               let text = this.inputElement.val().toString();
+               text = text.substring(0,selStart)+STRIKE+text.substring(selStart,selEnd)+STRIKE+text.substring(selEnd);
+               this.inputElement.val(text);
+               } else {
+                  let text = this.inputElement.val().toString();
+                  text = [text.slice(0, (<HTMLInputElement>this.inputElement[0]).selectionStart), STRIKE, text.slice((<HTMLInputElement>this.inputElement[0]).selectionStart)].join('')
+                  this.inputElement.val(text);
+               }
+               return;
+      }
    }
 
    public openContextMenu(event)
@@ -1134,3 +1237,4 @@ export default class ChatWindow {
       }
    }
 }
+

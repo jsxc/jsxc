@@ -89,7 +89,57 @@ class ClientSection extends Section {
          );
       }
 
+      contentElement.append(
+         new ListItem(
+            Translation.t('show_format_pref'),
+            Translation.t('show_format_description'),
+            undefined,
+            undefined,
+            this.toggleFormatTools()
+         )
+      );
+
       return contentElement.getDOM();
+   }
+
+   private toggleFormatTools() {
+
+      let element = $('<input type="checkbox" style="margin-left:10px;">');
+
+      element.on('change', () => {
+         let value = element.prop('checked');
+         element.val(value);
+         Client.setOption('useFormatTools', value ? value : undefined);
+         if (value)
+         {
+           
+            $(document).find('.jsxc-format-input').each(function(pos:number){
+               $(this).removeClass('jsxc-hidden');
+            });
+         }
+         else {
+            $(document).find('.jsxc-format-input').each(function(pos:number){
+               $(this).addClass('jsxc-hidden');
+            });
+         }
+      });
+
+      let useFormatTools = Client.getOption('useFormatTools') || false;
+      element.prop("checked",useFormatTools);
+      element.val(useFormatTools);
+      if (useFormatTools)
+      {
+         $(document).find('.jsxc-format-input').each(function(pos:number){
+            $(this).removeClass('jsxc-hidden');
+         });
+      }
+      else {
+         $(document).find('.jsxc-format-input').each(function(pos:number){
+            $(this).addClass('jsxc-hidden');
+         });
+      }
+
+      return element;
    }
 
    private toggleTwoColumnLayout() {
