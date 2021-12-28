@@ -162,7 +162,7 @@ export default class ChatWindow {
 
       this.getTranscript().clear();
 
-      this.element.find('.jsxc-message-area').empty();
+      this.element.find('.jsxc-message-area').empty().trigger('scroll');
 
       this.getAccount().triggerChatWindowClearedHook(this, this.contact);
    }

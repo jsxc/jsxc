@@ -64,8 +64,6 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
          if (this.supportCache[archiveJid.bare]) {
             this.getArchive(contact.getJid()).clear();
          }
-
-         this.addLoadButtonIfEnabled(chatWindow, contact);
       });
 
       this.pluginAPI.getConnection().registerHandler(this.onMamMessage, null, 'message', null);
