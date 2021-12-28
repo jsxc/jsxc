@@ -150,14 +150,18 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       element.append(spanElement);
 
       messageAreaElement.on('scroll', function () {
-         if (messageAreaElement.height() + this.scrollTop < 42 && !archive.isExhausted()) {
+         const topDelta = 10;
+         const scrollTop = Math.abs(this.scrollTop);
+         const isAtTop = this.clientHeight + scrollTop + topDelta >= this.scrollHeight;
+
+         if (isAtTop && !archive.isExhausted()) {
             element.addClass(classNameShow);
          } else {
             element.removeClass(classNameShow);
          }
       });
 
-      messageAreaElement.trigger('scroll');
+      setTimeout(() => messageAreaElement.trigger('scroll'), 1000);
 
       if (!archive.isExhausted()) {
          chatWindowElement.addClass(classNameMamEnable);
