@@ -119,7 +119,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
          let stanza = await pepService.retrieveItems(NS_DEVICELIST, contact.getJid().bare);
 
          this.onDeviceListUpdate(stanza);
-      } catch(err) {
+      } catch (err) {
          this.pluginAPI.Log.debug('Can not retrieve device list', err);
 
          return false;
