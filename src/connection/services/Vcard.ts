@@ -81,7 +81,7 @@ export default class Vcard extends AbstractService {
    private parseVcardChildren = (stanza: JQuery<XMLDocument>): vCardData => {
       let self = this;
       let data: vCardData = {};
-      let children = stanza.children();
+      let children: JQuery<XMLDocument> = stanza.children() as any;
 
       children.each(function () {
          let item = $(this);

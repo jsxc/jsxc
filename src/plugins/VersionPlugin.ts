@@ -106,7 +106,7 @@ export default class VersionPlugin extends AbstractPlugin {
                OSName = 'Android';
             }
 
-            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+            if (/iPad|iPhone|iPod/.test(userAgent) && !(<any>window).MSStream) {
                OSName = 'iOS';
             }
          }
