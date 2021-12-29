@@ -8,14 +8,23 @@ import Hash from '@util/Hash';
 import { IAvatar } from '@src/Avatar.interface';
 import AvatarUI from '../ui/AvatarSet';
 import FileHelper from '@util/FileHelper';
+import ImageHelper from '@util/ImageHelper';
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '99.0.0';
 
 const UANS_BASE = 'urn:xmpp:avatar';
-const UANS_METADATA = +UANS_BASE + ':metadata';
-const UANS_NOTIFY = UANS_METADATA + '+notify';
+const UANS_METADATA = UANS_BASE + ':metadata';
 const UANS_DATA = UANS_BASE + ':data';
+
+type AvatarMetaData = {
+   bytes?: number;
+   id: string;
+   type?: string;
+   height?: number;
+   width?: number;
+   url?: string;
+};
 
 export default class AvatarPEPPlugin extends AbstractPlugin {
    public static getId(): string {
@@ -44,113 +53,87 @@ export default class AvatarPEPPlugin extends AbstractPlugin {
 
       let connection = pluginAPI.getConnection();
 
-      connection.registerHandler(this.onMessageAvatarUpdate, 'http://jabber.org/protocol/pubsub#event', 'message');
+      connection.getPEPService().subscribe(UANS_BASE, this.onMessageAvatarUpdate);
 
       pluginAPI.addAvatarProcessor(this.avatarProcessor, 49);
       pluginAPI.addPublishAvatarProcessor(this.publishAvatarProcessor, 49);
-      pluginAPI.addFeature(UANS_NOTIFY);
    }
 
    public getStorage() {
       return this.pluginAPI.getStorage();
    }
 
-   private publishAvatarProcessor = (avatar: IAvatar | null): Promise<[IAvatar]> => {
-      let connection = this.pluginAPI.getConnection();
+   private publishAvatarProcessor = async (avatar: IAvatar | null): Promise<[IAvatar]> => {
+      let pepService = this.pluginAPI.getConnection().getPEPService();
 
-      if (!avatar || avatar.getData() === undefined) {
+      if (!avatar || !avatar.getData()) {
          let item = $build('metadata', { xmlns: UANS_METADATA });
 
-         return connection
-            .getPEPService()
-            .publish(UANS_METADATA, item.tree(), UANS_METADATA)
-            .then(function (result) {
-               if ($(result).attr('type') === 'result') {
-                  return [undefined];
-               } else {
-                  return [avatar];
-               }
-            });
-      } else {
-         let data = $build('data', { xmlns: UANS_DATA }).t(avatar.getData()).tree();
+         await pepService.publish(UANS_METADATA, item.tree(), UANS_METADATA);
 
-         return connection
-            .getPEPService()
-            .publish(UANS_DATA, data, UANS_DATA)
-            .then((result: any) => {
-               if ($(result).attr('type') === 'result') {
-                  let metadata;
-                  let hash = Hash.SHA1FromBase64(avatar.getData());
-                  let i = new Image();
-                  let iheight = 0;
-                  let iwidth = 0;
-                  let size = FileHelper.getFileSizeFromBase64(avatar.getData());
-
-                  i.onload = function () {
-                     iheight = i.height;
-                     iwidth = i.width;
-                  };
-                  i.src = 'data:' + avatar.getType() + ';base64,' + avatar.getData();
-                  metadata = $build('metadata', { xmlns: UANS_METADATA })
-                     .c('info', { bytes: size, id: hash, height: iheight, width: iwidth, type: avatar.getType() })
-                     .tree();
-
-                  return connection
-                     .getPEPService()
-                     .publish(UANS_METADATA, metadata, UANS_METADATA)
-                     .then(function (result) {
-                        if ($(result).attr('type') === 'result') {
-                           return [undefined];
-                        } else {
-                           return [avatar];
-                        }
-                     });
-               } else {
-                  return [avatar];
-               }
-            });
+         return [avatar];
       }
+
+      const avatarData = avatar.getData();
+      const imageDataUrl = avatar.getType() !== 'image/png' ? await ImageHelper.convertToPNG(avatarData) : avatarData;
+      const imageData = imageDataUrl.replace(/^.+;base64,/, '');
+      const imageId = Hash.SHA1FromBase64(imageDataUrl);
+
+      let dataElement = $build('data', { xmlns: UANS_DATA }).t(imageData).tree();
+
+      await pepService.publish(UANS_DATA, dataElement, imageId);
+
+      let imageSize = FileHelper.getFileSizeFromBase64(imageDataUrl);
+
+      let metadataElement = $build('metadata', {
+         xmlns: UANS_METADATA,
+      })
+         .c('info', {
+            bytes: imageSize,
+            id: imageId,
+            type: 'image/png',
+         })
+         .tree();
+
+      await pepService.publish(UANS_METADATA, metadataElement, imageId);
+
+      return [avatar];
    };
 
    private onMessageAvatarUpdate = stanza => {
       let from = new JID($(stanza).attr('from'));
-      let metadata = $(stanza).find('metadata[xmlns="urn:xmpp:avatar:metadata"]');
-      let data = $(stanza).find('data[xmlns="urn:xmpp:avatar:data"]');
+      let metadata = $(stanza).find(`metadata[xmlns="${UANS_METADATA}"]`);
 
-      if (metadata.length > 0) {
-         let info = metadata.find('info');
-         let contact = this.pluginAPI.getContact(from);
-         if (!contact) {
-            this.pluginAPI.Log.warn('No contact found for', from);
-            return true;
-         }
+      if (metadata.length === 0) {
+         return true;
+      }
 
-         if (info.length > 0) {
-            let hash = $(info).attr('id');
+      const contact = this.pluginAPI.getContact(from);
 
-            let storedHash = this.getStorage().getItem(from.bare);
-            if (storedHash === undefined || hash !== storedHash) {
-               let avatarUI = AvatarUI.get(contact);
-               this.getStorage().setItem(contact.getJid().bare, hash);
-               avatarUI.reload();
-            }
-         } else {
-            let avatarUI = AvatarUI.get(contact);
-            this.getStorage().setItem(contact.getJid().bare, '');
-            avatarUI.reload();
-         }
-      } else if (data.length > 0) {
-         let contact = this.pluginAPI.getContact(from);
-         if (!contact) {
-            this.pluginAPI.Log.warn('No contact found for', from);
-            return true;
-         }
+      if (!contact) {
+         this.pluginAPI.Log.warn(`Ignore PEP avatar notification for ${from.full}, because we do not know him.`);
+         return true;
+      }
 
-         let src = data.text().replace(/[\t\r\n\f]/gi, '');
-         const b64str = src.replace(/^.+;base64,/, '');
-         let hash = Hash.SHA1FromBase64(b64str);
-         let avatarUI = AvatarUI.get(contact);
-         this.getStorage().setItem(contact.getJid().bare, hash);
+      const info = metadata.find('>info[type="image/png"]');
+      const avatarUI = AvatarUI.get(contact);
+      const meta: AvatarMetaData =
+         info.length > 0
+            ? {
+                 id: info.attr('id'),
+                 type: info.attr('type'),
+                 bytes: info.attr('bytes') ? parseInt(info.attr('bytes'), 10) : undefined,
+                 width: info.attr('width') ? parseInt(info.attr('width'), 10) : undefined,
+                 height: info.attr('height') ? parseInt(info.attr('height'), 10) : undefined,
+              }
+            : {
+                 id: '',
+              };
+      const cachedMeta = this.getStorage().getItem<AvatarMetaData>(from.bare);
+
+      if (!cachedMeta || meta.id !== cachedMeta.id) {
+         this.getStorage().setItem<AvatarMetaData>(contact.getJid().bare, meta);
+
          avatarUI.reload();
       }
 
@@ -159,42 +142,21 @@ export default class AvatarPEPPlugin extends AbstractPlugin {
 
    private avatarProcessor = async (contact: IContact, avatar: IAvatar): Promise<[IContact, IAvatar]> => {
       let storage = this.getStorage();
-      let hash = storage.getItem(contact.getJid().bare);
+      let meta = storage.getItem<AvatarMetaData>(contact.getJid().bare);
 
-      if (!hash && !avatar) {
-         try {
-            const avatarObject = await this.getAvatar(contact);
-            const data = avatarObject.src.replace(/^.+;base64,/, '');
-            avatar = new Avatar(Hash.SHA1FromBase64(data), avatarObject.type, avatarObject.src);
-
-            this.getStorage().setItem(contact.getJid().bare, avatar.getHash() || '');
-
-            let avatarUI = AvatarUI.get(contact);
-            avatarUI.reload();
-         } catch (err) {
-            // we could not find any avatar
-         }
-      }
-
-      if (!hash || avatar) {
+      if (!meta || !meta.id) {
          return [contact, avatar];
       }
 
       try {
-         avatar = new Avatar(hash);
+         avatar = new Avatar(meta.id);
       } catch (err) {
          try {
             const avatarObject = await this.getAvatar(contact);
-
-            if (avatarObject) {
-               avatar = new Avatar(hash, avatarObject.type, avatarObject.src);
-               return [contact, avatar];
-            } else {
-               this.pluginAPI.Log.warn('No local cached avatar found');
-               return [contact, avatar];
-            }
+            avatar = new Avatar(meta.id, avatarObject.type, avatarObject.src);
          } catch (err) {
-            this.pluginAPI.Log.warn('Error during avatar retrieval', err);
+            this.pluginAPI.Log.warn('Error during pep avatar retrieval', err);
+
             return [contact, avatar];
          }
       }
@@ -203,43 +165,44 @@ export default class AvatarPEPPlugin extends AbstractPlugin {
    };
 
    private async getAvatar(contact: IContact): Promise<{ src: string; type: string }> {
-      let connection = this.pluginAPI.getConnection();
+      const connection = this.pluginAPI.getConnection();
+      const cachedMetaData = this.getStorage().getItem<AvatarMetaData>(contact.getJid().bare);
 
-      return connection
+      if (!cachedMetaData) {
+         throw new Error('No avatar meta data is cached');
+      }
+
+      if (!cachedMetaData.id) {
+         throw new Error('User has no avatar');
+      }
+
+      const stanza = await connection
          .getPEPService()
-         .retrieveItems(UANS_METADATA, contact.getJid().bare)
-         .then(meta => {
-            let metadata = $(meta).find('metadata[xmlns="urn:xmpp:avatar:metadata"]');
+         .retrieveItems(UANS_DATA, contact.getJid().bare, cachedMetaData.id);
+      const dataStanza = $(stanza).find(`data[xmlns="${UANS_DATA}"]`);
 
-            if (metadata.length > 0) {
-               let info = metadata.find('info');
+      if (dataStanza.length !== 1) {
+         throw new Error('Could not retrieve avatar pep item');
+      }
 
-               if (info && info.length > 0) {
-                  let hash = $(info).attr('id');
-                  if (hash && hash.length > 0) {
-                     let typeval = $(info).attr('type');
+      const data = dataStanza.text().replace(/[\t\r\n\f]/gim, '');
 
-                     let result = connection
-                        .getPEPService()
-                        .retrieveItems(UANS_DATA, contact.getJid().bare)
-                        .then(data => {
-                           if (data && $(data).text() && $(data).text().trim().length > 0) {
-                              let src = $(data)
-                                 .text()
-                                 .replace(/[\t\r\n\f]/gi, '');
-                              const b64str = src.replace(/^.+;base64,/, '');
-                              this.getStorage().setItem(contact.getJid().bare, Hash.SHA1FromBase64(b64str));
-                              return { src: 'data:' + typeval + ';base64,' + src, type: typeval };
-                           } else {
-                              throw new Error('No photo available');
-                           }
-                        });
-                     return result;
-                  }
-               }
-            }
+      try {
+         window.atob(data);
+      } catch (_) {
+         throw new Error('Received invalid base64 encoded string');
+      }
 
-            throw new Error('No photo available');
-         });
+      const src = 'data:' + cachedMetaData.type + ';base64,' + data;
+      const imageId = Hash.SHA1FromBase64(src);
+
+      if (cachedMetaData.id !== imageId) {
+         this.pluginAPI.Log.info(`Cached image id (${cachedMetaData.id}) is different to the retrieved image (${imageId}).`);
+      }
+
+      return {
+         src,
+         type: cachedMetaData.type,
+      };
    }
 }

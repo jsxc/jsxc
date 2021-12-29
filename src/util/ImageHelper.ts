@@ -42,4 +42,28 @@ export default class ImageHelper {
          img.src = data;
       });
    }
+
+   public static convertToPNG(data: string): Promise<string> {
+      const canvas = <HTMLCanvasElement>$('<canvas>').get(0);
+      const img = new Image();
+
+      return new Promise((resolve, reject) => {
+         img.onload = () => {
+            canvas.width = img.width;
+            canvas.height = img.height;
+
+            const ctx = canvas.getContext('2d');
+
+            ctx.drawImage(img, 0, 0, img.width, img.width, 0, 0, img.width, img.width);
+
+            resolve(canvas.toDataURL());
+         };
+
+         img.onerror = () => {
+            reject(new Error('Could not load image'));
+         };
+
+         img.src = data;
+      });
+   }
 }
