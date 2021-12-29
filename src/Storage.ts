@@ -121,8 +121,8 @@ export default class Storage implements IStorage {
       return Storage.backend;
    }
 
-   public setItem(type: string, key: string, value: any): void;
-   public setItem(key: string, value: any): void;
+   public setItem<Data = any>(type: string, key: string, value: Data): void;
+   public setItem<Data = any>(key: string, value: Data): void;
    public setItem(): void {
       let key: string;
       let value: any;
@@ -162,8 +162,8 @@ export default class Storage implements IStorage {
       }
    }
 
-   public getItem(type: string, key: string): any;
-   public getItem(key: string): any;
+   public getItem<Data = any>(type: string, key: string): Data;
+   public getItem<Data = any>(key: string): Data;
    public getItem(): any {
       let key: string;
 

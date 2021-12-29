@@ -4,11 +4,11 @@ export default interface IStorage {
    getPrefix(): string;
    getBackend();
 
-   setItem(type: string, key: string, value: any): void;
-   setItem(key: string, value: any): void;
+   setItem<Data = any>(type: string, key: string, value: Data): void;
+   setItem<Data = any>(key: string, value: Data): void;
 
-   getItem(type: string, key: string): any;
-   getItem(key: string): any;
+   getItem<Data = any>(type: string, key: string): Data;
+   getItem<Data = any>(key: string): Data;
 
    removeItem(type, key): void;
    removeItem(key): void;
