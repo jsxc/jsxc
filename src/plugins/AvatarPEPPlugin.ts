@@ -197,7 +197,9 @@ export default class AvatarPEPPlugin extends AbstractPlugin {
       const imageId = Hash.SHA1FromBase64(src);
 
       if (cachedMetaData.id !== imageId) {
-         this.pluginAPI.Log.info(`Cached image id (${cachedMetaData.id}) is different to the retrieved image (${imageId}).`);
+         this.pluginAPI.Log.info(
+            `Cached image id (${cachedMetaData.id}) is different to the retrieved image (${imageId}).`
+         );
       }
 
       return {
