@@ -105,12 +105,11 @@ export default class Message implements IIdentifiable, IMessage {
                   encryptedHtmlMessage: null,
                   encryptedPlaintextMessage: null,
                   replaceId: null,
-                  occupantId:null
+                  occupantId: null,
                },
                data
             )
          );
-
       } else if (!this.data.get('attrId')) {
          throw new Error(`Could not load message ${this.uid}`);
       }
@@ -329,36 +328,46 @@ export default class Message implements IIdentifiable, IMessage {
       this.data.set('direction', direction);
    }
 
-   public setReplaceBody(val: string) {//XEP - 0308
+   public setReplaceBody(val: string) {
+      //XEP - 0308
       this.data.set('replaceBody', val);
    }
 
-   public getReplaceBody() : string {//XEP - 0308
+   public getReplaceBody(): string {
+      //XEP - 0308
       return this.data.get('replaceBody');
    }
 
-   public setReplaceTime(val: number) {//XEP - 0308
-      return this.data.set('replacetime',val.toString());
+   public setReplaceTime(val: number) {
+      //XEP - 0308
+      return this.data.set('replacetime', val.toString());
    }
 
-   public getReplaceTime() : number {//XEP - 0308
-      return this.data.get('replacetime')!==undefined?parseInt(this.data.get('replacetime')):this.getStamp().getTime();
+   public getReplaceTime(): number {
+      //XEP - 0308
+      return this.data.get('replacetime') !== undefined
+         ? parseInt(this.data.get('replacetime'), 10)
+         : this.getStamp().getTime();
    }
 
-   public getReplaceId() : string{ //XEP - 0308
+   public getReplaceId(): string {
+      //XEP - 0308
       return this.data.get('replaceId');
    }
 
-   public setReplaceId(id: string) { //XEP - 0308
-      this.data.set('replaceId',id);
+   public setReplaceId(id: string) {
+      //XEP - 0308
+      this.data.set('replaceId', id);
    }
 
-   public getOccupantId() : string{ //XEP - 0421
+   public getOccupantId(): string {
+      //XEP - 0421
       return this.data.get('occupantId');
    }
 
-   public setOccupantId(id: string) { //XEP - 0421
-      this.data.set('occupantId',id);
+   public setOccupantId(id: string) {
+      //XEP - 0421
+      this.data.set('occupantId', id);
    }
 
    public setPlaintextMessage(plaintextMessage: string) {

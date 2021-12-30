@@ -23,50 +23,39 @@ export default class Transcript {
       });
    }
 
-   public insertMessage(message: IMessage)
-   {
-
-      if (!this.messages||this.messages[message.getUid()])
-      {
+   public insertMessage(message: IMessage) {
+      if (!this.messages || this.messages[message.getUid()]) {
          return;
       }
 
       let indexMessageArray = this.convertToIndexArray(this.messages);
 
-      for (let i = indexMessageArray.length-1;i>=0;i--)
-      {
-         if (indexMessageArray[i].getStamp().getTime()<message.getStamp().getTime())
-         {
-            if (i-1>0)
-            {
+      for (let i = indexMessageArray.length - 1; i >= 0; i--) {
+         if (indexMessageArray[i].getStamp().getTime() < message.getStamp().getTime()) {
+            if (i - 1 > 0) {
                message.setNext(indexMessageArray[i]);
-            }
-            else
-            {
+            } else {
                message.setNext(undefined);
             }
 
-            if (i+1<indexMessageArray.length)
-            {
-               indexMessageArray[i+1].setNext(message);
+            if (i + 1 < indexMessageArray.length) {
+               indexMessageArray[i + 1].setNext(message);
             }
             break;
          }
       }
 
-      this.firstMessage = indexMessageArray[indexMessageArray.length-1];
+      this.firstMessage = indexMessageArray[indexMessageArray.length - 1];
 
       this.contact.setLastMessageDate(message.getStamp());
       this.properties.set('firstMessageId', this.firstMessage.getUid());
 
-      if (message.getReplaceId()===null)
-      {
+      if (message.getReplaceId() === null) {
          this.addMessage(message);
       }
    }
 
    public unshiftMessage(message: IMessage) {
-
       let lastMessage = this.getLastMessage();
 
       if (lastMessage) {
@@ -80,19 +69,16 @@ export default class Transcript {
       this.lastMessage = message;
    }
 
-   public convertToIndexArray(messages:{[key: string]: IMessage}): IMessage[] {
-     
-      let indexMessageArray = new Array();
+   public convertToIndexArray(messages: { [key: string]: IMessage }): IMessage[] {
+      let indexMessageArray = [];
 
-      for (let strId in messages)
-      {
-         if(this.isValidMessage(messages[strId]))
-         {
+      for (let strId in messages) {
+         if (this.isValidMessage(messages[strId])) {
             indexMessageArray.push(messages[strId]);
          }
       }
 
-      indexMessageArray.sort(function compare(a:IMessage, b:IMessage) {
+      indexMessageArray.sort(function compare(a: IMessage, b: IMessage) {
          if (a.getStamp().getTime() === b.getStamp().getTime()) {
             return 0;
          }
@@ -109,83 +95,77 @@ export default class Transcript {
       return indexMessageArray;
    }
 
-   public processReplace(message:IMessage)
-   {
-       if (message===undefined||message.getDirection()===DIRECTION.SYS)
-         return;
+   public processReplace(message: IMessage) {
+      if (message === undefined || message.getDirection() === DIRECTION.SYS) return;
 
-       let chain =  this.getReplaceMessageChainFromMessage(message);
-       let oldmessage = chain[0];
-       let latestMessage = chain[chain.length-1];   
-       if (oldmessage)
-       {
-           //only allow corrections from same sender
-           if (latestMessage.getDirection()===DIRECTION.IN||latestMessage.getDirection()===DIRECTION.PROBABLY_IN) //reset Marker to transfered on outgoing messages
-           {
-               let oldsender = oldmessage.getSender().jid!==undefined?oldmessage.getSender().jid.full:oldmessage.getPeer().full;
-               let replaceSender = latestMessage.getSender().jid!==undefined?latestMessage.getSender().jid.full:latestMessage.getPeer().full;
-               //check vor occupant-id (XEP-0421) in old message > if available on old message it the replacement has to be the same!
+      let chain = this.getReplaceMessageChainFromMessage(message);
+      let oldmessage = chain[0];
+      let latestMessage = chain[chain.length - 1];
+      if (oldmessage) {
+         //only allow corrections from same sender
+         if (latestMessage.getDirection() === DIRECTION.IN || latestMessage.getDirection() === DIRECTION.PROBABLY_IN) {
+            //reset Marker to transfered on outgoing messages
+            let oldsender =
+               oldmessage.getSender().jid !== undefined ? oldmessage.getSender().jid.full : oldmessage.getPeer().full;
+            let replaceSender =
+               latestMessage.getSender().jid !== undefined
+                  ? latestMessage.getSender().jid.full
+                  : latestMessage.getPeer().full;
+            //check vor occupant-id (XEP-0421) in old message > if available on old message it the replacement has to be the same!
 
-               if ((oldmessage.getOccupantId()!==null&&oldmessage.getOccupantId()===latestMessage.getOccupantId())||
-                   (oldmessage.getOccupantId()===null&&oldsender===replaceSender))
-               {
-                   latestMessage.getProcessedBody().then((bodyString)=> {
-                     oldmessage.setReplaceTime(latestMessage.getStamp().getTime());
-                     oldmessage.setReplaceBody(bodyString);
-                   }); 
-                   latestMessage.received(); //reset Marker to received on incoming messages
-               }
-           }
-           else
-           if (latestMessage.getDirection()===DIRECTION.OUT||latestMessage.getDirection()===DIRECTION.PROBABLY_OUT)
-           {
-               latestMessage.getProcessedBody().then((bodyString)=> {
+            if (
+               (oldmessage.getOccupantId() !== null && oldmessage.getOccupantId() === latestMessage.getOccupantId()) ||
+               (oldmessage.getOccupantId() === null && oldsender === replaceSender)
+            ) {
+               latestMessage.getProcessedBody().then(bodyString => {
                   oldmessage.setReplaceTime(latestMessage.getStamp().getTime());
                   oldmessage.setReplaceBody(bodyString);
                });
-               latestMessage.transferred(); //reset Marker to transfered on outgoing messages               
-           }
-       }
-   }
-
-   public getLatestReplaceMessageFromMessage(message : IMessage) : IMessage {
-      let replacemsg = this.getReplaceMessageChainFromMessage(message);
-      if (replacemsg!==null&&replacemsg.length>0)
-      {
-         return replacemsg[replacemsg.length-1];
+               latestMessage.received(); //reset Marker to received on incoming messages
+            }
+         } else if (
+            latestMessage.getDirection() === DIRECTION.OUT ||
+            latestMessage.getDirection() === DIRECTION.PROBABLY_OUT
+         ) {
+            latestMessage.getProcessedBody().then(bodyString => {
+               oldmessage.setReplaceTime(latestMessage.getStamp().getTime());
+               oldmessage.setReplaceBody(bodyString);
+            });
+            latestMessage.transferred(); //reset Marker to transfered on outgoing messages
+         }
       }
-      else
-         return null;
    }
 
-   private isValidMessage(message: any): boolean{
-      return message!==null&&message!==undefined&&message.uid!==undefined&&message.data!==undefined;
+   public getLatestReplaceMessageFromMessage(message: IMessage): IMessage {
+      let replacemsg = this.getReplaceMessageChainFromMessage(message);
+      if (replacemsg !== null && replacemsg.length > 0) {
+         return replacemsg[replacemsg.length - 1];
+      } else return null;
    }
 
-   public getReplaceMessageChainFromMessage(message : IMessage) : IMessage[] {
+   private isValidMessage(message: any): boolean {
+      return message !== null && message !== undefined && message.uid !== undefined && message.data !== undefined;
+   }
 
+   public getReplaceMessageChainFromMessage(message: IMessage): IMessage[] {
       let sortedArray = this.convertToIndexArray(this.messages);
-      for (let i=sortedArray.length-1;i>=0;i--)
-      {
-         if (sortedArray[i].getReplaceId()!==null)
-         {
+      for (let i = sortedArray.length - 1; i >= 0; i--) {
+         if (sortedArray[i].getReplaceId() !== null) {
             let foundMessage = false;
-            let resultChain = new Array();
+            let resultChain = [];
 
             let replacedMsg = sortedArray[i];
             do {
-
-               if (replacedMsg.getAttrId()===message.getAttrId())
-               {
-                  foundMessage=true;
+               if (replacedMsg.getAttrId() === message.getAttrId()) {
+                  foundMessage = true;
                }
-           
-               resultChain.push(replacedMsg);
-               replacedMsg = replacedMsg.getReplaceId()!==null?this.findMessageByAttrId(replacedMsg.getReplaceId()):null;
-            } while(replacedMsg!==null&&replacedMsg!==undefined);
 
-            if (foundMessage)
-            {
+               resultChain.push(replacedMsg);
+               replacedMsg =
+                  replacedMsg.getReplaceId() !== null ? this.findMessageByAttrId(replacedMsg.getReplaceId()) : null;
+            } while (replacedMsg !== null && replacedMsg !== undefined);
+
+            if (foundMessage) {
                return resultChain.reverse();
             }
          }
@@ -195,7 +175,6 @@ export default class Transcript {
    }
 
    public pushMessage(message: IMessage) {
-
       if (!message.getNextId() && this.firstMessage) {
          message.setNext(this.firstMessage);
       }
@@ -271,7 +250,7 @@ export default class Transcript {
       return this.messages[id];
    }
 
-   public getMessages(): {[key: string]: IMessage} {     
+   public getMessages(): { [key: string]: IMessage } {
       return this.messages;
    }
 
@@ -384,8 +363,7 @@ export default class Transcript {
 
       this.messages[id] = message;
 
-      if (message!==undefined&&message.getReplaceId()!==null)
-      {
+      if (message !== undefined && message.getReplaceId() !== null) {
          this.processReplace(message);
       }
 

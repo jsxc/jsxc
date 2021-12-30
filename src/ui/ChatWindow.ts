@@ -114,24 +114,24 @@ export default class ChatWindow {
       this.getAccount().triggerChatWindowInitializedHook(this, contact);
    }
 
-   private selectLatestVisibleMessageForEdit() : void {
-      
-      let messagearr : IMessage[]= this.getTranscript().convertToIndexArray(this.getTranscript().getMessages());
-      for (let i = messagearr.length-1;i>=0;i--){
-         if (messagearr[i].getReplaceId()===null&&(messagearr[i].getDirection()===DIRECTION.OUT||messagearr[i].getDirection()===DIRECTION.PROBABLY_OUT))
-         {
+   private selectLatestVisibleMessageForEdit(): void {
+      let messagearr: IMessage[] = this.getTranscript().convertToIndexArray(this.getTranscript().getMessages());
+      for (let i = messagearr.length - 1; i >= 0; i--) {
+         if (
+            messagearr[i].getReplaceId() === null &&
+            (messagearr[i].getDirection() === DIRECTION.OUT || messagearr[i].getDirection() === DIRECTION.PROBABLY_OUT)
+         ) {
             this.selectEditMessage(messagearr[i]);
             break;
          }
       }
    }
 
-   public selectEditMessage(message: IMessage)
-   {
-       let latestReplace = this.getTranscript().getLatestReplaceMessageFromMessage(message);
-       this.editMessage=latestReplace;
+   public selectEditMessage(message: IMessage) {
+      let latestReplace = this.getTranscript().getLatestReplaceMessageFromMessage(message);
+      this.editMessage = latestReplace;
 
-       this.inputElement.val('> '+this.editMessage.getPlaintextMessage());
+      this.inputElement.val('> ' + this.editMessage.getPlaintextMessage());
    }
 
    public getTranscript(): Transcript {
@@ -421,10 +421,12 @@ export default class ChatWindow {
       ev.stopPropagation();
       // let message = <string> $(ev.target).val();
 
-      if ((ev.which === BACKSPACE_KEY || ev.which === DELETE_KEY) && (this.inputElement.val()==='' || this.inputElement.val()==='>'))
-      {
-          this.editMessage=null;
-          this.inputElement.val('');
+      if (
+         (ev.which === BACKSPACE_KEY || ev.which === DELETE_KEY) &&
+         (this.inputElement.val() === '' || this.inputElement.val() === '>')
+      ) {
+         this.editMessage = null;
+         this.inputElement.val('');
       }
 
       if (ev.which === ENTER_KEY && !ev.shiftKey) {
@@ -434,11 +436,14 @@ export default class ChatWindow {
       }
 
       if (ev.which === ESC_KEY) {
-         this.editMessage=null;
+         this.editMessage = null;
          this.getController().close();
       }
 
-      if (ev.which === UP_KEY && (this.inputElement.val()===null||this.inputElement.val().toString().trim().length===0)) {
+      if (
+         ev.which === UP_KEY &&
+         (this.inputElement.val() === null || this.inputElement.val().toString().trim().length === 0)
+      ) {
          this.selectLatestVisibleMessageForEdit();
       }
 
@@ -504,7 +509,7 @@ export default class ChatWindow {
    };
 
    private sendOutgoingMessage(messageString: string) {
-      let plainTextMessage = this.editMessage!=null?messageString.substring(1).trim():messageString;
+      let plainTextMessage = this.editMessage != null ? messageString.substring(1).trim() : messageString;
       let message = new Message({
          peer: this.contact.getJid(),
          direction: Message.DIRECTION.OUT,
@@ -514,21 +519,26 @@ export default class ChatWindow {
          unread: false,
       });
 
-      message.setReplaceId(this.editMessage!=null?this.editMessage.getAttrId():null);
+      message.setReplaceId(this.editMessage != null ? this.editMessage.getAttrId() : null);
 
-      if (this.attachmentDeposition!==undefined||(plainTextMessage!==null&&plainTextMessage!==undefined&&plainTextMessage.trim().length>0))
-      {
+      if (
+         this.attachmentDeposition !== undefined ||
+         (plainTextMessage !== null && plainTextMessage !== undefined && plainTextMessage.trim().length > 0)
+      ) {
          this.getTranscript().pushMessage(message);
 
          let pipe = this.getAccount().getPipe('preSendMessage');
 
-         pipe.run(this.contact, message).then(([contact, message]) => {
-            this.getAccount().getConnection().sendMessage(message);
-            this.editMessage=null;
-         }).catch(err => {
-            Log.warn('Error during preSendMessage pipe', err);
-            this.editMessage=null;
-         });
+         pipe
+            .run(this.contact, message)
+            .then(([contact, message]) => {
+               this.getAccount().getConnection().sendMessage(message);
+               this.editMessage = null;
+            })
+            .catch(err => {
+               Log.warn('Error during preSendMessage pipe', err);
+               this.editMessage = null;
+            });
       }
 
       this.clearAttachment();

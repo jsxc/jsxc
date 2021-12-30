@@ -8,20 +8,18 @@ let template = require('../../../template/xep308log.hbs');
 
 let dialog: Dialog;
 
-
-export default  function (from: IContact, to :IContact, messages: IMessage[]) {
+export default function (from: IContact, to: IContact, messages: IMessage[]) {
    let arr = [];
-   messages.forEach((item:IMessage)=>{
-      arr.push({text:item.getPlaintextMessage(),time:DateTime.stringifyToString(item.getStamp().getTime())});
+   messages.forEach((item: IMessage) => {
+      arr.push({ text: item.getPlaintextMessage(), time: DateTime.stringifyToString(item.getStamp().getTime()) });
    });
- 
+
    let content = template({
       from: from.getJid().bare,
       to: to.getJid().bare,
-      message: arr
+      message: arr,
    });
 
    dialog = new Dialog(content);
    dialog.open();
 }
-

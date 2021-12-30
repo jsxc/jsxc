@@ -167,18 +167,21 @@ abstract class AbstractConnection {
          xmlMsg.c('body').t(plaintextMessage).up();
       }
 
-      if (message.getReplaceId()!=null)
-      {
-         xmlMsg.c('replace', {
-             xmlns: 'urn:xmpp:message-correct:0',
-             id: message.getReplaceId()
-          }).up();
+      if (message.getReplaceId() != null) {
+         xmlMsg
+            .c('replace', {
+               xmlns: 'urn:xmpp:message-correct:0',
+               id: message.getReplaceId(),
+            })
+            .up();
       }
 
-      xmlMsg.c('origin-id', {
-         xmlns: 'urn:xmpp:sid:0',
-         id: message.getUid()
-      }).up();
+      xmlMsg
+         .c('origin-id', {
+            xmlns: 'urn:xmpp:sid:0',
+            id: message.getUid(),
+         })
+         .up();
 
       let pipe = this.account.getPipe('preSendMessageStanza');
       pipe
@@ -367,10 +370,9 @@ abstract class AbstractConnection {
          .up()
          .up();
 
-      iq.up()
-         .c('set', {
-            xmlns: 'http://jabber.org/protocol/rsm',
-         });
+      iq.up().c('set', {
+         xmlns: 'http://jabber.org/protocol/rsm',
+      });
 
       iq.up();
 

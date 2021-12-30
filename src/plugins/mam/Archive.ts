@@ -54,7 +54,6 @@ export default class Archive {
    }
 
    public lastMessages() {
-
       if (this.messageCache.length > 0) {
          Log.debug('Ongoing message retrieval');
          return false;
@@ -66,8 +65,7 @@ export default class Archive {
       let connection = this.plugin.getConnection();
 
       let firstMessage = this.contact.getTranscript().getFirstMessage();
-      if (firstMessage)
-      {
+      if (firstMessage) {
          let startDate = firstMessage.getStamp();
          startDate.setSeconds(startDate.getSeconds() + 1);
          this.plugin
@@ -77,14 +75,19 @@ export default class Archive {
                   throw new Error(`Archive JID ${this.archiveJid.full} has no support for MAM.`);
                }
 
-               return connection.queryArchiveSync(startDate, this.archiveJid, <string>version, queryId,this.contact.getJid().bare );
+               return connection.queryArchiveSync(
+                  startDate,
+                  this.archiveJid,
+                  <string>version,
+                  queryId,
+                  this.contact.getJid().bare
+               );
             })
             .then(this.onCompleteSync)
             .catch(stanza => {
                Log.warn('Error while requesting archive', stanza);
             });
-      }
-      else {
+      } else {
          this.nextMessages();
       }
    }
@@ -169,8 +172,14 @@ export default class Archive {
       let stanzaIdElement = messageElement.find('stanza-id[xmlns="urn:xmpp:sid:0"]');
       let originIdElement = messageElement.find('origin-id[xmlns="urn:xmpp:sid:0"]');
 
-      let replaceId = messageElement.find('replace[xmlns="urn:xmpp:message-correct:0"]').length>0?messageElement.find('replace[xmlns="urn:xmpp:message-correct:0"]').attr('id'):null;
-      let occupantId = messageElement.find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').length>0?messageElement.find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').attr('id'):null;
+      let replaceId =
+         messageElement.find('replace[xmlns="urn:xmpp:message-correct:0"]').length > 0
+            ? messageElement.find('replace[xmlns="urn:xmpp:message-correct:0"]').attr('id')
+            : null;
+      let occupantId =
+         messageElement.find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').length > 0
+            ? messageElement.find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').attr('id')
+            : null;
 
       let uid =
          direction === Message.DIRECTION.OUT && originIdElement.length
@@ -191,7 +200,7 @@ export default class Archive {
          stamp: stamp.getTime(),
          mark: MessageMark.transferred,
          unread: false,
-         sender: undefined
+         sender: undefined,
       };
 
       if (this.contact.isGroupChat()) {
@@ -221,7 +230,7 @@ export default class Archive {
       }
 
       let transcript = this.contact.getTranscript();
-      let replaceMessagesKeys = new Array();
+      let replaceMessagesKeys = [];
 
       while (this.messageCache.length > 0) {
          let messageElement = this.messageCache.pop();
@@ -229,9 +238,8 @@ export default class Archive {
          try {
             let message = await this.parseForwardedMessage(messageElement);
 
-            if (message.getReplaceId()!==null)
-            {
-               replaceMessagesKeys.push({attrid:message.getAttrId(),uid:message.getUid()});
+            if (message.getReplaceId() !== null) {
+               replaceMessagesKeys.push({ attrid: message.getAttrId(), uid: message.getUid() });
             }
 
             transcript.unshiftMessage(message);
@@ -256,29 +264,24 @@ export default class Archive {
          transcript.unshiftMessage(archiveExhaustedMessage);
       }
 
-      if (replaceMessagesKeys.length>0)
-      {
-         let arr : {[key: string]: IMessage} = {};
-        
-         for (let key of replaceMessagesKeys)
-         {
+      if (replaceMessagesKeys.length > 0) {
+         let arr: { [key: string]: IMessage } = {};
+
+         for (let key of replaceMessagesKeys) {
             let tmp = transcript.getMessage(key.uid);
-            let keystr=key.uid;
-            if (tmp===undefined||tmp===null)
-            {
+            let keystr = key.uid;
+            if (tmp === undefined || tmp === null) {
                tmp = transcript.getMessage(key.attrid);
-               keystr=key.uid;
+               keystr = key.uid;
             }
-          
-            if (tmp!==undefined&&tmp!==null)
-            {
-               arr[keystr]=tmp;
+
+            if (tmp !== undefined && tmp !== null) {
+               arr[keystr] = tmp;
             }
          }
          let indexedArr = transcript.convertToIndexArray(arr);
-         for (let i=0;i<indexedArr.length;i++)
-         {
-            transcript.processReplace(indexedArr[i]);
+         for (let indexedMessage of indexedArr) {
+            transcript.processReplace(indexedMessage);
          }
       }
 
@@ -297,16 +300,15 @@ export default class Archive {
       }
 
       let transcript = this.contact.getTranscript();
-      let replaceMessagesKeys = new Array();
+      let replaceMessagesKeys = [];
       while (this.messageCache.length > 0) {
          let messageElement = this.messageCache.pop();
 
          try {
             let message = await this.parseForwardedMessage(messageElement);
 
-            if (message.getReplaceId()!==null)
-            {
-               replaceMessagesKeys.push({attrid:message.getAttrId(),uid:message.getUid()});
+            if (message.getReplaceId() !== null) {
+               replaceMessagesKeys.push({ attrid: message.getAttrId(), uid: message.getUid() });
             }
 
             transcript.insertMessage(message);
@@ -315,28 +317,23 @@ export default class Archive {
          }
       }
 
-      if (replaceMessagesKeys.length>0)
-      {
-         let arr : {[key: string]: IMessage} = {};
-         for (let key of replaceMessagesKeys)
-         {
+      if (replaceMessagesKeys.length > 0) {
+         let arr: { [key: string]: IMessage } = {};
+         for (let key of replaceMessagesKeys) {
             let tmp = transcript.getMessage(key.uid);
-            let keystr=key.uid;
-            if (tmp===undefined||tmp===null)
-            {
+            let keystr = key.uid;
+            if (tmp === undefined || tmp === null) {
                tmp = transcript.getMessage(key.attrid);
-               keystr=key.uid;
+               keystr = key.uid;
             }
-          
-            if (tmp!==undefined&&tmp!==null)
-            {
-               arr[keystr]=tmp;
+
+            if (tmp !== undefined && tmp !== null) {
+               arr[keystr] = tmp;
             }
          }
          let indexedArr = transcript.convertToIndexArray(arr);
-         for (let i=0;i<indexedArr.length;i++)
-         {
-            transcript.processReplace(indexedArr[i]);
+         for (let indexedMessage of indexedArr) {
+            transcript.processReplace(indexedMessage);
          }
       }
 
