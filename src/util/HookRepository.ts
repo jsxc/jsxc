@@ -1,7 +1,7 @@
-export default class HookRepository<T extends Function> {
+export default class HookRepository<Args extends any[] = any[]> {
    private hooks = {};
 
-   public registerHook(eventName: string, func: T) {
+   public registerHook(eventName: string, func: (...args: Args) => void) {
       if (!this.hooks[eventName]) {
          this.hooks[eventName] = [];
       }
@@ -9,7 +9,7 @@ export default class HookRepository<T extends Function> {
       this.hooks[eventName].push(func);
    }
 
-   public removeHook(eventName: string, func: T) {
+   public removeHook(eventName: string, func: (...args: Args) => void) {
       let eventNameList = this.hooks[eventName] || [];
 
       if (eventNameList.indexOf(func) > -1) {
@@ -21,7 +21,7 @@ export default class HookRepository<T extends Function> {
       this.hooks[eventName] = eventNameList;
    }
 
-   public trigger(targetEventName: string, ...args) {
+   public trigger(targetEventName: string, ...args: Args) {
       let hooks = this.hooks;
 
       let eventNames = Object.keys(hooks);
