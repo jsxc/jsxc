@@ -17,7 +17,8 @@ import CommandPlugin from '@src/plugins/CommandPlugin';
 import VersionPlugin from '@src/plugins/VersionPlugin';
 import TimePlugin from '../plugins/TimePlugin';
 import JingleMessageInitiationPlugin from '../plugins/JingleMessageInitiationPlugin';
-import AvatarPEPPlugin from '../plugins/AvatarPEPPlugin';
+import AvatarPEPPlugin from '@src/plugins/AvatarPEPPlugin';
+import LastMessageCorrectionPlugin from '@src/plugins/LastMessageCorrectionPlugin';
 
 Client.addPlugin(OTRPlugin);
 Client.addPlugin(OMEMOPlugin);
@@ -38,3 +39,4 @@ Client.addPlugin(VersionPlugin);
 Client.addPlugin(TimePlugin);
 Client.addPlugin(JingleMessageInitiationPlugin);
 Client.addPlugin(AvatarPEPPlugin);
+Client.addPlugin(LastMessageCorrectionPlugin);

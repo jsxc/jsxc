@@ -43,6 +43,8 @@ export interface IMessagePayload {
    chatMarkersReceived?: boolean;
    chatMarkersDisplayed?: boolean;
    chatMarkersAcknowledged?: boolean;
+   replacedBy?: string;
+   original?: string;
 }
 
 export interface IMessage {
@@ -145,4 +147,16 @@ export interface IMessage {
    getErrorMessage(): string;
 
    updateProgress(transferred: number, complete: number);
+
+   getLastVersion(): IMessage;
+
+   getReplacedBy(): IMessage;
+
+   setReplacedBy(message: IMessage): void;
+
+   getOriginal(): IMessage;
+
+   setOriginal(message: IMessage): void;
+
+   isReplacement(): boolean;
 }

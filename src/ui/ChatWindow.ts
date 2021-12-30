@@ -183,6 +183,15 @@ export default class ChatWindow {
       this.element.find('.jsxc-bar__caption__secondary').text(text);
    }
 
+   public getInput(): string {
+      return this.inputElement.val().toString();
+   }
+
+   public setInput(text: string) {
+      this.inputElement.val(text);
+      this.inputElement.trigger('focus');
+   }
+
    public appendTextToInput(text: string = '') {
       let value = this.inputElement.val();
 
@@ -226,6 +235,10 @@ export default class ChatWindow {
 
    public addMenuEntry(className: string, label: string, cb: (ev) => void) {
       return this.settingsMenu.addEntry(label, cb, className);
+   }
+
+   public getAttachment(): Attachment {
+      return this.attachmentDeposition;
    }
 
    public setAttachment(attachment: Attachment) {
@@ -627,7 +640,7 @@ export default class ChatWindow {
    }
 
    private restoreLocalHistory() {
-      let firstMessage = this.getTranscript().getFirstMessage();
+      let firstMessage = this.getTranscript().getFirstOriginalMessage();
 
       if (!firstMessage) {
          return;
@@ -668,7 +681,9 @@ export default class ChatWindow {
 
          let message = this.getTranscript().getMessage(firstMessageId);
 
-         this.postMessage(message);
+         if (!message.isReplacement()) {
+            this.postMessage(message);
+         }
       });
    }
 

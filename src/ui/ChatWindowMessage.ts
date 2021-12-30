@@ -10,9 +10,13 @@ import Translation from '@util/Translation';
 let chatWindowMessageTemplate = require('../../template/chat-window-message.hbs');
 
 export default class ChatWindowMessage {
-   private element;
+   private element: JQuery<HTMLElement>;
 
-   constructor(private message: IMessage, private chatWindow: ChatWindow) {
+   private message: IMessage;
+
+   constructor(private originalMessage: IMessage, private chatWindow: ChatWindow) {
+      this.message = originalMessage.getLastVersion();
+
       this.generateElement();
       this.registerHooks();
    }
@@ -36,20 +40,22 @@ export default class ChatWindowMessage {
    }
 
    private getNextMessage() {
-      let nextId = this.message.getNextId();
+      let nextId = this.originalMessage.getNextId();
 
-      if (!nextId) {
-         return;
+      while (nextId) {
+         let nextMessage = this.chatWindow.getTranscript().getMessage(nextId);
+
+         if (!nextMessage) {
+            Log.warn('Couldnt find next message.');
+            return;
+         }
+
+         if (!nextMessage.isReplacement()) {
+            return nextMessage;
+         }
+
+         nextId = nextMessage.getNextId();
       }
-
-      let nextMessage = this.chatWindow.getTranscript().getMessage(nextId);
-
-      if (!nextMessage) {
-         Log.warn('Couldnt find next message.');
-         return;
-      }
-
-      return nextMessage;
    }
 
    private async generateElement() {
@@ -64,7 +70,7 @@ export default class ChatWindowMessage {
 
       LinkHandlerGeo.get().detect(bodyElement);
 
-      this.element.find('.jsxc-content').html(bodyElement);
+      this.element.find('.jsxc-content').html(bodyElement.get(0));
 
       let timestampElement = this.element.find('.jsxc-timestamp');
       DateTime.stringify(this.message.getStamp().getTime(), timestampElement);
@@ -83,6 +89,10 @@ export default class ChatWindowMessage {
 
       if (this.message.isUnread()) {
          this.element.addClass('jsxc-unread');
+      }
+
+      if (this.message.isReplacement()) {
+         this.element.addClass('jsxc-edited');
       }
 
       if (this.message.getErrorMessage()) {
@@ -219,6 +229,13 @@ export default class ChatWindowMessage {
    }
 
    private registerHooks() {
+      this.message.registerHook('replacedBy', () => {
+         const messageReplacement = this.message.getReplacedBy();
+         const chatWindowMessageReplacement = new ChatWindowMessage(messageReplacement, this.chatWindow);
+
+         this.element.replaceWith(chatWindowMessageReplacement.getElement());
+      });
+
       this.message.registerHook('encrypted', encrypted => {
          if (encrypted) {
             this.element.addClass('jsxc-encrypted');

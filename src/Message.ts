@@ -54,6 +54,10 @@ export default class Message implements IIdentifiable, IMessage {
 
    private attachment: Attachment;
 
+   private replacedBy: IMessage;
+
+   private original: IMessage;
+
    public static readonly DIRECTION = DIRECTION;
 
    public static readonly MSGTYPE = ContactType;
@@ -366,6 +370,52 @@ export default class Message implements IIdentifiable, IMessage {
 
    public updateProgress(transferred: number, size: number) {
       this.data.set('progress', transferred / size);
+   }
+
+   public getLastVersion(): IMessage {
+      let replacedBy = this.getReplacedBy();
+
+      while (replacedBy && replacedBy.getReplacedBy()) {
+         replacedBy = replacedBy.getReplacedBy();
+      }
+
+      return replacedBy || this;
+   }
+
+   public getReplacedBy(): IMessage {
+      if (this.replacedBy) {
+         return this.replacedBy;
+      }
+
+      const replacedByUid = this.data.get('replacedBy');
+
+      this.replacedBy = replacedByUid ? new Message(replacedByUid) : undefined;
+
+      return this.replacedBy;
+   }
+
+   public setReplacedBy(message: IMessage): void {
+      this.data.set('replacedBy', message.getUid());
+   }
+
+   public getOriginal(): IMessage {
+      if (this.original) {
+         return this.original;
+      }
+
+      const originalUid = this.data.get('original');
+
+      this.original = originalUid ? new Message(originalUid) : undefined;
+
+      return this.original;
+   }
+
+   public setOriginal(message: IMessage): void {
+      this.data.set('original', message.getUid());
+   }
+
+   public isReplacement(): boolean {
+      return !!this.data.get('original');
    }
 }
 

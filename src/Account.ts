@@ -51,7 +51,7 @@ export default class Account {
 
    private ownDiscoInfo: DiscoInfoChangeable;
 
-   private hookRepository = new HookRepository<any>();
+   private hookRepository = new HookRepository();
 
    private contactManager: ContactManager;
 

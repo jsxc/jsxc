@@ -526,6 +526,13 @@
   }
 }
 
+.jsxc-chatmessage.jsxc-edited {
+  .jsxc-version::before {
+    @extend %jsxc-icon-font;
+    content: map-get($jsxc-icons-map, "edit");
+  }
+}
+
 .jsxc-mark::before {
   height: 1em;
 

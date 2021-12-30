@@ -13,7 +13,11 @@ export class ArgumentError extends Error {
    }
 }
 
-export type CommandAction = (args: string[], contact: IContact | MultiUserContact) => Promise<boolean>;
+export type CommandAction = (
+   args: string[],
+   contact: IContact | MultiUserContact,
+   message?: string
+) => Promise<boolean>;
 
 export default class CommandRepository {
    private commands: {
@@ -47,7 +51,7 @@ export default class CommandRepository {
          return Promise.resolve(false);
       }
 
-      return this.commands[command].action(args, contact);
+      return this.commands[command].action(args, contact, message);
    }
 
    public getHelp() {

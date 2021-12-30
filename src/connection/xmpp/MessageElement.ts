@@ -71,7 +71,7 @@ export class MessageElement {
       return this.element.find(selector);
    }
 
-   public get(index?) {
+   public get(index?: number) {
       return this.element.get(index);
    }
 

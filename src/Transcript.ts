@@ -55,7 +55,23 @@ export default class Transcript {
 
    public getFirstChatMessage(): IMessage {
       for (let message of this.getGenerator()) {
-         if (!message.isSystem()) {
+         if (!message.isSystem() && !message.isReplacement()) {
+            return message;
+         }
+      }
+   }
+
+   public getFirstIncomingMessage(): IMessage {
+      for (let message of this.getGenerator()) {
+         if (message.isIncoming() && !message.isReplacement()) {
+            return message;
+         }
+      }
+   }
+
+   public getFirstOutgoingMessage(): IMessage {
+      for (let message of this.getGenerator()) {
+         if (message.isOutgoing() && !message.isReplacement()) {
             return message;
          }
       }
@@ -67,6 +83,14 @@ export default class Transcript {
       }
 
       return this.firstMessage;
+   }
+
+   public getFirstOriginalMessage(): IMessage {
+      for (let message of this.getGenerator()) {
+         if (!message.isReplacement()) {
+            return message;
+         }
+      }
    }
 
    public getLastMessage(): IMessage {
