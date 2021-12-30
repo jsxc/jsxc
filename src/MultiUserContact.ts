@@ -118,8 +118,8 @@ export default class MultiUserContact extends Contact {
 
       try {
          this.refreshFeatures();
-      }catch (e){
-         console.log('Features not received, cause room was not found.', e)
+      } catch (e) {
+         //console.error('Features not received, cause room was not found.', e)
       }
 
       return this.getService().joinMultiUserRoom(new JID(this.jid.bare, this.getNickname()), this.data.get('password'));
@@ -128,7 +128,7 @@ export default class MultiUserContact extends Contact {
    public leave() {
       this.chatWindow.close();
       this.chatWindow.getController().close();
-      this.chatWindow=null;
+      this.chatWindow = null;
       return this.getService().leaveMultiUserRoom(this.getJid());
    }
 
@@ -151,7 +151,6 @@ export default class MultiUserContact extends Contact {
    }
 
    public async refreshFeatures(): Promise<string[]> {
-
       const stanza = await this.account.getConnection().getDiscoService().getDiscoInfo(new JID(this.jid.bare));
 
       const features = $(stanza)
@@ -252,12 +251,11 @@ export default class MultiUserContact extends Contact {
       return isNewMember;
    }
 
-   public removeMember(nickname: string, shutdown:boolean=true) {
+   public removeMember(nickname: string, shutdown: boolean = true) {
       this.getMembers().remove(nickname);
 
       if (nickname === this.getNickname()) {
-         if (shutdown)
-         {
+         if (shutdown) {
             this.shutdown();
          }
       }

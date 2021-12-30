@@ -145,27 +145,36 @@ abstract class AbstractConnection {
          id: message.getAttrId(),
       });
 
-      xmlMsg.c('body').t("This person attempted to retract a previous message, but it's unsupported by your client.").up();
+      xmlMsg
+         .c('body')
+         .t("This person attempted to retract a previous message, but it's unsupported by your client.")
+         .up();
 
-      if (message.getRetractId()!=null)
-      {
-         xmlMsg.c('apply-to', {
-             xmlns: 'urn:xmpp:fasten:0',
-             id: message.getRetractId()
-          }).c('retract',{
-            xmlns: 'urn:xmpp:message-retract:0'
-          }).up().up().c('fallback',{
-            xmlns: 'urn:xmpp:fallback:0'
-          }).up().c('store',{
-            xmlns: 'urn:xmpp:hints'
-          }).up();
+      if (message.getRetractId() != null) {
+         xmlMsg
+            .c('apply-to', {
+               xmlns: 'urn:xmpp:fasten:0',
+               id: message.getRetractId(),
+            })
+            .c('retract', {
+               xmlns: 'urn:xmpp:message-retract:0',
+            })
+            .up()
+            .up()
+            .c('fallback', {
+               xmlns: 'urn:xmpp:fallback:0',
+            })
+            .up()
+            .c('store', {
+               xmlns: 'urn:xmpp:hints',
+            })
+            .up();
       }
 
       let pipe = this.account.getPipe('preSendMessageStanza');
       pipe
          .run(message, xmlMsg)
          .then(([message, xmlMsg]: [Message, Element]) => {
-
             this.send(xmlMsg);
 
             message.transferred();
@@ -214,18 +223,21 @@ abstract class AbstractConnection {
          xmlMsg.c('body').t(plaintextMessage).up();
       }
 
-      if (message.getReplaceId()!=null)
-      {
-         xmlMsg.c('replace', {
-             xmlns: 'urn:xmpp:message-correct:0',
-             id: message.getReplaceId()
-          }).up();
+      if (message.getReplaceId() != null) {
+         xmlMsg
+            .c('replace', {
+               xmlns: 'urn:xmpp:message-correct:0',
+               id: message.getReplaceId(),
+            })
+            .up();
       }
 
-      xmlMsg.c('origin-id', {
-         xmlns: 'urn:xmpp:sid:0',
-         id: message.getUid()
-      }).up();
+      xmlMsg
+         .c('origin-id', {
+            xmlns: 'urn:xmpp:sid:0',
+            id: message.getUid(),
+         })
+         .up();
 
       let pipe = this.account.getPipe('preSendMessageStanza');
       pipe
@@ -406,7 +418,7 @@ abstract class AbstractConnection {
          .up()
          .up();
 
-     /* iq.c('field', {
+      /* iq.c('field', {
          var: 'with',
       })
          .c('value')
@@ -414,10 +426,9 @@ abstract class AbstractConnection {
          .up()
          .up();*/
 
-      iq.up()
-         .c('set', {
-            xmlns: 'http://jabber.org/protocol/rsm',
-         });
+      iq.up().c('set', {
+         xmlns: 'http://jabber.org/protocol/rsm',
+      });
 
       iq.up();
 

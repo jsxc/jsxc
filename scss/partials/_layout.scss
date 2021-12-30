@@ -10,14 +10,14 @@ body.jsxc-fullscreen {
 
   .jsxc-fullscreen-active-conversations {
     background-color: #2a4163;
-    color: white;
+    color: #fff;
     display: block !important;
     height: 61px;
     min-height: 61px;
     padding: 3px;
 
     .jsxc-fullscreen-active-conversations-select {
-      color: black;
+      color: #000;
       font-size: 12px;
       height: 30px;
       margin-top: 12px;
@@ -25,7 +25,7 @@ body.jsxc-fullscreen {
 
       option[disabled] {
         background-color: var(--jsxc-color-placeholder-dark);
-        color: black;
+        color: #000;
       }
     }
   }

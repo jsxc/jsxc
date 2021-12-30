@@ -60,7 +60,7 @@ export interface IConnection {
    ): Promise<Element>;
 
    queryArchiveSync(
-      startDate:Date,
+      startDate: Date,
       archive: IJID,
       version: string,
       queryId: string,

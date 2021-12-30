@@ -49,25 +49,25 @@ $emoticons: jabber, jsxc, klaus, nextcloud, xmpp, owncloud;
 }
 
 .jsxc-menu-emoticon-list {
-    max-height: 200px;
-    overflow-y: auto !important;
+  max-height: 200px;
+  overflow-y: auto !important;
 
-    &::-webkit-scrollbar {
-        width:0.5em !important;
+  &::-webkit-scrollbar {
+    width: 0.5em !important;
 
-        /* Track */
-        &-track {
-          background: #f1f1f1;
-        }
-
-        /* Handle */
-        &-thumb {
-          background: #888;
-        }
-
-        /* Handle on hover */
-        &-thumb:hover {
-          background: #555;
-        }
+    /* Track */
+    &-track {
+      background: #f1f1f1;
     }
+
+    /* Handle */
+    &-thumb {
+      background: #888;
+    }
+
+    /* Handle on hover */
+    &-thumb:hover {
+      background: #555;
+    }
+  }
 }

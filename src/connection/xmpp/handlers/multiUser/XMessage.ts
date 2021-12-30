@@ -14,9 +14,14 @@ export default class extends AbstractHandler {
          let host = new JID(inviteElement.attr('from'));
          let reason = inviteElement.find('reason').text();
          let password = inviteElement.find('password').text();
-         let lastnoti : Notice = this.account.getNoticeManager().getNotices().getLastItem();
-         if (lastnoti===null||lastnoti.getTitle()!==Translation.t('muc_invitation')||lastnoti.getDescription()!==`for ${from.bare}`||lastnoti.getType()!==NOTICETYPE.invitation||lastnoti.callFunction()!==NOTICEFUNCTION.multiUserInvitation)
-         {
+         let lastnoti: Notice = this.account.getNoticeManager().getNotices().getLastItem();
+         if (
+            lastnoti === null ||
+            lastnoti.getTitle() !== Translation.t('muc_invitation') ||
+            lastnoti.getDescription() !== `for ${from.bare}` ||
+            lastnoti.getType() !== NOTICETYPE.invitation ||
+            lastnoti.callFunction() !== NOTICEFUNCTION.multiUserInvitation
+         ) {
             this.account.getNoticeManager().addNotice({
                title: Translation.t('muc_invitation'),
                description: `for ${from.bare}`,

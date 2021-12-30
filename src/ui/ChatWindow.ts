@@ -22,7 +22,7 @@ import interact from 'interactjs';
 import Translation from '../util/Translation';
 import MultiUserContact from '@src/MultiUserContact';
 import UUID from '@util/UUID';
-import alertDialog from './dialogs/AlertDialog'
+import alertDialog from './dialogs/AlertDialog';
 import confirmDialog from './dialogs/confirm';
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
@@ -100,9 +100,12 @@ export default class ChatWindow {
       this.element.attr('data-type', this.contact.getType());
 
       if (this.contact.isGroupChat()) {
-         if (this.element.attr('data-presence')==='offline')
-         {
-            (<MultiUserContact>this.contact).setNickname(this.getContact().getAccount().getDefaultNickname()===undefined?this.getContact().getAccount().getJID().node:this.getContact().getAccount().getDefaultNickname());
+         if (this.element.attr('data-presence') === 'offline') {
+            (<MultiUserContact>this.contact).setNickname(
+               this.getContact().getAccount().getDefaultNickname() === undefined
+                  ? this.getContact().getAccount().getJID().node
+                  : this.getContact().getAccount().getDefaultNickname()
+            );
             (<MultiUserContact>this.contact).join();
          }
 
@@ -121,52 +124,48 @@ export default class ChatWindow {
       }
 
       this.getAccount().triggerChatWindowInitializedHook(this, contact);
-      this.element.on('contextmenu', '.jsxc-in, .jsxc-probably_in, .jsxc-out, .jsxc-probably_out', {ref:this},this.openContextMenu);
+      this.element.on(
+         'contextmenu',
+         '.jsxc-in, .jsxc-probably_in, .jsxc-out, .jsxc-probably_out',
+         { ref: this },
+         this.openContextMenu
+      );
 
-      this.element.on('mousedown click', (ev) => {
-          if (!($(ev.target).parents('.jsxc-custom-menu').length > 0)) {
+      this.element.on('mousedown click', ev => {
+         if (!($(ev.target).parents('.jsxc-custom-menu').length > 0)) {
             $('.jsxc-custom-menu').hide(250);
-          }
+         }
       });
 
       let messageAreaElement = this.element.find('.jsxc-message-area');
       let anchorElement = this.element.find('.jsxc-message-area-anchor');
       messageAreaElement.on('scroll', function () {
-         if (messageAreaElement.text().trim().length>0)
-         {
-            let scrollHeight: number   = messageAreaElement[0].scrollHeight;
-            let clientHeight : number  = messageAreaElement[0].clientHeight;
-            let scrollTop : number     = messageAreaElement[0].scrollTop;
-            if (scrollTop<0)
-               scrollTop=scrollTop*(-1);
+         if (messageAreaElement.text().trim().length > 0) {
+            let scrollHeight: number = messageAreaElement[0].scrollHeight;
+            let clientHeight: number = messageAreaElement[0].clientHeight;
+            let scrollTop: number = messageAreaElement[0].scrollTop;
+            if (scrollTop < 0) scrollTop = scrollTop * -1;
 
-            if (!(clientHeight + 42 < scrollHeight - scrollTop))
-            {
+            if (!(clientHeight + 42 < scrollHeight - scrollTop)) {
                anchorElement.hide(400);
-            }
-            else
-            if (scrollTop>50)
-            {
+            } else if (scrollTop > 50) {
                anchorElement.show(400);
-            }
-            else
-            {
+            } else {
                anchorElement.hide(400);
             }
-         }
-         else {
+         } else {
             anchorElement.hide(400);
          }
       });
 
-      anchorElement.on('click',()=>{
+      anchorElement.on('click', () => {
          this.scrollMessageAreaToBottom();
       });
 
       let updateUnreadMessage = () => {
          let unreadMessages = this.contact.getTranscript().getNumberOfUnreadMessages();
-         
-         if (unreadMessages > 0 && this.element.hasClass("jsxc-minimized")) {
+
+         if (unreadMessages > 0 && this.element.hasClass('jsxc-minimized')) {
             this.element.find('.jsxc-bar--window.jsxc-bar').addClass('jsxc-blink-unread-msg');
          } else {
             this.element.find('.jsxc-bar--window.jsxc-bar').removeClass('jsxc-blink-unread-msg');
@@ -179,203 +178,260 @@ export default class ChatWindow {
       updateUnreadMessage();
    }
 
-   private initFormatTools() :void {
+   private initFormatTools(): void {
       let formatTools = this.element.find('.jsxc-format-input');
       let useFormatTools = Client.getOption('useFormatTools') || false;
-      if (useFormatTools)
-      {
+      if (useFormatTools) {
          formatTools.removeClass('jsxc-hidden');
-      }
-      else 
-      {
+      } else {
          formatTools.addClass('jsxc-hidden');
       }
 
-      formatTools.find('.jsxc-format-bold').on('click',()=>{this.insertFormatedText('bold');});
-      formatTools.find('.jsxc-format-italic').on('click',()=>{this.insertFormatedText('italic');});
-      formatTools.find('.jsxc-format-code').on('click',()=>{this.insertFormatedText('code');});
-      formatTools.find('.jsxc-format-strike').on('click',()=>{this.insertFormatedText('strike');});
-
-      formatTools.find('.jsxc-format-help').on('click',()=>{
-         alertDialog(Translation.t('show_format_pref'),Translation.t('help_format_tools'),Translation.t('Close'));
+      formatTools.find('.jsxc-format-bold').on('click', () => {
+         this.insertFormatedText('bold');
+      });
+      formatTools.find('.jsxc-format-italic').on('click', () => {
+         this.insertFormatedText('italic');
+      });
+      formatTools.find('.jsxc-format-code').on('click', () => {
+         this.insertFormatedText('code');
+      });
+      formatTools.find('.jsxc-format-strike').on('click', () => {
+         this.insertFormatedText('strike');
       });
 
-      formatTools.find('.jsxc-format-close').on('click',()=>{
-         confirmDialog(Translation.t('close_toolbar_message')).getPromise().then(()=>{
-            Client.setOption('useFormatTools',false);
-            formatTools.addClass('jsxc-hidden');
-         }).catch(()=>{
-            console.debug('confirm canceled');
-         });
+      formatTools.find('.jsxc-format-help').on('click', () => {
+         alertDialog(Translation.t('show_format_pref'), Translation.t('help_format_tools'), Translation.t('Close'));
+      });
+
+      formatTools.find('.jsxc-format-close').on('click', () => {
+         confirmDialog(Translation.t('close_toolbar_message'))
+            .getPromise()
+            .then(() => {
+               Client.setOption('useFormatTools', false);
+               formatTools.addClass('jsxc-hidden');
+            })
+            .catch(() => {
+               //console.debug('confirm canceled');
+            });
       });
    }
 
-   private insertFormatedText(type: string):void {
-
-      let BOLD : string = "*";
-      let ITALIC : string  = "_";
-      let CODE : string  = "`";
-      let STRIKE : string  = "~";
+   private insertFormatedText(type: string): void {
+      let BOLD: string = '*';
+      let ITALIC: string = '_';
+      let CODE: string = '`';
+      let STRIKE: string = '~';
 
       let selStart = (<HTMLInputElement>this.inputElement[0]).selectionStart;
-      let selEnd =  (<HTMLInputElement>this.inputElement[0]).selectionEnd;
-      
-      let selected = selStart===selEnd?false:true;
+      let selEnd = (<HTMLInputElement>this.inputElement[0]).selectionEnd;
+
+      let selected = selStart === selEnd ? false : true;
 
       let selectedText = selected ? this.inputElement.val().toString().substring(selStart, selEnd) : '';
 
-      if (selectedText.trim().length<selectedText.length)
-      {
-         selectedText=selectedText.trim();
-         selEnd=selStart+selectedText.length;
+      if (selectedText.trim().length < selectedText.length) {
+         selectedText = selectedText.trim();
+         selEnd = selStart + selectedText.length;
       }
 
       switch (type) {
-         case "bold":
-               if (selectedText.length != 0) {
+         case 'bold':
+            if (selectedText.length !== 0) {
                let text = this.inputElement.val().toString();
-               text = text.substring(0,selStart)+BOLD+text.substring(selStart,selEnd)+BOLD+text.substring(selEnd);
+               text =
+                  text.substring(0, selStart) + BOLD + text.substring(selStart, selEnd) + BOLD + text.substring(selEnd);
                this.inputElement.val(text);
-               } else {
-                  let text = this.inputElement.val().toString();
-                  text = [text.slice(0, (<HTMLInputElement>this.inputElement[0]).selectionStart), BOLD, text.slice((<HTMLInputElement>this.inputElement[0]).selectionStart)].join('')
-                  this.inputElement.val(text);
-               }
-               return;
-         case "italic":
-               if (selectedText.length!= 0) {
+            } else {
                let text = this.inputElement.val().toString();
-               text = text.substring(0,selStart)+ITALIC+text.substring(selStart,selEnd)+ITALIC+text.substring(selEnd);
+               text = [
+                  text.slice(0, (<HTMLInputElement>this.inputElement[0]).selectionStart),
+                  BOLD,
+                  text.slice((<HTMLInputElement>this.inputElement[0]).selectionStart),
+               ].join('');
                this.inputElement.val(text);
-               } else {
+            }
+            return;
+         case 'italic':
+            if (selectedText.length !== 0) {
                let text = this.inputElement.val().toString();
-               text = [text.slice(0, (<HTMLInputElement>this.inputElement[0]).selectionStart), ITALIC, text.slice((<HTMLInputElement>this.inputElement[0]).selectionStart)].join('')
+               text =
+                  text.substring(0, selStart) +
+                  ITALIC +
+                  text.substring(selStart, selEnd) +
+                  ITALIC +
+                  text.substring(selEnd);
                this.inputElement.val(text);
-               }
-               return;
-         case "code":
-               if (selectedText.length != 0) {
+            } else {
                let text = this.inputElement.val().toString();
-               text = text.substring(0,selStart)+CODE+text.substring(selStart,selEnd)+CODE+text.substring(selEnd);
+               text = [
+                  text.slice(0, (<HTMLInputElement>this.inputElement[0]).selectionStart),
+                  ITALIC,
+                  text.slice((<HTMLInputElement>this.inputElement[0]).selectionStart),
+               ].join('');
                this.inputElement.val(text);
-               } else {
-                  let text = this.inputElement.val().toString();
-                  text = [text.slice(0, (<HTMLInputElement>this.inputElement[0]).selectionStart), CODE, text.slice((<HTMLInputElement>this.inputElement[0]).selectionStart)].join('')
-                  this.inputElement.val(text);
-               }
-               return;
-         case "strike":
-               if (selectedText.length != 0) {
+            }
+            return;
+         case 'code':
+            if (selectedText.length !== 0) {
                let text = this.inputElement.val().toString();
-               text = text.substring(0,selStart)+STRIKE+text.substring(selStart,selEnd)+STRIKE+text.substring(selEnd);
+               text =
+                  text.substring(0, selStart) + CODE + text.substring(selStart, selEnd) + CODE + text.substring(selEnd);
                this.inputElement.val(text);
-               } else {
-                  let text = this.inputElement.val().toString();
-                  text = [text.slice(0, (<HTMLInputElement>this.inputElement[0]).selectionStart), STRIKE, text.slice((<HTMLInputElement>this.inputElement[0]).selectionStart)].join('')
-                  this.inputElement.val(text);
-               }
-               return;
+            } else {
+               let text = this.inputElement.val().toString();
+               text = [
+                  text.slice(0, (<HTMLInputElement>this.inputElement[0]).selectionStart),
+                  CODE,
+                  text.slice((<HTMLInputElement>this.inputElement[0]).selectionStart),
+               ].join('');
+               this.inputElement.val(text);
+            }
+            return;
+         case 'strike':
+            if (selectedText.length !== 0) {
+               let text = this.inputElement.val().toString();
+               text =
+                  text.substring(0, selStart) +
+                  STRIKE +
+                  text.substring(selStart, selEnd) +
+                  STRIKE +
+                  text.substring(selEnd);
+               this.inputElement.val(text);
+            } else {
+               let text = this.inputElement.val().toString();
+               text = [
+                  text.slice(0, (<HTMLInputElement>this.inputElement[0]).selectionStart),
+                  STRIKE,
+                  text.slice((<HTMLInputElement>this.inputElement[0]).selectionStart),
+               ].join('');
+               this.inputElement.val(text);
+            }
+            return;
       }
    }
 
-   public openContextMenu(event)
-   {
-        if ($(event.target).prop('tagName').toLowerCase()==='a')
-        {
-           return;
-        }
-        let element = event.data.ref.element;
-        event.preventDefault();
+   public openContextMenu(event) {
+      if ($(event.target).prop('tagName').toLowerCase() === 'a') {
+         return;
+      }
+      let element = event.data.ref.element;
+      event.preventDefault();
 
-        // Show contextmenu
-        let xoffset = event.currentTarget.offsetLeft+event.offsetX;
-        let yoffset =  (event.pageY-$(event.target).closest('div.jsxc-message-area').offset().top);
+      // Show contextmenu
+      let xoffset = event.currentTarget.offsetLeft + event.offsetX;
+      let yoffset = event.pageY - $(event.target).closest('div.jsxc-message-area').offset().top;
 
-        let contact = null;
-        let _self : ChatWindow = event.data.ref;
-        let refmessage = $(event.target).closest('div.jsxc-chatmessage').attr('id');
-        let msg : IMessage = _self.getTranscript().getMessage(refmessage);
-        if (msg.isRetracted())
-        {
-           return;
-        }
+      let contact = null;
+      let _self: ChatWindow = event.data.ref;
+      let refmessage = $(event.target).closest('div.jsxc-chatmessage').attr('id');
+      let msg: IMessage = _self.getTranscript().getMessage(refmessage);
+      if (msg.isRetracted()) {
+         return;
+      }
 
-        if (!$(event.currentTarget).hasClass('jsxc-out'))
-        {
-           contact = $(event.target).closest('div.jsxc-chatmessage').attr('data-name');
-           if (!contact) {
-              contact = $(event.target).closest('li.jsxc-window-item').attr('data-contact-id');
-           }
-        }
+      if (!$(event.currentTarget).hasClass('jsxc-out')) {
+         contact = $(event.target).closest('div.jsxc-chatmessage').attr('data-name');
+         if (!contact) {
+            contact = $(event.target).closest('li.jsxc-window-item').attr('data-contact-id');
+         }
+      }
 
-        if ($(event.target).closest('div.jsxc-chatmessage').hasClass('jsxc-in')||$(event.target).closest('div.jsxc-chatmessage').hasClass('jsxc-probably_in'))
-        {
-            element.find('.jsxc-custom-menu').finish().toggle().
+      if (
+         $(event.target).closest('div.jsxc-chatmessage').hasClass('jsxc-in') ||
+         $(event.target).closest('div.jsxc-chatmessage').hasClass('jsxc-probably_in')
+      ) {
+         element
+            .find('.jsxc-custom-menu')
+            .finish()
+            .toggle()
             // In the right position (the mouse)
-            css({
+            .css({
                top: yoffset + 'px',
-               left: xoffset  + 'px',
-               right: 'unset'
+               left: xoffset + 'px',
+               right: 'unset',
             });
-        }
-        else
-        {
-            element.find('.jsxc-custom-menu').finish().toggle().
+      } else {
+         element
+            .find('.jsxc-custom-menu')
+            .finish()
+            .toggle()
             // In the right position (the mouse)
-            css({
-               top:yoffset + 'px',
-               right: event.currentTarget.offsetWidth-event.offsetX-10 + 'px',
-               left: 'unset'
+            .css({
+               top: yoffset + 'px',
+               right: event.currentTarget.offsetWidth - event.offsetX - 10 + 'px',
+               left: 'unset',
             });
-        }
+      }
 
-        element.find('.jsxc-custom-menu').empty();
-        element.find('.jsxc-custom-menu').append('<div class="jsxc-context-menu-contact">'+(contact!==null?contact:Translation.t('Myself'))+'</div>');
+      element.find('.jsxc-custom-menu').empty();
+      element
+         .find('.jsxc-custom-menu')
+         .append(
+            '<div class="jsxc-context-menu-contact">' +
+               (contact !== null ? contact : Translation.t('Myself')) +
+               '</div>'
+         );
 
-        let liQuote = $('<li data-action="jsxc-context-menu-quote" data-refmessage="'+refmessage+'">'+Translation.t('Quote')+'</li>');
-        element.find('.jsxc-custom-menu').append(liQuote);
+      let liQuote = $(
+         '<li data-action="jsxc-context-menu-quote" data-refmessage="' +
+            refmessage +
+            '">' +
+            Translation.t('Quote') +
+            '</li>'
+      );
+      element.find('.jsxc-custom-menu').append(liQuote);
 
-        liQuote.on('click',{ref:event.data.ref},function(e)
-        {
-            $('.jsxc-custom-menu').hide(250);
-            let refmessage = $(e.target).attr('data-refmessage');
-            let msg : IMessage = _self.getTranscript().getMessage(refmessage);
-            _self.selectMessageForQuote(msg,contact);
-        });
+      liQuote.on('click', { ref: event.data.ref }, function (e) {
+         $('.jsxc-custom-menu').hide(250);
+         let refmessage = $(e.target).attr('data-refmessage');
+         let msg: IMessage = _self.getTranscript().getMessage(refmessage);
+         _self.selectMessageForQuote(msg, contact);
+      });
 
-        if ((msg.getDirection()===DIRECTION.OUT||msg.getDirection()===DIRECTION.PROBABLY_OUT)&&!_self.getTranscript().getMessage(refmessage).isRetracted())
-        {
-            let firstMessage = _self.getTranscript().getLatestOutgoingMessageForEdit();
+      if (
+         (msg.getDirection() === DIRECTION.OUT || msg.getDirection() === DIRECTION.PROBABLY_OUT) &&
+         !_self.getTranscript().getMessage(refmessage).isRetracted()
+      ) {
+         let firstMessage = _self.getTranscript().getLatestOutgoingMessageForEdit();
 
-            if (firstMessage.getAttrId()===msg.getAttrId()||Client.getOption("allowAllMessagesCorrection")|| false)
-            {
-               let liEdit = $('<li data-action="jsxc-context-menu-quote" data-refmessage="'+refmessage+'">'+Translation.t('Edit')+'</li>');        
-               element.find('.jsxc-custom-menu').append(liEdit);
-               liEdit.on('click',{ref:event.data.ref},function(e)
-               {
-                  $('.jsxc-custom-menu').hide(250);
-                  let refmessage = $(e.target).attr('data-refmessage');
-                  let msg : IMessage = _self.getTranscript().getMessage(refmessage);
-
-                  _self.selectEditMessage(msg);
-               });
-            }
-
-            let liRemove = $('<li data-action="jsxc-context-menu-quote" data-refmessage="'+refmessage+'">'+Translation.t('Remove')+'</li>');        
-            element.find('.jsxc-custom-menu').append(liRemove);
-            liRemove.on('click',{ref:event.data.ref},function(e)
-            {
+         if (firstMessage.getAttrId() === msg.getAttrId() || Client.getOption('allowAllMessagesCorrection') || false) {
+            let liEdit = $(
+               '<li data-action="jsxc-context-menu-quote" data-refmessage="' +
+                  refmessage +
+                  '">' +
+                  Translation.t('Edit') +
+                  '</li>'
+            );
+            element.find('.jsxc-custom-menu').append(liEdit);
+            liEdit.on('click', { ref: event.data.ref }, function (e) {
                $('.jsxc-custom-menu').hide(250);
                let refmessage = $(e.target).attr('data-refmessage');
-               let msg : IMessage = _self.getTranscript().getMessage(refmessage);
+               let msg: IMessage = _self.getTranscript().getMessage(refmessage);
 
-               _self.selectMessageForRetract(msg);
+               _self.selectEditMessage(msg);
             });
-        }
+         }
+
+         let liRemove = $(
+            '<li data-action="jsxc-context-menu-quote" data-refmessage="' +
+               refmessage +
+               '">' +
+               Translation.t('Remove') +
+               '</li>'
+         );
+         element.find('.jsxc-custom-menu').append(liRemove);
+         liRemove.on('click', { ref: event.data.ref }, function (e) {
+            $('.jsxc-custom-menu').hide(250);
+            let refmessage = $(e.target).attr('data-refmessage');
+            let msg: IMessage = _self.getTranscript().getMessage(refmessage);
+
+            _self.selectMessageForRetract(msg);
+         });
+      }
    }
 
-   private selectMessageForRetract(msg: IMessage)
-   {
+   private selectMessageForRetract(msg: IMessage) {
       let message = new Message({
          peer: this.contact.getJid(),
          direction: Message.DIRECTION.OUT,
@@ -391,54 +447,51 @@ export default class ChatWindow {
 
       let pipe = this.getAccount().getPipe('preSendMessage');
 
-      pipe.run(this.contact, message).then(([contact, message]) => {
-         this.getAccount().getConnection().sendRetractMessage(<Message>message);
-         this.editMessage=null;
-
-      }).catch(err => {
-         Log.warn('Error during preSendMessage pipe', err);
-         this.editMessage=null;
-      });
+      pipe
+         .run(this.contact, message)
+         .then(([contact, message]) => {
+            this.getAccount()
+               .getConnection()
+               .sendRetractMessage(<Message>message);
+            this.editMessage = null;
+         })
+         .catch(err => {
+            Log.warn('Error during preSendMessage pipe', err);
+            this.editMessage = null;
+         });
       this.clearAttachment();
    }
 
-   private selectMessageForQuote(msg:IMessage,contact:string){
+   private selectMessageForQuote(msg: IMessage, contact: string) {
       let message = msg.getPlaintextMessage();
       let msgarr = message.split('\n');
-      if (msgarr.join('').trim().length===0)
-      {
+      if (msgarr.join('').trim().length === 0) {
          message = msg.getAttachment().getData();
-      }
-      else
-         message = msgarr.join('\n> ');
+      } else message = msgarr.join('\n> ');
 
-      if (contact===null)
-      {
-         if (this.contact.isGroupChat())
-         {
+      if (contact === null) {
+         if (this.contact.isGroupChat()) {
             contact = (<MultiUserContact>this.getContact()).getNickname();
-         }
-         else
-         {
-            contact =  this.getAccount().getContact().getJid().bare;
+         } else {
+            contact = this.getAccount().getContact().getJid().bare;
          }
       }
 
       setTimeout(() => this.scrollMessageAreaToBottom(), 500);
 
-      this.inputElement.val('> '+contact+':\n> '+message+'\n\n');
+      this.inputElement.val('> ' + contact + ':\n> ' + message + '\n\n');
       this.inputElement.focus();
       this.resizeInputArea();
    }
 
-   public selectEditMessage(message: IMessage)
-   {
+   public selectEditMessage(message: IMessage) {
       let chain = this.getTranscript().getReplaceMessageChainFromMessage(message);
-      this.editMessage=message.getReplaceId()!==null?this.getTranscript().findMessageByAttrId(message.getReplaceId()):message;
+      this.editMessage =
+         message.getReplaceId() !== null ? this.getTranscript().findMessageByAttrId(message.getReplaceId()) : message;
 
-      this.inputElement.val('> '+chain[chain.length-1].getPlaintextMessage());
+      this.inputElement.val('> ' + chain[chain.length - 1].getPlaintextMessage());
       this.inputElement.focus();
-      this.resizeInputArea()
+      this.resizeInputArea();
    }
 
    public getTranscript(): Transcript {
@@ -534,12 +587,10 @@ export default class ChatWindow {
       if (message.getDOM().length > 0) {
          message.getDOM().replaceWith(messageElement);
       } else {
-         if (message.getDirection()===DIRECTION.IN||message.getDirection()===DIRECTION.PROBABLY_IN)
-         {
-            let oldout=this.element.find('div[id="'+message.getAttrId()+'"]');
-            if (oldout.length>0)
-            {
-               oldout.hide();  // hide old outgoing message if > 1 client with same bare jid have same nickname
+         if (message.getDirection() === DIRECTION.IN || message.getDirection() === DIRECTION.PROBABLY_IN) {
+            let oldout = this.element.find('div[id="' + message.getAttrId() + '"]');
+            if (oldout.length > 0) {
+               oldout.hide(); // hide old outgoing message if > 1 client with same bare jid have same nickname
                messageElement.removeClass('jsxc-in').addClass('jsxc-out');
             }
          }
@@ -547,24 +598,24 @@ export default class ChatWindow {
          this.element.find('.jsxc-message-area').prepend(messageElement);
       }
 
-      if (message.getDirection()===DIRECTION.SYS)
-      {
+      if (message.getDirection() === DIRECTION.SYS) {
          let disableJoinLeaveMessages = Client.getOption('disableJoinLeaveMessages') || false;
-         if (disableJoinLeaveMessages)
-         {
-
+         if (disableJoinLeaveMessages) {
             if (
-               message.getPlaintextMessage().indexOf(Translation.t('entered_the_room', {
-                  nickname: '',
-                  escapeInterpolation: true,
-               }))>-1||
-               message.getPlaintextMessage().indexOf(Translation.t('left_the_building', {
-                  nickname: '',
-                  escapeInterpolation: true,
-               }))>-1||
-               message.getPlaintextMessage().indexOf(Translation.t('You_left_the_building'))>-1
-               )
-            {
+               message.getPlaintextMessage().indexOf(
+                  Translation.t('entered_the_room', {
+                     nickname: '',
+                     escapeInterpolation: true,
+                  })
+               ) > -1 ||
+               message.getPlaintextMessage().indexOf(
+                  Translation.t('left_the_building', {
+                     nickname: '',
+                     escapeInterpolation: true,
+                  })
+               ) > -1 ||
+               message.getPlaintextMessage().indexOf(Translation.t('You_left_the_building')) > -1
+            ) {
                messageElement.hide();
             }
          }
@@ -738,19 +789,28 @@ export default class ChatWindow {
          }
       });
 
-      this.element.find('.jsxc-messagesearch-input').on('keyup',this.searchMessage);
+      this.element.find('.jsxc-messagesearch-input').on('keyup', this.searchMessage);
       elementHandler.add(this.element.find('.jsxc-message-search-off')[0], ev => {
          this.clearSearch(ev);
       });
    }
 
-   private clearSearch(ev) : void {
+   private clearSearch(ev): void {
       ev.stopPropagation();
       this.element.find('.jsxc-message-search').removeClass('jsxc-hidden');
       this.element.find('.jsxc-message-search-off').addClass('jsxc-hidden');
       this.element.find('.jsxc-search-negativeresult').removeClass('jsxc-search-negativeresult');
-      this.element.find('.jsxc-search-positiveresult').each(function(){
-         $(this).parent().html($(this).parent()[0].innerText.replace(/(?:(https?\:\/\/[^\s]+))/m, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'));
+      this.element.find('.jsxc-search-positiveresult').each(function () {
+         $(this)
+            .parent()
+            .html(
+               $(this)
+                  .parent()[0]
+                  .innerText.replace(
+                     /(?:(https?\:\/\/[^\s]+))/m,
+                     '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
+                  )
+            );
       });
    }
 
@@ -758,28 +818,24 @@ export default class ChatWindow {
       ev.stopPropagation();
 
       let inputtext = $(ev.target).val();
-      if (ev.which === ENTER_KEY && !ev.shiftKey && inputtext!==undefined)
-      {
+      if (ev.which === ENTER_KEY && !ev.shiftKey && inputtext !== undefined) {
          inputtext = inputtext.toString().trim();
-         if (inputtext!=='' && inputtext.length >= 3) {
-            let messages = this.element.find(".jsxc-chatmessage");
+         if (inputtext !== '' && inputtext.length >= 3) {
+            let messages = this.element.find('.jsxc-chatmessage');
             let iCaseInput = inputtext.toLocaleLowerCase();
             for (let message of messages) {
-
-               if ($(message).text().toLocaleLowerCase().indexOf(iCaseInput)===-1)
-               {
+               if ($(message).text().toLocaleLowerCase().indexOf(iCaseInput) === -1) {
                   $(message).addClass('jsxc-search-negativeresult');
-               }
-               else
-               {
-                  if ($(message).find('.jsxc-content').find('.jsxc-attachment.jsxc-text').length>0)
-                  {
-                     let text = this.replaceWithSpan($(message).find('.jsxc-content').find('.jsxc-attachment.jsxc-text'),inputtext);
+               } else {
+                  if ($(message).find('.jsxc-content').find('.jsxc-attachment.jsxc-text').length > 0) {
+                     let text = this.replaceWithSpan(
+                        $(message).find('.jsxc-content').find('.jsxc-attachment.jsxc-text'),
+                        inputtext
+                     );
                      $(message).find('.jsxc-content').find('.jsxc-attachment.jsxc-text').html(text);
                   }
-                  if ($(message).find('.jsxc-content').find('p').text().toLocaleLowerCase().indexOf(iCaseInput)>=0)
-                  {
-                     let text = this.replaceWithSpan($(message).find('.jsxc-content').find('p'),inputtext);
+                  if ($(message).find('.jsxc-content').find('p').text().toLocaleLowerCase().indexOf(iCaseInput) >= 0) {
+                     let text = this.replaceWithSpan($(message).find('.jsxc-content').find('p'), inputtext);
                      $(message).find('.jsxc-content').find('p').html(text);
                   }
                }
@@ -793,12 +849,11 @@ export default class ChatWindow {
 
    private replaceWithSpan(el: JQuery<HTMLElement>, replacetext: string): string {
       let cText = el[0].innerText; //jquery.text() removes line breaks
-      let pattern = new RegExp('('+replacetext.toLocaleLowerCase()+')','gmi')
+      let pattern = new RegExp('(' + replacetext.toLocaleLowerCase() + ')', 'gmi');
       let results = cText.match(pattern);
       let resultset = new Set(results);
-      for (let replace of resultset)
-      {
-         cText = cText.replace(replace,'<span class="jsxc-search-positiveresult">'+replace+'</span>');
+      for (let replace of resultset) {
+         cText = cText.replace(replace, '<span class="jsxc-search-positiveresult">' + replace + '</span>');
       }
 
       return cText;
@@ -826,10 +881,12 @@ export default class ChatWindow {
       ev.stopPropagation();
       // let message = <string> $(ev.target).val();
 
-      if ((ev.which === BACKSPACE_KEY || ev.which === DELETE_KEY) && (this.inputElement.val()==='' || this.inputElement.val()==='>'))
-      {
-          this.editMessage=null;
-          this.inputElement.val('');
+      if (
+         (ev.which === BACKSPACE_KEY || ev.which === DELETE_KEY) &&
+         (this.inputElement.val() === '' || this.inputElement.val() === '>')
+      ) {
+         this.editMessage = null;
+         this.inputElement.val('');
       }
 
       if (ev.which === ENTER_KEY && !ev.shiftKey) {
@@ -839,11 +896,14 @@ export default class ChatWindow {
       }
 
       if (ev.which === ESC_KEY) {
-         this.editMessage=null;
+         this.editMessage = null;
          this.getController().close();
       }
 
-      if (ev.which === UP_KEY && (this.inputElement.val()===null||this.inputElement.val().toString().trim().length===0)) {
+      if (
+         ev.which === UP_KEY &&
+         (this.inputElement.val() === null || this.inputElement.val().toString().trim().length === 0)
+      ) {
          let firstMessage = this.getTranscript().getLatestOutgoingMessageForEdit();
          this.selectEditMessage(firstMessage);
       }
@@ -910,7 +970,7 @@ export default class ChatWindow {
    };
 
    private sendOutgoingMessage(messageString: string) {
-      let plainTextMessage = this.editMessage!=null?messageString.substring(1).trim():messageString;
+      let plainTextMessage = this.editMessage != null ? messageString.substring(1).trim() : messageString;
       let message = new Message({
          peer: this.contact.getJid(),
          direction: Message.DIRECTION.OUT,
@@ -920,21 +980,26 @@ export default class ChatWindow {
          unread: false,
       });
 
-      message.setReplaceId(this.editMessage!=null?this.editMessage.getAttrId():null);
+      message.setReplaceId(this.editMessage != null ? this.editMessage.getAttrId() : null);
 
-      if (this.attachmentDeposition!==undefined||(plainTextMessage!==null&&plainTextMessage!==undefined&&plainTextMessage.trim().length>0))
-      {
+      if (
+         this.attachmentDeposition !== undefined ||
+         (plainTextMessage !== null && plainTextMessage !== undefined && plainTextMessage.trim().length > 0)
+      ) {
          this.getTranscript().pushMessage(message);
 
          let pipe = this.getAccount().getPipe('preSendMessage');
 
-         pipe.run(this.contact, message).then(([contact, message]) => {
-            this.getAccount().getConnection().sendMessage(message);
-            this.editMessage=null;
-         }).catch(err => {
-            Log.warn('Error during preSendMessage pipe', err);
-            this.editMessage=null;
-         });
+         pipe
+            .run(this.contact, message)
+            .then(([contact, message]) => {
+               this.getAccount().getConnection().sendMessage(message);
+               this.editMessage = null;
+            })
+            .catch(err => {
+               Log.warn('Error during preSendMessage pipe', err);
+               this.editMessage = null;
+            });
       }
 
       this.clearAttachment();
@@ -988,7 +1053,10 @@ export default class ChatWindow {
       }
 
       if (inputElement.val()) {
-         this.element.find('.jsxc-textinput-length').empty().text(Translation.t('message_length')+': '+inputElement.val().toString().length);
+         this.element
+            .find('.jsxc-textinput-length')
+            .empty()
+            .text(Translation.t('message_length') + ': ' + inputElement.val().toString().length);
          inputElement.parent().addClass('jsxc-contains-val');
       } else {
          this.element.find('.jsxc-textinput-length').empty();
@@ -1016,15 +1084,13 @@ export default class ChatWindow {
             },
          })
          .on('resizestart', () => {
-            if ($('.jsxc-fullscreen.jsxc-two-columns').length>0)
-            {
+            if ($('.jsxc-fullscreen.jsxc-two-columns').length > 0) {
                return;
             }
             fadeElement.addClass('jsxc-window-fade--resizing');
          })
          .on('resizemove', ev => {
-            if ($('.jsxc-fullscreen.jsxc-two-columns').length>0)
-            {
+            if ($('.jsxc-fullscreen.jsxc-two-columns').length > 0) {
                return;
             }
             let barHeight = element.find('.jsxc-bar--window').height();
@@ -1045,8 +1111,7 @@ export default class ChatWindow {
 
       $(window).on('resize', () => {
          let keepWindowSizeOnResize = Client.getOption('keepWindowSizeOnResize') || false;
-         if (!keepWindowSizeOnResize)
-         {
+         if (!keepWindowSizeOnResize) {
             fadeElement.css({
                width: '',
                height: '',
@@ -1061,27 +1126,22 @@ export default class ChatWindow {
       let emoticonListElement = this.element.find('.jsxc-menu--emoticons ul');
       let emoticonList = Emoticons.getDefaultEmoticonList();
 
-      let findInList = function (list:string[], filter:string):boolean{         
-         for (let item of list)
-         {
-            if (item.startsWith(filter))
-            {
+      let findInList = function (list: string[], filter: string): boolean {
+         for (let item of list) {
+            if (item.startsWith(filter)) {
                return true;
             }
          }
          return false;
       };
 
-      var addSmileys = (emoticonList, emoticonListElement, filterElement) => {
+      let addSmileys = (emoticonList, emoticonListElement, filterElement) => {
          emoticonListElement.empty();
-         let filter = filterElement.val()!==null?filterElement.val().toString():null;
-         let ids = new Array();;
-         for (let type in emoticonList)
-         {
-            for (let smiley of emoticonList[type])
-            {
-               if (filter===null||filter===''||findInList(smiley.keywords,filter))
-               {
+         let filter = filterElement.val() !== null ? filterElement.val().toString() : null;
+         let ids = [];
+         for (let type in emoticonList) {
+            for (let smiley of emoticonList[type]) {
+               if (filter === null || filter === '' || findInList(smiley.keywords, filter)) {
                   let li = $('<li>');
                   emoticonListElement.append(li);
                   li.append(smiley.emoji);
@@ -1089,10 +1149,9 @@ export default class ChatWindow {
                   let id = UUID.v4();
                   ids.push(id);
                   li.attr('id', id);
-                  $(emoticonListElement).on('click','li[id="'+id+'"]',(ev) => {
-                     for (let strid in ids)
-                     {
-                        $(document).off('click','li[id="'+strid+'"]');
+                  $(emoticonListElement).on('click', 'li[id="' + id + '"]', ev => {
+                     for (let strid of ids) {
+                        $(document).off('click', 'li[id="' + strid + '"]');
                      }
                      let inputElement = this.element.find('.jsxc-message-input');
                      let inputValue = <string>inputElement.val() || '';
@@ -1110,7 +1169,7 @@ export default class ChatWindow {
                      inputElement.val(newValue);
                      inputElement.focus();
                      filterElement.val(null);
-                     addSmileys(emoticonList,emoticonListElement,jsxcemoticonsearch);
+                     addSmileys(emoticonList, emoticonListElement, jsxcemoticonsearch);
                   });
                }
             }
@@ -1118,19 +1177,17 @@ export default class ChatWindow {
       };
 
       let jsxcemoticonsearch = this.element.find('.jsxc-emoticon-search');
-      addSmileys(emoticonList,emoticonListElement,jsxcemoticonsearch);
-      jsxcemoticonsearch.on("keyup",(ev:any)=>{
-         var code = ev.keyCode || ev.which;
-         if (code===undefined)
-         {
+      addSmileys(emoticonList, emoticonListElement, jsxcemoticonsearch);
+      jsxcemoticonsearch.on('keyup', (ev: any) => {
+         let code = ev.keyCode || ev.which;
+         if (code === undefined) {
             jsxcemoticonsearch.val(null);
-            addSmileys(emoticonList,emoticonListElement,jsxcemoticonsearch);
+            addSmileys(emoticonList, emoticonListElement, jsxcemoticonsearch);
             return;
-         }
-         else {
-            var charTyped = String.fromCharCode(code);
-            if (/[a-zA-Z0-9]/g.test(charTyped)||code==8) {
-               addSmileys(emoticonList,emoticonListElement,jsxcemoticonsearch);
+         } else {
+            let charTyped = String.fromCharCode(code);
+            if (/[a-zA-Z0-9]/g.test(charTyped) || code === 8) {
+               addSmileys(emoticonList, emoticonListElement, jsxcemoticonsearch);
             }
          }
       });
@@ -1237,4 +1294,3 @@ export default class ChatWindow {
       }
    }
 }
-

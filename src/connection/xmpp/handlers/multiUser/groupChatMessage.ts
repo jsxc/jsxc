@@ -20,20 +20,28 @@ export default class extends AbstractHandler {
       let attrId = messageElement.attr('id');
       let body = bodyElement.text();
       let nickname = from.resource;
-      let replaceId = messageElement.find('replace[xmlns="urn:xmpp:message-correct:0"]').length>0?messageElement.find('replace[xmlns="urn:xmpp:message-correct:0"]').attr('id'):null;
-      let occupantId = messageElement.find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').length>0?messageElement.find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').attr('id'):null;
+      let replaceId =
+         messageElement.find('replace[xmlns="urn:xmpp:message-correct:0"]').length > 0
+            ? messageElement.find('replace[xmlns="urn:xmpp:message-correct:0"]').attr('id')
+            : null;
+      let occupantId =
+         messageElement.find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').length > 0
+            ? messageElement.find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').attr('id')
+            : null;
       let retractId = null;
 
-      if (messageElement.find('apply-to[xmlns="urn:xmpp:fasten:0"]').length>0&&messageElement.find('apply-to[xmlns="urn:xmpp:fasten:0"]').find('retract[xmlns="urn:xmpp:message-retract:0"]').length>0)
-      {
+      if (
+         messageElement.find('apply-to[xmlns="urn:xmpp:fasten:0"]').length > 0 &&
+         messageElement.find('apply-to[xmlns="urn:xmpp:fasten:0"]').find('retract[xmlns="urn:xmpp:message-retract:0"]')
+            .length > 0
+      ) {
          retractId = messageElement.find('apply-to[xmlns="urn:xmpp:fasten:0"]').attr('id');
       }
 
-      let styled = messageElement.find('unstyled[xmlns="urn:xmpp:styling:0"]').length>0?false:true;
+      let styled = messageElement.find('unstyled[xmlns="urn:xmpp:styling:0"]').length > 0 ? false : true;
 
-      if (retractId!==null)
-      {
-         replaceId=null;
+      if (retractId !== null) {
+         replaceId = null;
       }
 
       let contact = <MultiUserContact>this.account.getContact(from);
@@ -61,19 +69,17 @@ export default class extends AbstractHandler {
 
          let translatedMessage = null;
 
-         if (subject!=='') //if room was created with standard configuration, then there is no topic at all
-         {
-            if (nickname!=='') //if the message comes from the muc service instead of the user, then its a bare jid without nickname
-            {
+         if (subject !== '') {
+            //if room was created with standard configuration, then there is no topic at all
+            if (nickname !== '') {
+               //if the message comes from the muc service instead of the user, then its a bare jid without nickname
                translatedMessage = Translation.t('changed_subject_to', {
-                  nickname: nickname,
-                  subject: subject,
+                  nickname,
+                  subject,
                });
-            }
-            else
-            {
+            } else {
                translatedMessage = Translation.t('subject_was_changed', {
-                  subject: subject,
+                  subject,
                });
             }
 
@@ -156,9 +162,9 @@ export default class extends AbstractHandler {
          mark: MessageMark.transferred,
       });
 
-      message.setReplaceId(typeof replaceId ==='string'?replaceId:null);
-      message.setOccupantId(typeof occupantId ==='string'?occupantId:null);
-      message.setRetractId(typeof retractId ==='string'?retractId:null);
+      message.setReplaceId(typeof replaceId === 'string' ? replaceId : null);
+      message.setOccupantId(typeof occupantId === 'string' ? occupantId : null);
+      message.setRetractId(typeof retractId === 'string' ? retractId : null);
       message.setStyled(styled);
 
       if (direction === Message.DIRECTION.OUT) {

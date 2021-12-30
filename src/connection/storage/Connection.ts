@@ -99,7 +99,7 @@ export default class StorageConnection extends AbstractConnection implements ICo
                return;
             }
 
-            let stanza = typeof newValue ==='string' ? newValue : newValue.stanza;
+            let stanza = typeof newValue === 'string' ? newValue : newValue.stanza;
             let stanzaElement = $.parseXML(stanza).documentElement;
 
             if (newValue.type === 'success') {

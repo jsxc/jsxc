@@ -105,15 +105,14 @@ export default class Message implements IIdentifiable, IMessage {
                   encryptedHtmlMessage: null,
                   encryptedPlaintextMessage: null,
                   replaceId: null,
-                  occupantId:null,
-                  retractId:null,
-                  retracted:false,
-                  styled:true
+                  occupantId: null,
+                  retractId: null,
+                  retracted: false,
+                  styled: true,
                },
                data
             )
          );
-
       } else if (!this.data.get('attrId')) {
          throw new Error(`Could not load message ${this.uid}`);
       }
@@ -332,60 +331,76 @@ export default class Message implements IIdentifiable, IMessage {
       this.data.set('direction', direction);
    }
 
-   public setReplaceBody(val: string) {//XEP - 0308
+   public setReplaceBody(val: string) {
+      //XEP - 0308
       this.data.set('replaceBody', val);
    }
 
-   public getReplaceBody() : string {//XEP - 0308
+   public getReplaceBody(): string {
+      //XEP - 0308
       return this.data.get('replaceBody');
    }
 
-   public setReplaceTime(val: number) {//XEP - 0308
-      return this.data.set('replacetime',val.toString());
+   public setReplaceTime(val: number) {
+      //XEP - 0308
+      return this.data.set('replacetime', val.toString());
    }
 
-   public getReplaceTime() : number {//XEP - 0308
-      return this.data.get('replacetime')!==undefined?parseInt(this.data.get('replacetime')):this.getStamp().getTime();
+   public getReplaceTime(): number {
+      //XEP - 0308
+      return this.data.get('replacetime') !== undefined
+         ? parseInt(this.data.get('replacetime'), 10)
+         : this.getStamp().getTime();
    }
 
-   public getReplaceId() : string{ //XEP - 0308
-      return this.data.get('replaceId')===undefined?null:this.data.get('replaceId');
+   public getReplaceId(): string {
+      //XEP - 0308
+      return this.data.get('replaceId') === undefined ? null : this.data.get('replaceId');
    }
 
-   public setReplaceId(id: string) { //XEP - 0308
-      this.data.set('replaceId',id);
+   public setReplaceId(id: string) {
+      //XEP - 0308
+      this.data.set('replaceId', id);
    }
 
-   public isRetracted() : boolean { //XEP - 0424
-      return this.data.get('retracted')===undefined?false:this.data.get('retracted');
+   public isRetracted(): boolean {
+      //XEP - 0424
+      return this.data.get('retracted') === undefined ? false : this.data.get('retracted');
    }
 
-   public setRetracted(val: boolean) { //XEP - 0424
-      this.data.set('retracted',val);
+   public setRetracted(val: boolean) {
+      //XEP - 0424
+      this.data.set('retracted', val);
    }
 
-   public getRetractId() : string{ //XEP - 0424
-      return this.data.get('retractId')===undefined?null:this.data.get('retractId');
+   public getRetractId(): string {
+      //XEP - 0424
+      return this.data.get('retractId') === undefined ? null : this.data.get('retractId');
    }
 
-   public setRetractId(id: string) { //XEP - 0424
-      this.data.set('retractId',id);
+   public setRetractId(id: string) {
+      //XEP - 0424
+      this.data.set('retractId', id);
    }
 
-   public setStyled(styled : boolean) {//XEP - 0393
-      this.data.set('styled',styled);
+   public setStyled(styled: boolean) {
+      //XEP - 0393
+      this.data.set('styled', styled);
    }
 
-   public isStyled() : boolean { //XEP - 0393
-      return this.data.get('styled')===undefined?true:this.data.get('styled');
+   public isStyled(): boolean {
+      //XEP - 0393
+      return this.data.get('styled') === undefined ? true : this.data.get('styled');
    }
 
-   public getOccupantId() : string{ //XEP - 0421
+   public getOccupantId(): string {
+      //XEP - 0421
       return this.data.get('occupantId');
    }
 
-   public setOccupantId(id: string) { //XEP - 0421
-      this.data.set('occupantId',id);
+   public setOccupantId(id: string) {
+      //XEP - 0421
+      this.data.set('occupantId', id);
    }
 
    public setPlaintextMessage(plaintextMessage: string) {
@@ -404,8 +419,7 @@ export default class Message implements IIdentifiable, IMessage {
       let body = this.getPlaintextMessage();
 
       body = Utils.escapeHTML(body);
-      if (this.isStyled())
-      {
+      if (this.isStyled()) {
          body = await Message.formatText(body, this.getDirection(), this.getPeer(), this.getSender().name);
       }
 
@@ -463,36 +477,26 @@ function convertGeoToLink(text: string) {
 }
 
 function markQuotation(text: string) {
-   let inpre=0;
+   let inpre = 0;
    return text
       .split(/(?:\n|\r\n|\r)/)
       .map(line => {
-         inpre = line.indexOf('<pre>')>=0||line.indexOf('</pre>')>=0?(inpre+1):inpre;
-         if (inpre===0)
-         {
-            if (line.indexOf('&gt;')===0)
-            {
-               line='<span class="jsxc-quote">'+line.replace(/^&gt; ?/, '')+'</span>';
-            }
-         }
-         else
-         if (inpre===1)
-         {
+         inpre = line.indexOf('<pre>') >= 0 || line.indexOf('</pre>') >= 0 ? inpre + 1 : inpre;
+         if (inpre === 0) {
             if (line.indexOf('&gt;') === 0) {
-               line='<span class="jsxc-quote">'+line.replace(/^&gt; ?/, '').replace(/<pre>/,'<span class="jsxc-pre">');
+               line = '<span class="jsxc-quote">' + line.replace(/^&gt; ?/, '') + '</span>';
+            }
+         } else if (inpre === 1) {
+            if (line.indexOf('&gt;') === 0) {
+               line =
+                  '<span class="jsxc-quote">' + line.replace(/^&gt; ?/, '').replace(/<pre>/, '<span class="jsxc-pre">');
                inpre++;
             }
-         }
-         else
-         if (inpre===2)
-         {
-            line=line.replace(/^&gt; ?/, '');
-         }
-         else
-         if (inpre===3)
-         {
-            line=line.replace(/^&gt; ?/, '').replace(/<\/pre>/, '</span>')+'</span>';
-            inpre=0;
+         } else if (inpre === 2) {
+            line = line.replace(/^&gt; ?/, '');
+         } else if (inpre === 3) {
+            line = line.replace(/^&gt; ?/, '').replace(/<\/pre>/, '</span>') + '</span>';
+            inpre = 0;
          }
 
          return line;
@@ -500,65 +504,69 @@ function markQuotation(text: string) {
       .join('\n');
 }
 
-function regexIndexOf(text: string, regex: RegExp, startpos:number) : number{
-   var indexOf = text.substring(startpos || 0).search(regex);
-   return (indexOf >= 0) ? (indexOf + (startpos || 0)) : indexOf;
+function regexIndexOf(text: string, regex: RegExp, startpos: number): number {
+   let indexOf = text.substring(startpos || 0).search(regex);
+   return indexOf >= 0 ? indexOf + (startpos || 0) : indexOf;
 }
 
 function transformBold(text: string): string {
-   return transformText(text,/\*(?=[\S])/,/(?<=[^\*\s])(\*)/,'<b>','</b>');
+   return transformText(text, /\*(?=[\S])/, /(?<=[^\*\s])(\*)/, '<b>', '</b>');
 }
 
 function transformItalic(text: string): string {
-   return transformText(text,/\_(?=[\S])/,/(?<=[^\_\s])(\_)/,'<i>','</i>');
+   return transformText(text, /\_(?=[\S])/, /(?<=[^\_\s])(\_)/, '<i>', '</i>');
 }
 
 function transformStrike(text: string): string {
-   return transformText(text,/\~(?=[\S])/,/(?<=[^\~\s])(\~)/,'<s>','</s>');
+   return transformText(text, /\~(?=[\S])/, /(?<=[^\~\s])(\~)/, '<s>', '</s>');
 }
 
 function transformPre(text: string): string {
-   return transformText(text,/\`(?=[\S])/,/(?<=[^\`\s(\\`)]|&gt; |\n)(\`)/,'<pre>','</pre>');
+   return transformText(text, /\`(?=[\S])/, /(?<=[^\`\s(\\`)]|&gt; |\n)(\`)/, '<pre>', '</pre>');
 }
 
-function transformText(text: string, startkey: RegExp, endkey: RegExp, replaceStart: string, replaceEnd: string ): string {
-
+function transformText(
+   text: string,
+   startkey: RegExp,
+   endkey: RegExp,
+   replaceStart: string,
+   replaceEnd: string
+): string {
    let pos1 = 0;
    let found = false;
    do {
-      found=false;
-      pos1 = regexIndexOf(text,startkey,pos1);
-      if (pos1!=-1)
-      {
-         let pos2 = regexIndexOf(text,endkey,pos1);
-         if (pos2!=-1)
-         {
-            let styledpart = text.substring(pos1+1,pos2);
-            if (replaceStart==='<pre>'&&replaceEnd==='</pre>')
-            {
-               styledpart=styledpart.replace('<b>','').replace('</b>','');
-               styledpart=styledpart.replace('<s>','').replace('</s>','');
-               styledpart=styledpart.replace('<i>','').replace('</i>','');
+      found = false;
+      pos1 = regexIndexOf(text, startkey, pos1);
+      if (pos1 !== -1) {
+         let pos2 = regexIndexOf(text, endkey, pos1);
+         if (pos2 !== -1) {
+            let styledpart = text.substring(pos1 + 1, pos2);
+            if (replaceStart === '<pre>' && replaceEnd === '</pre>') {
+               styledpart = styledpart.replace('<b>', '').replace('</b>', '');
+               styledpart = styledpart.replace('<s>', '').replace('</s>', '');
+               styledpart = styledpart.replace('<i>', '').replace('</i>', '');
             }
-            if (text.substring(pos1,pos2).indexOf('\\n')==-1||replaceStart==='<pre>'&&replaceEnd==='</pre>')
-            {
-               let result = text.substring(0,pos1)+replaceStart+styledpart+replaceEnd+text.substring(pos2+1);
-               text=result;
-               found=true;
+            if (
+               text.substring(pos1, pos2).indexOf('\\n') === -1 ||
+               (replaceStart === '<pre>' && replaceEnd === '</pre>')
+            ) {
+               let result = text.substring(0, pos1) + replaceStart + styledpart + replaceEnd + text.substring(pos2 + 1);
+               text = result;
+               found = true;
             }
          }
       }
-   } while(found);
+   } while (found);
 
    return text;
 }
 
-function textStyling(plaintext : string) {
-      plaintext = transformBold(plaintext);
-      plaintext = transformItalic(plaintext);
-      plaintext = transformStrike(plaintext);
-      plaintext = transformPre(plaintext);
-      return plaintext;
+function textStyling(plaintext: string) {
+   plaintext = transformBold(plaintext);
+   plaintext = transformItalic(plaintext);
+   plaintext = transformStrike(plaintext);
+   plaintext = transformPre(plaintext);
+   return plaintext;
 }
 
 function replaceLineBreaks(text: string) {

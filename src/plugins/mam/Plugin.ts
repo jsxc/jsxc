@@ -57,16 +57,13 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
 
       pluginAPI.registerChatWindowInitializedHook((chatWindow: ChatWindow, contact: Contact) => {
          this.addLoadButtonIfEnabled(chatWindow, contact, true);
-         if (contact.isGroupChat())
-         {
+         if (contact.isGroupChat()) {
             this.syncMUCConversation(contact);
          }
       });
 
-      pluginAPI.registerConnectionHook((status:number, condition: string)=>{
-
-         if (status===Strophe.Status.ATTACHED)
-         {
+      pluginAPI.registerConnectionHook((status: number, condition: string) => {
+         if (status === Strophe.Status.ATTACHED) {
             this.syncConversations();
          }
       });
@@ -75,51 +72,49 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
          let archiveJid = this.getArchiveJid(contact);
 
          let fadeElement = chatWindow.getDom().find('.jsxc-window-fade');
-         if (fadeElement.find('.jsxc-mam-load-more').length>0){
+         if (fadeElement.find('.jsxc-mam-load-more').length > 0) {
             fadeElement.find('.jsxc-mam-load-more').remove();
          }
 
-         let messageAreaElement =  chatWindow.getDom().find('.jsxc-message-area');
+         let messageAreaElement = chatWindow.getDom().find('.jsxc-message-area');
          messageAreaElement.off('scroll');
 
          if (this.supportCache[archiveJid.bare]) {
             this.getArchive(contact.getJid()).clear();
          }
 
-         setTimeout(()=>{
-            this.addLoadButtonIfEnabled(chatWindow, contact,false);
-         },500);
-
+         setTimeout(() => {
+            this.addLoadButtonIfEnabled(chatWindow, contact, false);
+         }, 500);
       });
 
       this.pluginAPI.getConnection().registerHandler(this.onMamMessage, null, 'message', null);
    }
 
-   private syncMUCConversation(contact: IContact)
-   {
+   private syncMUCConversation(contact: IContact) {
       let archive = this.getArchive(contact.getJid());
       archive.lastMessages();
    }
 
-   private syncConversations(){
+   private syncConversations() {
       let account = Client.getAccountManager().getAccount();
       let storage = account.getStorage();
-      let cachedRoster = storage.getItem('roster','cache') || [];
+      let cachedRoster = storage.getItem('roster', 'cache') || [];
 
       for (let id of cachedRoster) {
          let jid = new JID(id);
-         try
-         {
+         try {
             let contact = account.getContact(jid);
-            while (contact===undefined)
-            {
-               setTimeout(()=>{this.syncConversations();},50);
+            while (contact === undefined) {
+               setTimeout(() => {
+                  this.syncConversations();
+               }, 50);
                return;
             }
             let archive = this.getArchive(jid);
             archive.lastMessages();
          } catch (err) {
-            console.error('Error while syncing conversation with user: '+id,err);
+            //console.error('Error while syncing conversation with user: '+id,err);
          }
       }
    }
@@ -177,7 +172,7 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       return new JID(jid.bare);
    }
 
-   private addLoadButtonIfEnabled(chatWindow: ChatWindow, contact: Contact, loadNow : boolean) {
+   private addLoadButtonIfEnabled(chatWindow: ChatWindow, contact: Contact, loadNow: boolean) {
       let archivingJid = this.getArchiveJid(contact);
 
       this.determineServerSupport(archivingJid).then(version => {
@@ -187,9 +182,9 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       });
    }
 
-   private addLoadButton(chatWindowElement: JQuery<HTMLElement>, contact: Contact, loadNow : boolean) {
+   private addLoadButton(chatWindowElement: JQuery<HTMLElement>, contact: Contact, loadNow: boolean) {
       let fadeElement = chatWindowElement.find('.jsxc-window-fade');
-      if (fadeElement.find('.jsxc-mam-load-more').length>0){
+      if (fadeElement.find('.jsxc-mam-load-more').length > 0) {
          return;
       }
       let classNameShow = 'jsxc-show';
@@ -207,19 +202,19 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       });
       element.append(spanElement);
 
-      messageAreaElement.on('scroll', function() {
-
-         let scrollHeight: number   = messageAreaElement[0].scrollHeight;
-         let clientHeight : number  = messageAreaElement[0].clientHeight;
-         let scrollTop : number     = messageAreaElement[0].scrollTop;
-         if (scrollTop<0)
-            scrollTop=scrollTop*(-1);
+      messageAreaElement.on('scroll', function () {
+         let scrollHeight: number = messageAreaElement[0].scrollHeight;
+         let clientHeight: number = messageAreaElement[0].clientHeight;
+         let scrollTop: number = messageAreaElement[0].scrollTop;
+         if (scrollTop < 0) scrollTop = scrollTop * -1;
 
          let autoLoadOnScrollToTop = Client.getOption('autoLoadOnScrollToTop') || false;
 
-         if (((clientHeight + 42 > scrollHeight - scrollTop) && !archive.isExhausted())||messageAreaElement.text().trim().length===0) {
-            if (autoLoadOnScrollToTop)
-            {
+         if (
+            (clientHeight + 42 > scrollHeight - scrollTop && !archive.isExhausted()) ||
+            messageAreaElement.text().trim().length === 0
+         ) {
+            if (autoLoadOnScrollToTop) {
                archive.nextMessages();
             }
 
@@ -227,13 +222,11 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
          } else {
             element.removeClass(classNameShow);
          }
-
       });
 
       if (loadNow) {
          messageAreaElement.trigger('scroll');
-      }
-      else {
+      } else {
          element.addClass(classNameShow);
       }
 
@@ -275,13 +268,12 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       let jid = new JID(bareJid);
 
       let msg = forwardedElement.find('message');
-      if (msg)
-      {
+      if (msg) {
          let to = new JID(msg.attr('to'));
          let from = new JID(msg.attr('from'));
 
-         if (jid.bare!==to.bare&&jid.bare!==from.bare) //filter messages to himself
-         {
+         if (jid.bare !== to.bare && jid.bare !== from.bare) {
+            //filter messages to himself
             return true;
          }
       }

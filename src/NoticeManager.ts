@@ -63,7 +63,7 @@ export class NoticeManager {
       return notice;
    }
 
-   public getNotices() : SortedPersistentMap {
+   public getNotices(): SortedPersistentMap {
       return this.notices;
    }
 

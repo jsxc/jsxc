@@ -41,6 +41,7 @@
 
   .jsxc-message-area {
     @extend %scrollbar;
+    background-color: var(--jsxc-color-background-dark);
     background-image: url("../images/resize_gray.svg");
     background-position: top left;
     background-repeat: no-repeat;
@@ -55,7 +56,6 @@
     padding: 3px;
     width: 100%;
     z-index: 10;
-    background-color: var(--jsxc-color-background-dark);
   }
 
   .jsxc-close {
@@ -306,10 +306,10 @@
 }
 
 .jsxc-content-retraction {
-  opacity:0.5;
+  opacity: 0.5;
 
   .jsxc-content {
-     font-size:10px;
+    font-size: 10px;
   }
 }
 
@@ -337,21 +337,21 @@
     white-space: nowrap;
 
     .jsxc-replace-icon {
-       background-image: url('../images/icons/edit.svg');
-       background-size: contain;
-       background-repeat: no-repeat;
-       background-position: center;
-       height: 15px;
-       width: 15px;
+      background-image: url("../images/icons/edit.svg");
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: contain;
+      height: 15px;
+      width: 15px;
     }
 
     .jsxc-retract-icon {
-       background-image: url('../images/icons/delete.svg');
-       background-size: contain;
-       background-repeat: no-repeat;
-       background-position: center;
-       height: 11px;
-       width: 11px;
+      background-image: url("../images/icons/delete.svg");
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: contain;
+      height: 11px;
+      width: 11px;
     }
 
     .jsxc-timestamp {
@@ -643,8 +643,8 @@
   position: relative;
 
   .jsxc-timestamp {
-    float: left;
     color: var(--jsxc-color-text-lighter);
+    float: left;
   }
 }
 
@@ -873,8 +873,7 @@
   white-space: nowrap;
   z-index: 1000;
 
-  li
-  {
+  li {
     cursor: pointer;
     list-style-type: none;
     padding: 8px 12px;
@@ -884,8 +883,8 @@
 
   div {
     background: var(--jsxc-color-primary) !important;
-    color: var(--jsxc-color-primary-text);
     border: 1px solid var(--jsxc-color-primary);
+    color: var(--jsxc-color-primary-text);
     font-size: 10px;
     font-weight: bold;
     padding: 3px;
@@ -898,34 +897,36 @@
 }
 
 .jsxc-message-area-anchor {
-    display: none;
-    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgMCAwIDI0IDI0IiBoZWlnaHQ9IjI0cHgiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0cHgiIGZpbGw9IiMwMDAwMDAiPjxnPjxyZWN0IGZpbGw9Im5vbmUiIGhlaWdodD0iMjQiIHdpZHRoPSIyNCIvPjxwYXRoIGQ9Ik0xMiw0YzQuNDEsMCw4LDMuNTksOCw4cy0zLjU5LDgtOCw4cy04LTMuNTktOC04UzcuNTksNCwxMiw0IE0xMiwyQzYuNDgsMiwyLDYuNDgsMiwxMmMwLDUuNTIsNC40OCwxMCwxMCwxMCBjNS41MiwwLDEwLTQuNDgsMTAtMTBDMjIsNi40OCwxNy41MiwyLDEyLDJMMTIsMnogTTEzLDEybDAtNGgtMmwwLDRIOGw0LDRsNC00SDEzeiIvPjwvZz48L3N2Zz4");
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: contain;
-    height: 30px;
-    opacity: 0.5;
-    position: absolute;
-    right: 10px;
-    top: 6px;
-    width: 30px;
-    z-index: 10;
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgMCAwIDI0IDI0IiBoZWlnaHQ9IjI0cHgiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0cHgiIGZpbGw9IiMwMDAwMDAiPjxnPjxyZWN0IGZpbGw9Im5vbmUiIGhlaWdodD0iMjQiIHdpZHRoPSIyNCIvPjxwYXRoIGQ9Ik0xMiw0YzQuNDEsMCw4LDMuNTksOCw4cy0zLjU5LDgtOCw4cy04LTMuNTktOC04UzcuNTksNCwxMiw0IE0xMiwyQzYuNDgsMiwyLDYuNDgsMiwxMmMwLDUuNTIsNC40OCwxMCwxMCwxMCBjNS41MiwwLDEwLTQuNDgsMTAtMTBDMjIsNi40OCwxNy41MiwyLDEyLDJMMTIsMnogTTEzLDEybDAtNGgtMmwwLDRIOGw0LDRsNC00SDEzeiIvPjwvZz48L3N2Zz4");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  display: none;
+  height: 30px;
+  opacity: 0.5;
+  position: absolute;
+  right: 10px;
+  top: 6px;
+  width: 30px;
+  z-index: 10;
 }
 
 .jsxc-blink-unread-msg {
-  background-color: black;
-  animation-name: jsxc-pulse-color;
   animation-duration: 2s;
   animation-iteration-count: infinite;
+  animation-name: jsxc-pulse-color;
+  background-color: #000;
 }
 
 @keyframes jsxc-pulse-color {
   0% {
     background-color: #222;
   }
+
   50% {
     background-color: #4285f4;
   }
+
   100% {
     background-color: #222;
   }
@@ -937,19 +938,19 @@
 
 .jsxc-search-positiveresult {
   background: var(--jsxc-color-error);
-  color: white;
+  color: #fff;
 }
 
 .jsxc-message-search {
   &-icon {
-    background-image: url('../images/icons/msgsearch.svg');
+    background-image: url("../images/icons/msgsearch.svg");
     background-position: center center;
     background-repeat: no-repeat;
     background-size: 20px 20px;
   }
 
   &-off-icon {
-    background-image: url('../images/icons/msgsearch_off.svg');
+    background-image: url("../images/icons/msgsearch_off.svg");
     background-position: center center;
     background-repeat: no-repeat;
     background-size: 20px 20px;
@@ -996,13 +997,15 @@ pre {
   border-top: 0;
   color: var(--jsxc-color-text-maxcontrast);
   display: flex;
-  .jsxc-format-input{
+
+  .jsxc-format-input {
     flex: 2;
     padding: 3px;
+
     .jsxc-format-list {
+      display: flex;
 
       list-style: none;
-      display: flex;
       margin: 0;
       padding: 0;
 
@@ -1010,12 +1013,12 @@ pre {
         background-position: center center;
         background-repeat: no-repeat;
         background-size: contain;
+        flex: 1;
         float: right;
-        height:20px;
-        margin-left:10px;
-        width:20px;
-        flex:1;
+        height: 20px;
+        margin-left: 10px;
         opacity: 0.5;
+        width: 20px;
       }
 
       li:hover {
@@ -1025,18 +1028,23 @@ pre {
       .jsxc-format-icon-bold {
         background-image: url("../images/icons/format_bold_black_24dp.svg");
       }
+
       .jsxc-format-icon-italic {
         background-image: url("../images/icons/format_italic_black_24dp.svg");
       }
+
       .jsxc-format-icon-code {
         background-image: url("../images/icons/code_black_24dp.svg");
       }
+
       .jsxc-format-icon-strike {
         background-image: url("../images/icons/strikethrough_s_black_24dp.svg");
       }
+
       .jsxc-format-icon-help {
         background-image: url("../images/icons/help_outline_black_24dp.svg");
       }
+
       .jsxc-format-icon-close {
         background-image: url("../images/icons/close_black_24dp.svg");
       }
@@ -1049,7 +1057,7 @@ pre {
     font-size: 10px;
     font-style: italic;
     margin-bottom: auto;
-	margin-top: auto;
+    margin-top: auto;
     padding-right: 5px;
     text-align: right;
   }

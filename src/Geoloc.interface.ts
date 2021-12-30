@@ -1,4 +1,4 @@
-import { IJID } from "./JID.interface";
+import { IJID } from './JID.interface';
 
 export interface IGeoloc {
    getLat(): number;

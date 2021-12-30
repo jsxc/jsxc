@@ -76,8 +76,7 @@ class ClientSection extends Section {
       );
 
       let showTwoColumnPreference = Client.getOption('showTwoColumnPreference') || false;
-      if (showTwoColumnPreference)
-      {
+      if (showTwoColumnPreference) {
          contentElement.append(
             new ListItem(
                Translation.t('show_two_column_pref'),
@@ -103,40 +102,42 @@ class ClientSection extends Section {
    }
 
    private toggleFormatTools() {
-
       let element = $('<input type="checkbox" style="margin-left:10px;">');
 
       element.on('change', () => {
          let value = element.prop('checked');
          element.val(value);
          Client.setOption('useFormatTools', value ? value : undefined);
-         if (value)
-         {
-           
-            $(document).find('.jsxc-format-input').each(function(pos:number){
-               $(this).removeClass('jsxc-hidden');
-            });
-         }
-         else {
-            $(document).find('.jsxc-format-input').each(function(pos:number){
-               $(this).addClass('jsxc-hidden');
-            });
+         if (value) {
+            $(document)
+               .find('.jsxc-format-input')
+               .each(function (pos: number) {
+                  $(this).removeClass('jsxc-hidden');
+               });
+         } else {
+            $(document)
+               .find('.jsxc-format-input')
+               .each(function (pos: number) {
+                  $(this).addClass('jsxc-hidden');
+               });
          }
       });
 
       let useFormatTools = Client.getOption('useFormatTools') || false;
-      element.prop("checked",useFormatTools);
+      element.prop('checked', useFormatTools);
       element.val(useFormatTools);
-      if (useFormatTools)
-      {
-         $(document).find('.jsxc-format-input').each(function(pos:number){
-            $(this).removeClass('jsxc-hidden');
-         });
-      }
-      else {
-         $(document).find('.jsxc-format-input').each(function(pos:number){
-            $(this).addClass('jsxc-hidden');
-         });
+      if (useFormatTools) {
+         $(document)
+            .find('.jsxc-format-input')
+            .each(function (pos: number) {
+               $(this).removeClass('jsxc-hidden');
+            });
+      } else {
+         $(document)
+            .find('.jsxc-format-input')
+            .each(function (pos: number) {
+               $(this).addClass('jsxc-hidden');
+            });
       }
 
       return element;
@@ -149,45 +150,47 @@ class ClientSection extends Section {
          let value = element.prop('checked');
          element.val(value);
          Client.setOption('useTwoColumnLayout', value ? value : undefined);
-         if (value)
-         {
-            $(document.body).find('.jsxc-window-fade').each(function(){
-               $(this).css('width','');
-               $(this).css('height','');
-            });
-            $(document.body).find('.jsxc-bar--window.jsxc-bar').each(function(){
-               $(this).css('width','');
-               $(this).css('height','');
-            });
-            
+         if (value) {
+            $(document.body)
+               .find('.jsxc-window-fade')
+               .each(function () {
+                  $(this).css('width', '');
+                  $(this).css('height', '');
+               });
+            $(document.body)
+               .find('.jsxc-bar--window.jsxc-bar')
+               .each(function () {
+                  $(this).css('width', '');
+                  $(this).css('height', '');
+               });
+
             $(document.body).addClass('jsxc-fullscreen');
             $(document.body).addClass('jsxc-two-columns');
-         }
-         else
-         {
+         } else {
             $(document.body).removeClass('jsxc-fullscreen');
             $(document.body).removeClass('jsxc-two-columns');
          }
       });
 
       let useTwoColumnLayout = Client.getOption('useTwoColumnLayout') || false;
-      element.prop("checked",useTwoColumnLayout);
+      element.prop('checked', useTwoColumnLayout);
       element.val(useTwoColumnLayout);
-      if (useTwoColumnLayout)
-      {
-         $(document.body).find('.jsxc-window-fade').each(function(){
-            $(this).css('width','');
-            $(this).css('height','');
-         });
-         $(document.body).find('.jsxc-bar--window.jsxc-bar').each(function(){
-            $(this).css('width','');
-            $(this).css('height','');
-         });
+      if (useTwoColumnLayout) {
+         $(document.body)
+            .find('.jsxc-window-fade')
+            .each(function () {
+               $(this).css('width', '');
+               $(this).css('height', '');
+            });
+         $(document.body)
+            .find('.jsxc-bar--window.jsxc-bar')
+            .each(function () {
+               $(this).css('width', '');
+               $(this).css('height', '');
+            });
          $(document.body).addClass('jsxc-fullscreen');
          $(document.body).addClass('jsxc-two-columns');
-      }
-      else
-      {
+      } else {
          $(document.body).removeClass('jsxc-fullscreen');
          $(document.body).removeClass('jsxc-two-columns');
       }
@@ -232,7 +235,7 @@ class ClientSection extends Section {
       });
 
       let disableJoinLeaveMessages = Client.getOption('disableJoinLeaveMessages') || false;
-      element.prop("checked",disableJoinLeaveMessages);
+      element.prop('checked', disableJoinLeaveMessages);
       element.val(disableJoinLeaveMessages);
 
       return element;
@@ -248,12 +251,11 @@ class ClientSection extends Section {
       });
 
       let deleteonexit = Client.getOption('delete_on_disconnect') || false;
-      element.prop("checked",deleteonexit);
+      element.prop('checked', deleteonexit);
       element.val(deleteonexit);
 
       return element;
    }
-
 
    private getTrustedDomainsElement(): JQuery {
       let element = $('<textarea style="margin-left:10px;">');
@@ -472,7 +474,7 @@ class MainAppSection extends Section {
       contentElement.append(this.getListItemForData('', 'Jabber Search', '0055', '1.3'));
       contentElement.append(this.getListItemForData('', 'Publish-Subscribe', '0060', '1.2.1'));
       contentElement.append(this.getListItemForData('', 'Personal Eventing Protocol', '0163', '1.2.1'));
-	   contentElement.append(this.getListItemForData('', 'Last Message Correction', '0308', '1.2.0'));
+      contentElement.append(this.getListItemForData('', 'Last Message Correction', '0308', '1.2.0'));
       contentElement.append(this.getListItemForData('', 'Message Retraction', '0424', '0.3.0'));
       contentElement.append(this.getListItemForData('', 'Message Styling', '0393', '1.1.1'));
 

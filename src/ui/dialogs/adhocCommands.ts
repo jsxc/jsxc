@@ -34,7 +34,7 @@ function init() {
             .getPlugin(AdHocCommandPlugin.getId()) as AdHocCommandPlugin;
 
          removeWarnings();
-        
+
          adHocCommandPlugin
             .hasSupport()
             .then(hasSupport => {
@@ -71,24 +71,22 @@ function getCommands(adHocCommandPlugin: AdHocCommandPlugin) {
    let dom = dialog.getDom();
    dom.find('.jsxc-warning').remove();
 
-   adHocCommandPlugin.requestAdHocCommands()
+   adHocCommandPlugin
+      .requestAdHocCommands()
       .then(function (commands) {
          let select = dom.find('select.jsxc-command-selection');
-         if (commands&&commands.length>0)
-         {
+         if (commands && commands.length > 0) {
             select.empty();
-            for (let i=0;i<commands.length;i++)
-            {
+            for (let cmd of commands) {
                let option = $('<option>');
-               option.val(commands[i].node);
-               option.attr('jid',commands[i].jid);
-               option.append(commands[i].name);
+               option.val(cmd.node);
+               option.attr('jid', cmd.jid);
+               option.append(cmd.name);
                select.append(option);
             }
 
             initSubmitChooseCommand(dialog, adHocCommandPlugin);
-         }
-         else {
+         } else {
             select.parent().append(Translation.t('No_commands_available'));
             select.remove();
          }
@@ -99,57 +97,55 @@ function getCommands(adHocCommandPlugin: AdHocCommandPlugin) {
       });
 }
 
-function initSubmitChooseCommand(dialog: Dialog, adHocCommandPlugin: AdHocCommandPlugin)
-{
+function initSubmitChooseCommand(dialog: Dialog, adHocCommandPlugin: AdHocCommandPlugin) {
    dialog
-   .getDom()
-   .find('form')
-   .off('submit')
-   .on('submit',ev=>{
-      ev.preventDefault();
-      dialog.getDom().find('input, button').prop('disabled', true);
-      let option = dialog.getDom().find('select.jsxc-command-selection').find(":selected");
-      adHocCommandPlugin.getCommandForm({jid:option.attr('jid'),node:option.attr('value')}).then(stanza=>{
-         let formElement = generateForm(stanza);
-         let command = $(stanza).find('command');
-         let csessionid = command.attr('sessionid');
-         let cnode = command.attr('node');
-         dialog.getDom().find('.jsxc-content').empty().append(formElement);
-         dialog.getDom().find('.jsxc-results').empty();
+      .getDom()
+      .find('form')
+      .off('submit')
+      .on('submit', ev => {
+         ev.preventDefault();
+         dialog.getDom().find('input, button').prop('disabled', true);
+         let option = dialog.getDom().find('select.jsxc-command-selection').find(':selected');
+         adHocCommandPlugin.getCommandForm({ jid: option.attr('jid'), node: option.attr('value') }).then(stanza => {
+            let formElement = generateForm(stanza);
+            let command = $(stanza).find('command');
+            let csessionid = command.attr('sessionid');
+            let cnode = command.attr('node');
+            dialog.getDom().find('.jsxc-content').empty().append(formElement);
+            dialog.getDom().find('.jsxc-results').empty();
 
-         formElement.find('.jsxc-js-close').on('click', () => dialog.close());
-         formElement.find('.jsxc-js-back').on('click', () => {
-            dialog.close();
-            init();           
-         });
-
-         if (command.attr('status')==='completed')
-         {
-            dialog.getDom().find('.jsxc-content').empty();
-            appendSearchResultsSimple(stanza, dialog);
-         }
-         else {
-            formElement.on('submit', ev => {
-               ev.preventDefault();
-
-               formElement.find('input, button').prop('disabled', true);
-
-               let form = Form.fromHTML(formElement.get(0));
-               adHocCommandPlugin.executeForm(option.attr('jid'),cnode,csessionid,form)
-               .then(stanza=>{
-                  dialog.getDom().find('.jsxc-content').empty();
-                  appendSearchResults(stanza, dialog);
-               })
-               .catch(err => {
-                  dialog.getDom().find('.jsxc-results').empty();
-               })
-               .then(() => {
-                  formElement.find('input, button').prop('disabled', false);
-               });
+            formElement.find('.jsxc-js-close').on('click', () => dialog.close());
+            formElement.find('.jsxc-js-back').on('click', () => {
+               dialog.close();
+               init();
             });
-         }
+
+            if (command.attr('status') === 'completed') {
+               dialog.getDom().find('.jsxc-content').empty();
+               appendSearchResultsSimple(stanza, dialog);
+            } else {
+               formElement.on('submit', ev => {
+                  ev.preventDefault();
+
+                  formElement.find('input, button').prop('disabled', true);
+
+                  let form = Form.fromHTML(formElement.get(0));
+                  adHocCommandPlugin
+                     .executeForm(option.attr('jid'), cnode, csessionid, form)
+                     .then(stanza => {
+                        dialog.getDom().find('.jsxc-content').empty();
+                        appendSearchResults(stanza, dialog);
+                     })
+                     .catch(err => {
+                        dialog.getDom().find('.jsxc-results').empty();
+                     })
+                     .then(() => {
+                        formElement.find('input, button').prop('disabled', false);
+                     });
+               });
+            }
+         });
       });
-   });
 }
 
 function appendSearchResultsSimple(resultStanza: Element, dialog: Dialog) {

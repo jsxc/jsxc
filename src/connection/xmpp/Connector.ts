@@ -140,8 +140,7 @@ export default class Connector {
 
          if (status === Strophe.Status.DISCONNECTED) {
             this.account.connectionDisconnected();
-            if (Client.getOption('delete_on_disconnect') || false)
-            {
+            if (Client.getOption('delete_on_disconnect') || false) {
                deleteAllData();
             }
          }

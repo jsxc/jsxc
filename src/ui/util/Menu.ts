@@ -66,14 +66,14 @@ export default class Menu {
 
       window.clearTimeout(this.timer);
 
-      if (!$(ev.target).hasClass("jsxc-input-search"))
-      {
+      if (!$(ev.target).hasClass('jsxc-input-search')) {
          this.element.toggleClass(CLASSNAME_OPENED);
       }
 
-      if ($(ev.currentTarget).find('.jsxc-input-search').length>0)
-      {
-         setTimeout(()=>{$(ev.currentTarget).find('.jsxc-input-search').focus();},50);
+      if ($(ev.currentTarget).find('.jsxc-input-search').length > 0) {
+         setTimeout(() => {
+            $(ev.currentTarget).find('.jsxc-input-search').focus();
+         }, 50);
       }
 
       if (this.element.hasClass(CLASSNAME_OPENED)) {
@@ -93,8 +93,8 @@ export default class Menu {
 
    private closeMenu = () => {
       this.element.removeClass(CLASSNAME_OPENED);
-      if (this.element.find(".jsxc-input-search").length>0){
-         this.element.find(".jsxc-input-search").val(null);
+      if (this.element.find('.jsxc-input-search').length > 0) {
+         this.element.find('.jsxc-input-search').val(null);
       }
 
       $('body').off('click', null, this.closeMenu);

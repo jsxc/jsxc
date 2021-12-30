@@ -102,7 +102,7 @@ export default class extends AbstractHandler {
 
       this.account.getNoticeManager().addNotice({
          title: Translation.t('Friendship_request'),
-         description: Translation.t('from')+': ' + jid.bare,
+         description: Translation.t('from') + ': ' + jid.bare,
          type: NOTICETYPE.contact,
          fnName: NOTICEFUNCTION.contactRequest,
          fnParams: [jid.bare],

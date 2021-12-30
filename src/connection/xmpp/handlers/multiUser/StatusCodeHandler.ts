@@ -13,14 +13,11 @@ export default class MultiUserStatusCodeHandler {
 
          if (typeof msg === 'string') {
             let firstmsg = multiUserContact.getTranscript().getFirstMessage();
-            if (firstmsg!==undefined&&firstmsg.getDirection()==DIRECTION.SYS)
-            {
-               if (firstmsg.getPlaintextMessage()!==msg)
-               {
+            if (firstmsg !== undefined && firstmsg.getDirection() === DIRECTION.SYS) {
+               if (firstmsg.getPlaintextMessage() !== msg) {
                   multiUserContact.addSystemMessage(msg);
                }
-            }
-            else {
+            } else {
                multiUserContact.addSystemMessage(msg);
             }
          }

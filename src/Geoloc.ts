@@ -1,22 +1,18 @@
 import { IGeoloc } from './Geoloc.interface';
 import { IJID } from './JID.interface';
 
-
 export default class implements IGeoloc {
-   
    constructor(
       private from: IJID,
       private lat: number,
-      private lon: number,      
+      private lon: number,
       private timestamp: Date,
       private alt?: number,
       private accuracy?: number,
       private speed?: number,
       private bearing?: number,
-      private altaccuracy?: number,
-      ) {
-
-   }
+      private altaccuracy?: number
+   ) {}
    public getFrom() {
       return this.from;
    }

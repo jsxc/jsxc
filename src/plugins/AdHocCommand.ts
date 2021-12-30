@@ -52,12 +52,12 @@ export default class AdHocCommandPlugin extends AbstractPlugin {
       }
    }
 
-   public async requestAdHocCommands(): Promise<{jid:string, node:string, name: string}[]> {
+   public async requestAdHocCommands(): Promise<{ jid: string; node: string; name: string }[]> {
       let iq = $iq({
          type: 'get',
       }).c('query', {
          xmlns: NAMESPACE_DISCO_ITEMS,
-         node: NAMESPACE_ADHOC_COMMAND
+         node: NAMESPACE_ADHOC_COMMAND,
       });
 
       if (!(await this.hasSupport())) {
@@ -72,7 +72,7 @@ export default class AdHocCommandPlugin extends AbstractPlugin {
       return query
          .find('> item')
          .map(function (index, item) {
-            return {jid:$(item).attr('jid').toLowerCase(),node:$(item).attr('node'),name:$(item).attr('name')};
+            return { jid: $(item).attr('jid').toLowerCase(), node: $(item).attr('node'), name: $(item).attr('name') };
          })
          .get();
    }
@@ -81,45 +81,46 @@ export default class AdHocCommandPlugin extends AbstractPlugin {
       return this.pluginAPI.getDiscoInfoRepository().hasFeature(undefined, NAMESPACE_ADHOC_COMMAND);
    }
 
-   public async getCommandForm(command: {jid:string, node:string}): Promise<Element> {
-
+   public async getCommandForm(command: { jid: string; node: string }): Promise<Element> {
       let iq = $iq({
          to: command.jid,
          type: 'set',
       }).c('command', {
          xmlns: NAMESPACE_ADHOC_COMMAND,
          node: command.node,
-         action:'execute'
+         action: 'execute',
       });
 
       return this.pluginAPI.sendIQ(iq);
    }
 
-   public executeForm(jid: string, node: string, session: string, form) : Promise<Element>{
+   public executeForm(jid: string, node: string, session: string, form): Promise<Element> {
       let iq = $iq({
          to: jid,
          type: 'set',
-      }).c('command', {
-         xmlns: NAMESPACE_ADHOC_COMMAND,
-         node: node,
-         action:'complete',
-         sessionid: session
-      }).cnode(form.toXML());
+      })
+         .c('command', {
+            xmlns: NAMESPACE_ADHOC_COMMAND,
+            node,
+            action: 'complete',
+            sessionid: session,
+         })
+         .cnode(form.toXML());
 
-      return  this.pluginAPI.sendIQ(iq);
+      return this.pluginAPI.sendIQ(iq);
    }
 
-   public cancelForm(jid: string, node: string, session: string) : Promise<Element>{
+   public cancelForm(jid: string, node: string, session: string): Promise<Element> {
       let iq = $iq({
          to: jid,
          type: 'set',
       }).c('command', {
          xmlns: NAMESPACE_ADHOC_COMMAND,
-         node: node,
-         action:'cancel',
-         sessionid: session
+         node,
+         action: 'cancel',
+         sessionid: session,
       });
 
-      return  this.pluginAPI.sendIQ(iq);
+      return this.pluginAPI.sendIQ(iq);
    }
 }

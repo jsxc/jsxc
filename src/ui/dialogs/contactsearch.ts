@@ -16,7 +16,7 @@ const possibleSearchFields = ['first', 'last', 'nick', 'email'];
 
 let contactSearchTemplate = require('../../../template/contactsearch.hbs');
 
-export default function (jid? : IJID) {
+export default function (jid?: IJID) {
    let content = contactSearchTemplate();
 
    let dialog = new Dialog(content);
@@ -35,23 +35,16 @@ export default function (jid? : IJID) {
       .on('change', ev => {
          let uid = $(ev.target).val().toString();
 
-         if (jid===undefined)
-         {
+         if (jid === undefined) {
             loadForm(Client.getAccountManager().getAccount(uid), dialog);
-         }
-         else
-         {
+         } else {
             loadFormFromMucService(Client.getAccountManager().getAccount(uid), jid, dialog);
          }
-
       });
 
-   if (jid===undefined)
-   {
+   if (jid === undefined) {
       loadForm(accounts[0], dialog);
-   }
-   else
-   {
+   } else {
       dialog.getDom().find('h3').hide();
       dialog.getDom().find('h3').before(`<h4>${jid.toString()}</h4>`);
       dialog.getDom().find('.jsxc-account-choice').hide();
@@ -62,8 +55,7 @@ export default function (jid? : IJID) {
 function loadFormFromMucService(account: Account, jid: IJID, dialog: Dialog) {
    let searchService = account.getConnection().getSearchService();
 
-   searchService.getSearchForm(jid).then((searchFormElement)=>{
-
+   searchService.getSearchForm(jid).then(searchFormElement => {
       let formElement = generateForm(searchFormElement);
 
       dialog.getDom().find('.jsxc-content').empty().append(formElement);
@@ -262,7 +254,9 @@ function appendSearchResults(resultStanza: Element, dialog: Dialog, mucsearch: b
 
    dom.find('.jsxc-results form').append(`<div class="form-group">
    <div class="col-sm-offset-4 col-sm-8">
-      <button class="jsxc-button jsxc-button--primary" type="submit">${mucsearch===false?Translation.t('Add'):Translation.t('Continue')}</button>
+      <button class="jsxc-button jsxc-button--primary" type="submit">${
+         mucsearch === false ? Translation.t('Add') : Translation.t('Continue')
+      }</button>
    </div>
  </div>`);
 
@@ -286,18 +280,14 @@ function appendSearchResults(resultStanza: Element, dialog: Dialog, mucsearch: b
             alias = simpleItem.find('first').text() + ' ' + simpleItem.find('last').text();
          }
       }
-         
+
       dialog.close();
 
-      if (bareJid!=='')
-      {
-         if (!mucsearch)
-         {
+      if (bareJid !== '') {
+         if (!mucsearch) {
             openContactDialog(bareJid, alias);
-         }
-         else 
-         {
-            let bjid = new JID(bareJid);            
+         } else {
+            let bjid = new JID(bareJid);
             showMultiUserJoinDialog(bjid.domain, bjid.node);
          }
       }

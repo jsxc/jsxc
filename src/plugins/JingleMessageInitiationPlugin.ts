@@ -123,15 +123,12 @@ export default class JingleMessageInitiationPlugin extends AbstractPlugin {
       const contact = this.pluginAPI.getContact(fromJid);
       const toAttribute = stanzaElement.attr('to');
       const toJid = new JID(toAttribute);
-      if (toJid.bare===fromJid.bare)
-      {
+      if (toJid.bare === fromJid.bare) {
          let forwardedStanza = $(stanza).find('forwarded' + NS.getFilter('FORWARD'));
          let carbonStanza = $(stanza).find('> ' + NS.getFilter('CARBONS'));
 
-         if (forwardedStanza.length>0&&carbonStanza.length>0) {
-
+         if (forwardedStanza.length > 0 && carbonStanza.length > 0) {
             if (carbonStanza.get(0) !== forwardedStanza.parent().get(0)) {
-               console.warn('Forwarded message is not part of carbon copy');
                return true;
             }
 

@@ -318,12 +318,12 @@ button.jsxc-page__subheadline {
   margin: 2em 0;
 
   .jsxc-avatar-upload-placeholer {
-    height: 96px;
-    width: 96px;
     background-image: url("../images/icons/placeholder.svg");
+    background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
-    background-position: center;
+    height: 96px;
+    width: 96px;
   }
 
   input[type="file"] {
@@ -344,15 +344,17 @@ button.jsxc-page__subheadline {
 }
 
 .jsxc-dialog .jsxc-vcard-data {
-    margin-top: 2em;
-    &>li {
-        display: block;
-        margin-top: 0.5em;
-        border: 1px solid var(--jsxc-color-border-dark);
-        padding-left: 0.25em;
-        padding-right: 0.25em;
-    }
-    & li>div {
-        float: right;
-    }
+  margin-top: 2em;
+
+  > li {
+    border: 1px solid var(--jsxc-color-border-dark);
+    display: block;
+    margin-top: 0.5em;
+    padding-left: 0.25em;
+    padding-right: 0.25em;
+  }
+
+  li > div {
+    float: right;
+  }
 }

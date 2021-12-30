@@ -35,7 +35,7 @@ export default class Roster {
    private contactList: JQuery;
    private groupList: JQuery;
    private rosterItems: { [uid: string]: RosterItem } = {};
-   private static geoloc : Geoloc;
+   private static geoloc: Geoloc;
 
    private static instance: Roster;
 
@@ -378,7 +378,7 @@ export default class Roster {
          id: 'add-avatar',
          handler: showAddAvatarDialog,
          label: Translation.t('Edit_avatar'),
-         icon: 'smiley'
+         icon: 'smiley',
       });
 
       this.addMenuEntry({
@@ -391,12 +391,12 @@ export default class Roster {
       this.addMenuEntry({
          id: 'mute-notification',
          handler: this.toggleMuteNotification,
-         label: Translation.t('Mute')
+         label: Translation.t('Mute'),
       });
 
       this.addMenuEntry({
          id: 'search-contact',
-         handler: ()=> showContactSearchDialog(),
+         handler: () => showContactSearchDialog(),
          label: Translation.t('contact_search'),
          icon: 'search',
       });
@@ -414,7 +414,6 @@ export default class Roster {
          label: Translation.t('Join_chat'),
          icon: 'groupcontact',
       });
-     
    }
 
    private registerPresenceHandler() {
@@ -527,15 +526,15 @@ export default class Roster {
       });
       Client.getPresenceController().registerCurrentPresenceHook(() => {
          this.refreshOwnPresenceIndicator();
-         if (Client.getAccountManager().getAccount()&&
-             Client.getAccountManager().getAccount().getContact()&&
-             Client.getPresenceController().getCurrentPresence()===Presence.online)
-         {
-            Client.getAccountManager().getAccount().getContact().registerHook('geoloc',this.geoLocHook);
+         if (
+            Client.getAccountManager().getAccount() &&
+            Client.getAccountManager().getAccount().getContact() &&
+            Client.getPresenceController().getCurrentPresence() === Presence.online
+         ) {
+            Client.getAccountManager().getAccount().getContact().registerHook('geoloc', this.geoLocHook);
          }
 
-         if (Client.getPresenceController().getCurrentPresence()===Presence.offline)
-         {
+         if (Client.getPresenceController().getCurrentPresence() === Presence.offline) {
             $('.jsxc-bar__geoloc').removeClass('jsxc-position-show');
          }
       });
@@ -549,45 +548,81 @@ export default class Roster {
 
    private geoLocHook(geo: any) {
       let geolocdiv = $('.jsxc-bottom.jsxc-presence.jsxc-roster-item.jsxc-bar').find('.jsxc-bar__geoloc');
-      if (geolocdiv.length>0&&geo&&geo.lat!==undefined&&geo.lon!==undefined) {
+      if (geolocdiv.length > 0 && geo && geo.lat !== undefined && geo.lon !== undefined) {
          geolocdiv.addClass('jsxc-position-show');
-         if (Roster.geoloc===undefined||Roster.geoloc.getLat()!==geo.lat&&Roster.geoloc.getLon()!==geo.lon)
-         {
-            let distance = Roster.geoloc!==undefined?Location.distanceBetweenCoordinates(Roster.geoloc.getLat(),Roster.geoloc.getLon(),geo.lat,geo.lon):0;
-            Roster.geoloc = new Geoloc(geo.from,geo.lat,geo.lon,geo.timestamp,geo.alt,geo.accuracy,geo.speed,geo.bearing,geo.altaccuracy);
+         if (
+            Roster.geoloc === undefined ||
+            (Roster.geoloc.getLat() !== geo.lat && Roster.geoloc.getLon() !== geo.lon)
+         ) {
+            let distance =
+               Roster.geoloc !== undefined
+                  ? Location.distanceBetweenCoordinates(
+                       Roster.geoloc.getLat(),
+                       Roster.geoloc.getLon(),
+                       geo.lat,
+                       geo.lon
+                    )
+                  : 0;
+            Roster.geoloc = new Geoloc(
+               geo.from,
+               geo.lat,
+               geo.lon,
+               geo.timestamp,
+               geo.alt,
+               geo.accuracy,
+               geo.speed,
+               geo.bearing,
+               geo.altaccuracy
+            );
 
-            console.log("distance (old/new) = "+distance);
+            let href = Location.locationToLink(Roster.geoloc.getLat(), Roster.geoloc.getLon());
 
-            let href = Location.locationToLink(Roster.geoloc.getLat(),Roster.geoloc.getLon());
-
-            geolocdiv.off('click').on('click',(e)=>{
+            geolocdiv.off('click').on('click', e => {
                e.preventDefault();
                e.stopPropagation();
-               let a = $(`<a href="${href}" target="_blank" rel="noopener noreferrer">${Roster.geoloc.getLat()} Longitude: ${Roster.geoloc.getLon()}</a>`);
+               let a = $(
+                  `<a href="${href}" target="_blank" rel="noopener noreferrer">${Roster.geoloc.getLat()} Longitude: ${Roster.geoloc.getLon()}</a>`
+               );
                $(document.body).append(a);
                a.get(0).click();
                a.remove();
             });
 
-            if ((Client.getOption('enableGeocode')||false)&&(distance===0||distance>Location.GEOCODE_THRESHOLD))
-            {
-               Location.reverseGeocodeLocation(Roster.geoloc.getLat(),Roster.geoloc.getLon()).then((result:{ street: string,
-                  nr: string, zip: string, city: string, country: string })=>{
-                     let address = result.street+' '+result.nr+',\n'+result.zip+' '+result.city+'\n'+result.country+'\n('+new Date(geo.timestamp).toISOString()+')';                       
-                     geolocdiv.attr('title',address);
-                  }).catch ((e)=>{
-                     geolocdiv.attr('title',`Latitude: ${Roster.geoloc.getLat()} Longitude: ${Roster.geoloc.getLon()}`);
-               });
-            }
-            else {
-               geolocdiv.attr('title',`Latitude: ${Roster.geoloc.getLat()} Longitude: ${Roster.geoloc.getLon()}`);
+            if (
+               (Client.getOption('enableGeocode') || false) &&
+               (distance === 0 || distance > Location.GEOCODE_THRESHOLD)
+            ) {
+               Location.reverseGeocodeLocation(Roster.geoloc.getLat(), Roster.geoloc.getLon())
+                  .then((result: { street: string; nr: string; zip: string; city: string; country: string }) => {
+                     let address =
+                        result.street +
+                        ' ' +
+                        result.nr +
+                        ',\n' +
+                        result.zip +
+                        ' ' +
+                        result.city +
+                        '\n' +
+                        result.country +
+                        '\n(' +
+                        new Date(geo.timestamp).toISOString() +
+                        ')';
+                     geolocdiv.attr('title', address);
+                  })
+                  .catch(e => {
+                     geolocdiv.attr(
+                        'title',
+                        `Latitude: ${Roster.geoloc.getLat()} Longitude: ${Roster.geoloc.getLon()}`
+                     );
+                  });
+            } else {
+               geolocdiv.attr('title', `Latitude: ${Roster.geoloc.getLat()} Longitude: ${Roster.geoloc.getLon()}`);
             }
          }
-      }
-      else {
+      } else {
          geolocdiv.removeClass('jsxc-position-show');
-         Roster.geoloc=undefined;
-         geolocdiv.attr('title','');
+         Roster.geoloc = undefined;
+         geolocdiv.attr('title', '');
          geolocdiv.off('click');
       }
    }
@@ -623,12 +658,17 @@ export default class Roster {
          $(this).toggleClass('jsxc-active');
       });
 
-      this.element.find('.jsxc-join-muc-button').on('click',()=>{showMultiUserJoinDialog();}); 
-      this.element.find('.jsxc-add-contact-button').on('click',()=>{showContactDialog();});
-      this.element.find('.jsxc-search-contact-button').on('click',()=>{showContactSearchDialog();});
+      this.element.find('.jsxc-join-muc-button').on('click', () => {
+         showMultiUserJoinDialog();
+      });
+      this.element.find('.jsxc-add-contact-button').on('click', () => {
+         showContactDialog();
+      });
+      this.element.find('.jsxc-search-contact-button').on('click', () => {
+         showContactSearchDialog();
+      });
 
-      this.element.find('.jsxc-fullscreen-active-conversations-select').on('change',(e)=>{
-
+      this.element.find('.jsxc-fullscreen-active-conversations-select').on('change', e => {
          let uid = $(e.target).val().toString();
          let contact = this.rosterItems[uid].getContact();
          let chatWindow = contact.getChatWindowController();
@@ -640,19 +680,21 @@ export default class Roster {
          chatWindow.openProminently();
       });
 
-      setTimeout(()=>{
-      let select =  this.element.find('.jsxc-fullscreen-active-conversations-select');
-      if (select.find('option').length===0)
-      {
-         let cwindows = Client.getChatWindowList().getChatWindowIds();
-         for (let item of cwindows)
-         {
-            let contact = Client.getAccountManager().getAccount().getContact(new JID(item));
-            let option = $(`<option data-jid="${contact.getJid().bare}" value="${contact.getUid()}">${contact.getName()}</option>`);
-            select.append(option);
+      setTimeout(() => {
+         let select = this.element.find('.jsxc-fullscreen-active-conversations-select');
+         if (select.find('option').length === 0) {
+            let cwindows = Client.getChatWindowList().getChatWindowIds();
+            for (let item of cwindows) {
+               let contact = Client.getAccountManager().getAccount().getContact(new JID(item));
+               let option = $(
+                  `<option data-jid="${
+                     contact.getJid().bare
+                  }" value="${contact.getUid()}">${contact.getName()}</option>`
+               );
+               select.append(option);
+            }
+            select.val(select.find(':first-child').val());
          }
-         select.val(select.find(':first-child').val());
-      }
-      },2000);
+      }, 2000);
    }
 }

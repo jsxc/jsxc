@@ -14,7 +14,7 @@ let multiUserJoinTemplate = require('../../../template/multiUserJoin.hbs');
 
 const ENTER_KEY = 13;
 
-export default function (server?: string, room?: string) : MultiUserJoinDialog {
+export default function (server?: string, room?: string): MultiUserJoinDialog {
    return new MultiUserJoinDialog(server, room);
 }
 
@@ -55,7 +55,7 @@ class MultiUserJoinDialog {
       if (server && room) {
          this.serverInputElement.val(server);
          this.roomInputElement.val(room);
-         this.updateAccount(Client.getAccountManager().getAccount().getUid(),false);
+         this.updateAccount(Client.getAccountManager().getAccount().getUid(), false);
          this.testAndLoadRoomInfo();
       } else {
          this.updateAccount(Client.getAccountManager().getAccount().getUid());
@@ -64,16 +64,18 @@ class MultiUserJoinDialog {
       this.initializeInputElements();
    }
 
-   private updateAccount(id: string, initMucLists : boolean=true) {
+   private updateAccount(id: string, initMucLists: boolean = true) {
       this.account = Client.getAccountManager().getAccount(id);
 
       this.connection = this.account.getConnection();
-      this.defaultNickname = this.account.getDefaultNickname()===undefined?this.connection.getJID().node:this.account.getDefaultNickname();
+      this.defaultNickname =
+         this.account.getDefaultNickname() === undefined
+            ? this.connection.getJID().node
+            : this.account.getDefaultNickname();
 
       this.nicknameInputElement.attr('placeholder', this.defaultNickname);
 
-      if (initMucLists)
-      {
+      if (initMucLists) {
          this.getMultiUserServices().then((services: JID[]) => {
             this.serverInputElement.val(services[0].full);
             this.serverInputElement.trigger('change');
@@ -103,24 +105,28 @@ class MultiUserJoinDialog {
 
          let jid = new JID(<string>this.serverInputElement.val(), '');
 
-         this.account.getDiscoInfoRepository().hasFeature(jid,'jabber:iq:search').then((result: boolean)=>{
-            if (result)
-            {
-               this.dom.find('button.jsxc-search').removeClass('jsxc-hidden');
-               this.dom.find('button.jsxc-search').off('click').on('click',()=>{
-                  this.dialog.close();
-                  showSearchDialog(jid);
-               });
-            }
-            else
-            {
+         this.account
+            .getDiscoInfoRepository()
+            .hasFeature(jid, 'jabber:iq:search')
+            .then((result: boolean) => {
+               if (result) {
+                  this.dom.find('button.jsxc-search').removeClass('jsxc-hidden');
+                  this.dom
+                     .find('button.jsxc-search')
+                     .off('click')
+                     .on('click', () => {
+                        this.dialog.close();
+                        showSearchDialog(jid);
+                     });
+               } else {
+                  this.dom.find('button.jsxc-search').addClass('jsxc-hidden');
+                  this.dom.find('button.jsxc-search').off('click');
+               }
+            })
+            .catch(e => {
                this.dom.find('button.jsxc-search').addClass('jsxc-hidden');
                this.dom.find('button.jsxc-search').off('click');
-            }
-         }).catch((e)=>{
-            this.dom.find('button.jsxc-search').addClass('jsxc-hidden');
-            this.dom.find('button.jsxc-search').off('click');
-         });
+            });
 
          this.getMultiUserRooms(jid);
       });
@@ -252,9 +258,8 @@ class MultiUserJoinDialog {
          return a.attr('value').localeCompare(b.attr('value'));
       });
 
-      for (let i=0;i<array.length;i++)
-      {
-         $('#jsxc-roomlist select').append(array[i]);
+      for (let obj of array) {
+         $('#jsxc-roomlist select').append(obj);
       }
 
       let set = $(stanza).find('set[xmlns="http://jabber.org/protocol/rsm"]');

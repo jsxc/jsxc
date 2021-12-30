@@ -91,8 +91,7 @@ export default class Vcard extends AbstractService {
 
          if (itemName === 'PHOTO') {
             let img = item.find('BINVAL').text();
-            if (!img||img.trim().length===0)
-            {
+            if (!img || img.trim().length === 0) {
                return;
             }
 

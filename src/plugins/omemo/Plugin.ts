@@ -70,7 +70,9 @@ export default class OMEMOPlugin extends EncryptionPlugin {
             return;
          }
 
-         chatWindow.addMenuEntry('omemo-devices', Translation.t('OMEMO_devices'), () => this.openDeviceDialog(chatWindow));
+         chatWindow.addMenuEntry('omemo-devices', Translation.t('OMEMO_devices'), () =>
+            this.openDeviceDialog(chatWindow)
+         );
       });
    }
 
@@ -119,7 +121,7 @@ export default class OMEMOPlugin extends EncryptionPlugin {
          let stanza = await pepService.retrieveItems(NS_DEVICELIST, contact.getJid().bare);
 
          this.onDeviceListUpdate(stanza);
-      } catch(err) {
+      } catch (err) {
          this.pluginAPI.Log.debug('Can not retrieve device list', err);
 
          return false;

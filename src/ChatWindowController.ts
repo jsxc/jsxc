@@ -17,15 +17,15 @@ export default class ChatWindowController {
       this.setState(State.Closed);
       let select = $(document.body).find('.jsxc-fullscreen-active-conversations-select');
       let option = select.find(`option[value="${this.contact.getUid()}"]`);
-      if (option.length>0)
-      {
+      if (option.length > 0) {
          option.remove();
       }
-      option=select.find('option');
-      if (option.length>0)
-      {
+      option = select.find('option');
+      if (option.length > 0) {
          select.val($(select.find(`:first-child`)).val());
-         let c = Client.getAccountManager().getAccount().getContact(new JID($(select.find(`:first-child`)).attr("data-jid")));
+         let c = Client.getAccountManager()
+            .getAccount()
+            .getContact(new JID($(select.find(`:first-child`)).attr('data-jid')));
 
          let tchatWindow = c.getChatWindowController();
 
@@ -46,14 +46,14 @@ export default class ChatWindowController {
 
       let chatWindow = this.contact.getChatWindow();
       let select = $(document.body).find('.jsxc-fullscreen-active-conversations-select');
-      if (select.find('option[value="'+this.contact.getUid()+'"]').length===0)
-      {
+      if (select.find('option[value="' + this.contact.getUid() + '"]').length === 0) {
          let uid = chatWindow.getContact().getUid();
-         let option = $(`<option data-jid="${this.contact.getJid().bare}" value="${uid}">${this.contact.getName()}</option>`);
+         let option = $(
+            `<option data-jid="${this.contact.getJid().bare}" value="${uid}">${this.contact.getName()}</option>`
+         );
          select.append(option);
          select.val(uid);
-      }
-      else {
+      } else {
          select.val(this.contact.getUid());
       }
       Client.getChatWindowList().moveIntoViewport(chatWindow);

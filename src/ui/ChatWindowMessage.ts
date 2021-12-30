@@ -9,7 +9,7 @@ import Translation from '@util/Translation';
 import showLogDialog from './dialogs/xep308log';
 import Client from '@src/Client';
 
-let chatWindowMessageTemplate = require('../../template/chat-window-message.hbs')
+let chatWindowMessageTemplate = require('../../template/chat-window-message.hbs');
 
 export default class ChatWindowMessage {
    private element;
@@ -28,36 +28,35 @@ export default class ChatWindowMessage {
    public restoreNextMessage() {
       let nextMessage = this.getNextMessage();
 
-      if (nextMessage===undefined || nextMessage.getDOM().length > 0) {
+      if (nextMessage === undefined || nextMessage.getDOM().length > 0) {
          return;
       }
 
       let chatWindowMessage = this.chatWindow.getChatWindowMessage(nextMessage);
       let element = chatWindowMessage.getElement();
 
-      if (!this.chatWindow.getChatWindowMessage(nextMessage))
-      {
+      if (!this.chatWindow.getChatWindowMessage(nextMessage)) {
          element.hide(); // hide old outgoing message if > 1 client with same bare jid have same nickname
       }
 
-      if (nextMessage.getDirection()===DIRECTION.SYS)
-      {
+      if (nextMessage.getDirection() === DIRECTION.SYS) {
          let disableJoinLeaveMessages = Client.getOption('disableJoinLeaveMessages') || false;
-         if (disableJoinLeaveMessages)
-         {
-
+         if (disableJoinLeaveMessages) {
             if (
-               nextMessage.getPlaintextMessage().indexOf(Translation.t('entered_the_room', {
-                  nickname: '',
-                  escapeInterpolation: true,
-               }))>-1||
-               nextMessage.getPlaintextMessage().indexOf(Translation.t('left_the_building', {
-                  nickname: '',
-                  escapeInterpolation: true,
-               }))>-1||
-               nextMessage.getPlaintextMessage().indexOf(Translation.t('You_left_the_building'))>-1
-               )
-            {
+               nextMessage.getPlaintextMessage().indexOf(
+                  Translation.t('entered_the_room', {
+                     nickname: '',
+                     escapeInterpolation: true,
+                  })
+               ) > -1 ||
+               nextMessage.getPlaintextMessage().indexOf(
+                  Translation.t('left_the_building', {
+                     nickname: '',
+                     escapeInterpolation: true,
+                  })
+               ) > -1 ||
+               nextMessage.getPlaintextMessage().indexOf(Translation.t('You_left_the_building')) > -1
+            ) {
                element.hide();
             }
          }
@@ -71,13 +70,13 @@ export default class ChatWindowMessage {
    private getNextMessage() {
       let nextId = this.message.getNextId();
 
-      if (nextId===undefined||nextId===null) {
+      if (nextId === undefined || nextId === null) {
          return undefined;
       }
 
       let nextMessage = this.chatWindow.getTranscript().getMessage(nextId);
 
-      if (nextMessage===undefined||nextMessage===null||(<any>nextMessage).data===undefined) {
+      if (nextMessage === undefined || nextMessage === null || (<any>nextMessage).data === undefined) {
          Log.warn('Couldnt find next message.');
          return undefined;
       }
@@ -93,14 +92,14 @@ export default class ChatWindowMessage {
 
       this.element = $(template);
 
-      let bodyElement= $ (await this.message.getProcessedBody());
+      let bodyElement = $(await this.message.getProcessedBody());
 
       LinkHandlerGeo.get().detect(bodyElement);
 
       this.element.find('.jsxc-content').html(bodyElement);
 
       let timestampElement = this.element.find('.jsxc-timestamp');
-      DateTime.stringify(this.message.getStamp().getTime(),timestampElement);
+      DateTime.stringify(this.message.getStamp().getTime(), timestampElement);
 
       if (this.message.getDirection() === DIRECTION.OUT || this.message.getDirection() === DIRECTION.PROBABLY_OUT) {
          this.element.attr('data-mark', MessageMark[this.message.getMark()]);
@@ -143,75 +142,70 @@ export default class ChatWindowMessage {
          this.addSenderToElement();
       }
 
-      if (this.message.getDirection()!==DIRECTION.SYS)
-      {
-         if (this.message.getRetractId()!==null)
-         {
-            if (!this.message.isRetracted())
-            {
+      if (this.message.getDirection() !== DIRECTION.SYS) {
+         if (this.message.getRetractId() !== null) {
+            if (!this.message.isRetracted()) {
                this.element.hide();
             }
          }
-         if (this.message.getReplaceId()!==null)
-         {
+         if (this.message.getReplaceId() !== null) {
             this.element.hide();
-         }
-         else {
+         } else {
             let replacement = this.chatWindow.getTranscript().getLatestReplaceMessageFromMessage(this.message);
-            if (replacement!==null&&replacement.getAttrId()!==this.message.getAttrId())
-            {
+            if (replacement !== null && replacement.getAttrId() !== this.message.getAttrId()) {
                this.replaceBody($(await replacement.getProcessedBody()));
                let newtimestampElement = $('<div class="jsxc-timestamp">');
                newtimestampElement.insertBefore(timestampElement);
                timestampElement.remove(); // to kill the timer
-               DateTime.stringify(this.message.getReplaceTime(),newtimestampElement);
+               DateTime.stringify(this.message.getReplaceTime(), newtimestampElement);
             }
          }
 
-         if (this.message.isRetracted())
-         {
+         if (this.message.isRetracted()) {
             this.retractBody();
             let timestampElement = this.element.find('.jsxc-timestamp');
             let newtimestampElement = $('<div class="jsxc-timestamp">');
             newtimestampElement.insertBefore(timestampElement);
             timestampElement.remove(); // to kill the timer
-            DateTime.stringify(this.message.getReplaceTime(),newtimestampElement);
+            DateTime.stringify(this.message.getReplaceTime(), newtimestampElement);
          }
-      }
-      else {
- 
+      } else {
          let disableJoinLeaveMessages = Client.getOption('disableJoinLeaveMessages') || false;
-         if (disableJoinLeaveMessages)
-         {
+         if (disableJoinLeaveMessages) {
             if (
-               this.message.getPlaintextMessage().indexOf(Translation.t('entered_the_room', {
-                  nickname: '',
-                  escapeInterpolation: true,
-               }))>-1||
-               this.message.getPlaintextMessage().indexOf(Translation.t('left_the_building', {
-                  nickname: '',
-                  escapeInterpolation: true,
-               }))>-1||
-               this.message.getPlaintextMessage().indexOf(Translation.t('You_left_the_building'))>-1
-               )
-            {
+               this.message.getPlaintextMessage().indexOf(
+                  Translation.t('entered_the_room', {
+                     nickname: '',
+                     escapeInterpolation: true,
+                  })
+               ) > -1 ||
+               this.message.getPlaintextMessage().indexOf(
+                  Translation.t('left_the_building', {
+                     nickname: '',
+                     escapeInterpolation: true,
+                  })
+               ) > -1 ||
+               this.message.getPlaintextMessage().indexOf(Translation.t('You_left_the_building')) > -1
+            ) {
                this.element.hide();
             }
          }
       }
    }
 
-   private format(messages:IMessage[]) {
+   private format(messages: IMessage[]) {
       let text = '';
-      for (let i=0;i<messages.length;i++)
-      {
+      for (let message of messages) {
          try {
-         if (messages[i]!==undefined&&(<any>messages[i]).uid!==undefined)
-         {
-            text+=messages[i].getPlaintextMessage()+' - ('+DateTime.stringifyToString(messages[i].getStamp().getTime())+')\n\n';
-         }
-         }catch (e){
-            console.error(messages,messages[i],i,e);
+            if (message !== undefined && (<any>message).uid !== undefined) {
+               text +=
+                  message.getPlaintextMessage() +
+                  ' - (' +
+                  DateTime.stringifyToString(message.getStamp().getTime()) +
+                  ')\n\n';
+            }
+         } catch (e) {
+            //console.error(messages,messages[i],i,e);
          }
       }
       return text;
@@ -339,18 +333,18 @@ export default class ChatWindowMessage {
          }
       });
 
-      this.message.registerHook('replaceBody', (processBodyString) => {
+      this.message.registerHook('replaceBody', processBodyString => {
          if (processBodyString) {
-            this.replaceBody(processBodyString);         
+            this.replaceBody(processBodyString);
             let timestampElement = this.element.find('.jsxc-timestamp');
             let newtimestampElement = $('<div class="jsxc-timestamp">');
             newtimestampElement.insertBefore(timestampElement);
             timestampElement.remove(); // to kill the timer
-            DateTime.stringify(this.message.getReplaceTime(),newtimestampElement);
+            DateTime.stringify(this.message.getReplaceTime(), newtimestampElement);
          }
       });
 
-      this.message.registerHook('retracted', (val) => {
+      this.message.registerHook('retracted', val => {
          if (val) {
             this.chatWindow.getTranscript().processRetract(this.message);
             this.retractBody();
@@ -358,11 +352,11 @@ export default class ChatWindowMessage {
             let newtimestampElement = $('<div class="jsxc-timestamp">');
             newtimestampElement.insertBefore(timestampElement);
             timestampElement.remove(); // to kill the timer
-            DateTime.stringify(this.message.getReplaceTime(),newtimestampElement);
+            DateTime.stringify(this.message.getReplaceTime(), newtimestampElement);
          }
       });
 
-      this.message.registerHook('progress', (progress) => {
+      this.message.registerHook('progress', progress => {
          this.element.find('.jsxc-attachment').attr('data-progress', Math.round(progress * 100) + '%');
       });
 
@@ -387,55 +381,48 @@ export default class ChatWindowMessage {
             this.element.find('.jsxc-error-content').empty();
          }
       });
-
    }
 
-   private replaceBody(processBodyString:any) {
-
-      if (!this.element.find('.jsxc-retract').hasClass('jsxc-retract-icon'))
-      {
-
+   private replaceBody(processBodyString: any) {
+      if (!this.element.find('.jsxc-retract').hasClass('jsxc-retract-icon')) {
          let contentElement = this.element.find('.jsxc-content');
          contentElement.html(processBodyString);
 
-         if (!this.element.find('.jsxc-replace').hasClass('jsxc-replace-icon'))
-         {
-               this.element.find('.jsxc-replace').addClass('jsxc-replace-icon');
-               this.element.find('.jsxc-replace').on('click',()=>{
-                  let chain = this.chatWindow.getTranscript().getReplaceMessageChainFromMessage(this.message);
-                  if (chain!==null)
-                  {
-                     showLogDialog(this.chatWindow.getContact().getAccount().getContact(),this.chatWindow.getContact(),chain);
-                  }
-               });
+         if (!this.element.find('.jsxc-replace').hasClass('jsxc-replace-icon')) {
+            this.element.find('.jsxc-replace').addClass('jsxc-replace-icon');
+            this.element.find('.jsxc-replace').on('click', () => {
+               let chain = this.chatWindow.getTranscript().getReplaceMessageChainFromMessage(this.message);
+               if (chain !== null) {
+                  showLogDialog(
+                     this.chatWindow.getContact().getAccount().getContact(),
+                     this.chatWindow.getContact(),
+                     chain
+                  );
+               }
+            });
          }
 
          let chain = this.chatWindow.getTranscript().getReplaceMessageChainFromMessage(this.message);
 
-         if (chain!==null)
-         {
-            this.element.find('.jsxc-replace.jsxc-replace-icon').attr('title',this.format(chain));
+         if (chain !== null) {
+            this.element.find('.jsxc-replace.jsxc-replace-icon').attr('title', this.format(chain));
          }
-      }
-      else {
+      } else {
          this.retractBody();
       }
    }
 
    private retractBody() {
-
       let contentElement = this.element.find('.jsxc-content');
-      this.element.addClass('jsxc-content-retraction')
+      this.element.addClass('jsxc-content-retraction');
       contentElement.html(Translation.t('RETRACTION_BODY'));
 
-      if (!this.element.find('.jsxc-retract').hasClass('jsxc-retract-icon'))
-      {
+      if (!this.element.find('.jsxc-retract').hasClass('jsxc-retract-icon')) {
          this.element.find('.jsxc-retract').addClass('jsxc-retract-icon');
       }
 
-      if (this.element.find('.jsxc-replace').hasClass('jsxc-replace-icon'))
-      {
-         this.element.find('.jsxc-replace.jsxc-replace-icon').attr('title','');
+      if (this.element.find('.jsxc-replace').hasClass('jsxc-replace-icon')) {
+         this.element.find('.jsxc-replace.jsxc-replace-icon').attr('title', '');
          this.element.find('.jsxc-replace').removeClass('jsxc-replace-icon');
          this.element.find('.jsxc-replace').off('click');
       }

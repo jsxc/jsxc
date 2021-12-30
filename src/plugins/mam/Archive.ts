@@ -54,15 +54,13 @@ export default class Archive {
    }
 
    public lastMessages() {
-
       if (this.messageCache.length > 0) {
          Log.debug('Ongoing message retrieval');
          return false;
       }
 
       let messages = this.contact.getTranscript().getMessages();
-      if (messages===undefined||messages===null)
-         return;
+      if (messages === undefined || messages === null) return;
 
       let queryId = UUID.v4();
 
@@ -70,16 +68,17 @@ export default class Archive {
       let connection = this.plugin.getConnection();
 
       let lastMessage = this.contact.getTranscript().getLastMessage();
-      while (lastMessage!==undefined&&(<any>lastMessage).data!==undefined&&lastMessage.getDirection()===DIRECTION.SYS)
-      {
+      while (
+         lastMessage !== undefined &&
+         (<any>lastMessage).data !== undefined &&
+         lastMessage.getDirection() === DIRECTION.SYS
+      ) {
          lastMessage = this.contact.getTranscript().getMessage(lastMessage.getNextId());
-         if (lastMessage===undefined)
-         {
+         if (lastMessage === undefined) {
             break;
          }
       }
-      if (lastMessage!==undefined&&lastMessage!==null&&(<any>lastMessage).data!==undefined)
-      {
+      if (lastMessage !== undefined && lastMessage !== null && (<any>lastMessage).data !== undefined) {
          let startDate = lastMessage.getStamp();
          startDate.setSeconds(startDate.getSeconds() + 1);
          this.plugin
@@ -89,7 +88,13 @@ export default class Archive {
                   throw new Error(`Archive JID ${this.archiveJid.full} has no support for MAM.`);
                }
 
-               return connection.queryArchiveSync(startDate, this.archiveJid, <string>version, queryId,this.contact.getJid().bare );
+               return connection.queryArchiveSync(
+                  startDate,
+                  this.archiveJid,
+                  <string>version,
+                  queryId,
+                  this.contact.getJid().bare
+               );
             })
             .then(this.onCompleteSync)
             .catch(stanza => {
@@ -118,17 +123,15 @@ export default class Archive {
 
       if (!firstResultId) {
          let lastMessage = this.contact.getTranscript().getLastMessage();
-         if (lastMessage!==undefined&&(<any>lastMessage).data!==undefined) {
-            while (lastMessage.getDirection()===DIRECTION.SYS)
-            {
+         if (lastMessage !== undefined && (<any>lastMessage).data !== undefined) {
+            while (lastMessage.getDirection() === DIRECTION.SYS) {
                lastMessage = this.contact.getTranscript().getBefore(lastMessage);
-               if (lastMessage===undefined||(<any>lastMessage).data===undefined)
-               {
+               if (lastMessage === undefined || (<any>lastMessage).data === undefined) {
                   endDate = undefined;
                   break;
                }
             }
-            if (lastMessage!==undefined&&(<any>lastMessage).data!==undefined) {
+            if (lastMessage !== undefined && (<any>lastMessage).data !== undefined) {
                endDate = lastMessage.getStamp();
                endDate.setSeconds(endDate.getSeconds() - 1);
             }
@@ -174,8 +177,7 @@ export default class Archive {
          return;
       }
 
-      if (this.contact.getJid().bare !== to.bare && this.contact.getJid().bare !== from.bare)
-      {
+      if (this.contact.getJid().bare !== to.bare && this.contact.getJid().bare !== from.bare) {
          return;
       }
 
@@ -189,25 +191,34 @@ export default class Archive {
          return;
       }
 
-      let direction = this.contact.getJid().bare === to.bare ? Message.DIRECTION.PROBABLY_OUT : Message.DIRECTION.PROBABLY_IN;
+      let direction =
+         this.contact.getJid().bare === to.bare ? Message.DIRECTION.PROBABLY_OUT : Message.DIRECTION.PROBABLY_IN;
 
       let stanzaIdElement = messageElement.find('stanza-id[xmlns="urn:xmpp:sid:0"]');
       let originIdElement = messageElement.find('origin-id[xmlns="urn:xmpp:sid:0"]');
 
-      let replaceId = messageElement.find('replace[xmlns="urn:xmpp:message-correct:0"]').length>0?messageElement.find('replace[xmlns="urn:xmpp:message-correct:0"]').attr('id'):null;
-      let occupantId = messageElement.find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').length>0?messageElement.find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').attr('id'):null;
+      let replaceId =
+         messageElement.find('replace[xmlns="urn:xmpp:message-correct:0"]').length > 0
+            ? messageElement.find('replace[xmlns="urn:xmpp:message-correct:0"]').attr('id')
+            : null;
+      let occupantId =
+         messageElement.find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').length > 0
+            ? messageElement.find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').attr('id')
+            : null;
       let retractId = null;
 
-      if (messageElement.find('apply-to[xmlns="urn:xmpp:fasten:0"]').length>0&&messageElement.find('apply-to[xmlns="urn:xmpp:fasten:0"]').find('retract[xmlns="urn:xmpp:message-retract:0"]').length>0)
-      {
+      if (
+         messageElement.find('apply-to[xmlns="urn:xmpp:fasten:0"]').length > 0 &&
+         messageElement.find('apply-to[xmlns="urn:xmpp:fasten:0"]').find('retract[xmlns="urn:xmpp:message-retract:0"]')
+            .length > 0
+      ) {
          retractId = messageElement.find('apply-to[xmlns="urn:xmpp:fasten:0"]').attr('id');
       }
 
-      let styled = messageElement.find('unstyled[xmlns="urn:xmpp:styling:0"]').length>0?false:true;
+      let styled = messageElement.find('unstyled[xmlns="urn:xmpp:styling:0"]').length > 0 ? false : true;
 
-      if (retractId!==null)
-      {
-         replaceId=null;
+      if (retractId !== null) {
+         replaceId = null;
       }
 
       let uid =
@@ -229,7 +240,7 @@ export default class Archive {
          stamp: stamp.getTime(),
          mark: MessageMark.transferred,
          unread: false,
-         sender: undefined
+         sender: undefined,
       };
 
       if (this.contact.isGroupChat()) {
@@ -261,8 +272,8 @@ export default class Archive {
       }
 
       let transcript = this.contact.getTranscript();
-      let replaceMessagesKeys = new Array();
-      let retractMessagesKeys = new Array();
+      let replaceMessagesKeys = [];
+      let retractMessagesKeys = [];
 
       while (this.messageCache.length > 0) {
          let messageElement = this.messageCache.pop();
@@ -270,20 +281,16 @@ export default class Archive {
          try {
             let message = await this.parseForwardedMessage(messageElement);
 
-            if (message.getReplaceId()!==null)
-            {
-               replaceMessagesKeys.push({attrid:message.getAttrId(),uid:message.getUid()});
+            if (message.getReplaceId() !== null) {
+               replaceMessagesKeys.push({ attrid: message.getAttrId(), uid: message.getUid() });
             }
 
-            if (message.getRetractId()!==null)
-            {
-               retractMessagesKeys.push({attrid:message.getAttrId(),uid:message.getUid()});
+            if (message.getRetractId() !== null) {
+               retractMessagesKeys.push({ attrid: message.getAttrId(), uid: message.getUid() });
             }
-            if (!transcript.isDuplicatate(message))
-            {
+            if (!transcript.isDuplicatate(message)) {
                transcript.unshiftMessage(message);
             }
-
          } catch (err) {
             continue;
          }
@@ -293,59 +300,49 @@ export default class Archive {
       let firstResultId = finElement.find('first').text();
       let queryId = finElement.attr('queryid');
 
-      if (replaceMessagesKeys.length>0)
-      {
-         let arr : {[key: string]: IMessage} = {};
-        
-         for (let key of replaceMessagesKeys)
-         {
+      if (replaceMessagesKeys.length > 0) {
+         let arr: { [key: string]: IMessage } = {};
+
+         for (let key of replaceMessagesKeys) {
             let tmp = transcript.getMessage(key.uid);
-            let keystr=key.uid;
-            if (tmp===undefined||tmp===null)
-            {
+            let keystr = key.uid;
+            if (tmp === undefined || tmp === null) {
                tmp = transcript.getMessage(key.attrid);
-               keystr=key.uid;
+               keystr = key.uid;
             }
-          
-            if (tmp!==undefined&&tmp!==null)
-            {
-               arr[keystr]=tmp;
+
+            if (tmp !== undefined && tmp !== null) {
+               arr[keystr] = tmp;
             }
          }
          let indexedArr = transcript.convertToIndexArray(arr);
-         for (let i=0;i<indexedArr.length;i++)
-         {
-            transcript.processReplace(indexedArr[i]);
+         for (let indexedMessage of indexedArr) {
+            transcript.processReplace(indexedMessage);
          }
       }
 
-      if (retractMessagesKeys.length>0)
-      {
-         let arr : {[key: string]: IMessage} = {};
+      if (retractMessagesKeys.length > 0) {
+         let arr: { [key: string]: IMessage } = {};
 
-         for (let key of retractMessagesKeys)
-         {
+         for (let key of retractMessagesKeys) {
             let tmp = transcript.getMessage(key.uid);
-            let keystr=key.uid;
-            if (tmp===undefined||tmp===null)
-            {
+            let keystr = key.uid;
+            if (tmp === undefined || tmp === null) {
                tmp = transcript.getMessage(key.attrid);
-               keystr=key.uid;
+               keystr = key.uid;
             }
 
-            if (tmp!==undefined&&tmp!==null)
-            {
-               arr[keystr]=tmp;
+            if (tmp !== undefined && tmp !== null) {
+               arr[keystr] = tmp;
             }
          }
          let indexedArr = transcript.convertToIndexArray(arr);
-         for (let i=0;i<indexedArr.length;i++)
-         {
-            transcript.processRetract(indexedArr[i]);
+         for (let indexedMessage of indexedArr) {
+            transcript.processRetract(indexedMessage);
          }
       }
 
-      if (isArchiveExhausted&&!this.isExhausted()) {
+      if (isArchiveExhausted && !this.isExhausted()) {
          let archiveExhaustedMessage = new Message({
             peer: this.contact.getJid(),
             direction: Message.DIRECTION.SYS,
@@ -372,8 +369,8 @@ export default class Archive {
       }
 
       let transcript = this.contact.getTranscript();
-      let replaceMessagesKeys = new Array();
-      let retractMessagesKeys = new Array();
+      let replaceMessagesKeys = [];
+      let retractMessagesKeys = [];
 
       while (this.messageCache.length > 0) {
          let messageElement = this.messageCache.pop();
@@ -381,73 +378,59 @@ export default class Archive {
          try {
             let message = await this.parseForwardedMessage(messageElement);
 
-            if (message.getReplaceId()!==null)
-            {
-               replaceMessagesKeys.push({attrid:message.getAttrId(),uid:message.getUid()});
+            if (message.getReplaceId() !== null) {
+               replaceMessagesKeys.push({ attrid: message.getAttrId(), uid: message.getUid() });
             }
 
-            if (message.getRetractId()!==null)
-            {
-               retractMessagesKeys.push({attrid:message.getAttrId(),uid:message.getUid()});
+            if (message.getRetractId() !== null) {
+               retractMessagesKeys.push({ attrid: message.getAttrId(), uid: message.getUid() });
             }
-            if (!transcript.isDuplicatate(message))
-            {
+            if (!transcript.isDuplicatate(message)) {
                transcript.insertMessage(message);
             }
-
          } catch (err) {
             continue;
          }
       }
 
-      if (replaceMessagesKeys.length>0)
-      {
-         let arr : {[key: string]: IMessage} = {};
-         for (let key of replaceMessagesKeys)
-         {
+      if (replaceMessagesKeys.length > 0) {
+         let arr: { [key: string]: IMessage } = {};
+         for (let key of replaceMessagesKeys) {
             let tmp = transcript.getMessage(key.uid);
-            let keystr=key.uid;
-            if (tmp===undefined||tmp===null)
-            {
+            let keystr = key.uid;
+            if (tmp === undefined || tmp === null) {
                tmp = transcript.getMessage(key.attrid);
-               keystr=key.uid;
+               keystr = key.uid;
             }
-          
-            if (tmp!==undefined&&tmp!==null)
-            {
-               arr[keystr]=tmp;
+
+            if (tmp !== undefined && tmp !== null) {
+               arr[keystr] = tmp;
             }
          }
          let indexedArr = transcript.convertToIndexArray(arr);
-         for (let i=0;i<indexedArr.length;i++)
-         {
-            transcript.processReplace(indexedArr[i]);
+         for (let indexedMessage of indexedArr) {
+            transcript.processReplace(indexedMessage);
          }
       }
 
-      if (retractMessagesKeys.length>0)
-      {
-         let arr : {[key: string]: IMessage} = {};
+      if (retractMessagesKeys.length > 0) {
+         let arr: { [key: string]: IMessage } = {};
 
-         for (let key of retractMessagesKeys)
-         {
+         for (let key of retractMessagesKeys) {
             let tmp = transcript.getMessage(key.uid);
-            let keystr=key.uid;
-            if (tmp===undefined||tmp===null)
-            {
+            let keystr = key.uid;
+            if (tmp === undefined || tmp === null) {
                tmp = transcript.getMessage(key.attrid);
-               keystr=key.uid;
+               keystr = key.uid;
             }
 
-            if (tmp!==undefined&&tmp!==null)
-            {
-               arr[keystr]=tmp;
+            if (tmp !== undefined && tmp !== null) {
+               arr[keystr] = tmp;
             }
          }
          let indexedArr = transcript.convertToIndexArray(arr);
-         for (let i=0;i<indexedArr.length;i++)
-         {
-            transcript.processRetract(indexedArr[i]);
+         for (let indexedMessage of indexedArr) {
+            transcript.processRetract(indexedMessage);
          }
       }
 

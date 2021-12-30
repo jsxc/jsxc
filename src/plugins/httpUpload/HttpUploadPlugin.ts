@@ -99,12 +99,15 @@ export default class HttpUploadPlugin extends AbstractPlugin {
             if (err) {
                setTimeout(() => {
                   let error = $(err);
-                  if (error.prop("tagName")!==undefined&&error.prop("tagName").toLowerCase()==='iq'&&error.attr('type')==='error')
-                  {
-                     console.error(err);
-                     contact.addSystemMessage('Error: '+error.find('error').attr('code')+' '+error.find('error').text());
-                  }
-                  else {
+                  if (
+                     error.prop('tagName') !== undefined &&
+                     error.prop('tagName').toLowerCase() === 'iq' &&
+                     error.attr('type') === 'error'
+                  ) {
+                     contact.addSystemMessage(
+                        'Error: ' + error.find('error').attr('code') + ' ' + error.find('error').text()
+                     );
+                  } else {
                      contact.addSystemMessage(err.toString());
                   }
                }, 500);

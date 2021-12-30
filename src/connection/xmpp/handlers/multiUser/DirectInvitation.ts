@@ -20,9 +20,14 @@ export default class extends AbstractHandler {
       let password = xElement.attr('password');
       let reason = xElement.attr('reason') || xElement.text(); //pidgin workaround
 
-      let lastnoti : Notice = this.account.getNoticeManager().getNotices().getLastItem();
-      if (lastnoti===null||lastnoti.getTitle()!==Translation.t('muc_invitation')||lastnoti.getDescription()!==`for ${roomJid.bare}`||lastnoti.getType()!==NOTICETYPE.invitation||lastnoti.callFunction()!==NOTICEFUNCTION.multiUserInvitation)
-      {
+      let lastnoti: Notice = this.account.getNoticeManager().getNotices().getLastItem();
+      if (
+         lastnoti === null ||
+         lastnoti.getTitle() !== Translation.t('muc_invitation') ||
+         lastnoti.getDescription() !== `for ${roomJid.bare}` ||
+         lastnoti.getType() !== NOTICETYPE.invitation ||
+         lastnoti.callFunction() !== NOTICEFUNCTION.multiUserInvitation
+      ) {
          this.account.getNoticeManager().addNotice({
             title: Translation.t('muc_invitation'),
             description: `for ${roomJid.bare}`,

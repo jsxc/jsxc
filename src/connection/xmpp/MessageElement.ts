@@ -28,19 +28,27 @@ export class MessageElement {
       let from = new JID($(stanza).attr('from'));
       let to = new JID($(stanza).attr('to'));
 
-      this.replaceId = $(stanza).find('replace[xmlns="urn:xmpp:message-correct:0"]').length>0?$(stanza).find('replace[xmlns="urn:xmpp:message-correct:0"]').attr('id'):null;
-      this.occupantId = $(stanza).find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').length>0?$(stanza).find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').attr('id'):null;
+      this.replaceId =
+         $(stanza).find('replace[xmlns="urn:xmpp:message-correct:0"]').length > 0
+            ? $(stanza).find('replace[xmlns="urn:xmpp:message-correct:0"]').attr('id')
+            : null;
+      this.occupantId =
+         $(stanza).find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').length > 0
+            ? $(stanza).find('occupant-id[xmlns="urn:xmpp:occupant-id:0"]').attr('id')
+            : null;
 
-      if ($(stanza).find('apply-to[xmlns="urn:xmpp:fasten:0"]').length>0&&$(stanza).find('apply-to[xmlns="urn:xmpp:fasten:0"]').find('retract[xmlns="urn:xmpp:message-retract:0"]').length>0)
-      {
+      if (
+         $(stanza).find('apply-to[xmlns="urn:xmpp:fasten:0"]').length > 0 &&
+         $(stanza).find('apply-to[xmlns="urn:xmpp:fasten:0"]').find('retract[xmlns="urn:xmpp:message-retract:0"]')
+            .length > 0
+      ) {
          this.retractId = $(stanza).find('apply-to[xmlns="urn:xmpp:fasten:0"]').attr('id');
       }
 
-      this.styled = $(stanza).find('unstyled[xmlns="urn:xmpp:styling:0"]').length>0?false:true;
+      this.styled = $(stanza).find('unstyled[xmlns="urn:xmpp:styling:0"]').length > 0 ? false : true;
 
-      if (this.retractId!==null)
-      {
-         this.replaceId=null;
+      if (this.retractId !== null) {
+         this.replaceId = null;
       }
 
       if (forwardedStanza.length === 0) {
@@ -66,7 +74,7 @@ export class MessageElement {
          let carbonTagName = <string>carbonStanza.prop('tagName') || '';
 
          this.carbon = true;
-         this.direction = (carbonTagName.toLowerCase() === 'sent') ? Message.DIRECTION.OUT : Message.DIRECTION.IN;
+         this.direction = carbonTagName.toLowerCase() === 'sent' ? Message.DIRECTION.OUT : Message.DIRECTION.IN;
 
          return;
       }
@@ -82,23 +90,19 @@ export class MessageElement {
       return this.carbon;
    }
 
-   public getReplaceId()
-   {
+   public getReplaceId() {
       return this.replaceId;
    }
 
-   public getRetractId()
-   {
+   public getRetractId() {
       return this.retractId;
    }
 
-   public getOccupantId()
-   {
+   public getOccupantId() {
       return this.occupantId;
    }
 
-   public isStyled()
-   {
+   public isStyled() {
       return this.styled;
    }
 
