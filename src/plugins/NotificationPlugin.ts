@@ -1,11 +1,11 @@
-import Message from '../Message';
 import { AbstractPlugin } from '../plugin/AbstractPlugin';
 import PluginAPI from '../plugin/PluginAPI';
-import Contact from '../Contact';
 import Translation from '../util/Translation';
 import Notification from '../Notification';
 import { Presence } from '../connection/AbstractConnection';
 import { SOUNDS } from '../CONST';
+import { IContact } from '@src/Contact.interface';
+import { IMessage } from '@src/Message.interface';
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '99.0.0';
@@ -32,7 +32,11 @@ export default class NotificationPlugin extends AbstractPlugin {
       pluginAPI.registerPresenceHook(this.onPresence);
    }
 
-   private afterReceiveMessageProcessor = (contact: Contact, message: Message): Promise<any> => {
+   private afterReceiveMessageProcessor = (
+      contact: IContact,
+      message: IMessage,
+      stanza: Element
+   ): Promise<[IContact, IMessage, Element]> => {
       if ((message.getPlaintextMessage() || message.getAttachment()) && message.isIncoming()) {
          Notification.notify({
             title: Translation.t('New_message_from', {
@@ -44,10 +48,10 @@ export default class NotificationPlugin extends AbstractPlugin {
          });
       }
 
-      return Promise.resolve([contact, message]);
+      return Promise.resolve([contact, message, stanza]);
    };
 
-   private onPresence = (contact: Contact, newPresence, oldPresence) => {
+   private onPresence = (contact: IContact, newPresence, oldPresence) => {
       if (oldPresence !== Presence.offline || newPresence === Presence.offline) {
          return;
       }
