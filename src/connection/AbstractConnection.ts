@@ -149,11 +149,13 @@ abstract class AbstractConnection {
             })
             .c('body', {
                xmlns: Strophe.NS.XHTML,
-            })
-            .cnode($(htmlMessage).get(0))
-            .up()
-            .up()
-            .up();
+            });
+
+         for (const node of $(htmlMessage).get()) {
+            xmlMsg.cnode(node).up();
+         }
+
+         xmlMsg.up().up();
       }
 
       let plaintextMessage = this.getMessage(
@@ -202,7 +204,7 @@ abstract class AbstractConnection {
          });
    }
 
-   private getMessage(message: Message, getEncryptedMessage: () => string, getMessage: () => string) {
+   private getMessage(message: Message, getEncryptedMessage: () => string, getMessage: () => string): string {
       if (message.isEncrypted() && getEncryptedMessage.call(message)) {
          return getEncryptedMessage.call(message);
       } else if (getMessage.call(message)) {
