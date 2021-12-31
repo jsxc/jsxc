@@ -6,6 +6,7 @@ import Log from '../util/Log';
 import LinkHandlerGeo from '@src/LinkHandlerGeo';
 import Color from '@util/Color';
 import Translation from '@util/Translation';
+import messageHistory from './dialogs/messageHistory';
 
 let chatWindowMessageTemplate = require('../../template/chat-window-message.hbs');
 
@@ -14,8 +15,15 @@ export default class ChatWindowMessage {
 
    private message: IMessage;
 
-   constructor(private originalMessage: IMessage, private chatWindow: ChatWindow) {
-      this.message = originalMessage.getLastVersion();
+   constructor(private originalMessage: IMessage, private chatWindow: ChatWindow, useLastVersion: boolean = true) {
+      this.message = useLastVersion ? originalMessage.getLastVersion() : originalMessage;
+
+      let template = chatWindowMessageTemplate({
+         id: this.message.getCssId(),
+         direction: this.message.getDirectionString(),
+      });
+
+      this.element = $(template);
 
       this.generateElement();
       this.registerHooks();
@@ -59,13 +67,6 @@ export default class ChatWindowMessage {
    }
 
    private async generateElement() {
-      let template = chatWindowMessageTemplate({
-         id: this.message.getCssId(),
-         direction: this.message.getDirectionString(),
-      });
-
-      this.element = $(template);
-
       let bodyElement = $(await this.message.getProcessedBody());
 
       LinkHandlerGeo.get().detect(bodyElement);
@@ -94,6 +95,14 @@ export default class ChatWindowMessage {
       if (this.message.isReplacement()) {
          this.element.addClass('jsxc-edited');
       }
+
+      this.element.find('.jsxc-version').on('click', () => {
+         if (!this.element.hasClass('jsxc-edited')) {
+            return;
+         }
+
+         messageHistory(this.originalMessage, this.chatWindow);
+      });
 
       if (this.message.getErrorMessage()) {
          this.element.addClass('jsxc-error');
@@ -230,8 +239,7 @@ export default class ChatWindowMessage {
 
    private registerHooks() {
       this.message.registerHook('replacedBy', () => {
-         const messageReplacement = this.message.getReplacedBy();
-         const chatWindowMessageReplacement = new ChatWindowMessage(messageReplacement, this.chatWindow);
+         const chatWindowMessageReplacement = new ChatWindowMessage(this.originalMessage, this.chatWindow);
 
          this.element.replaceWith(chatWindowMessageReplacement.getElement());
       });

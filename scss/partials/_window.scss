@@ -530,6 +530,16 @@
   .jsxc-version::before {
     @extend %jsxc-icon-font;
     content: map-get($jsxc-icons-map, "edit");
+    cursor: pointer;
+  }
+}
+
+ul.jsxc-message-history {
+  padding: 0.5em 0 2em;
+  width: 250px;
+
+  .jsxc-version {
+    display: none;
   }
 }
 

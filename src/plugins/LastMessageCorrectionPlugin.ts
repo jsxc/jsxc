@@ -143,11 +143,7 @@ export default class LastMessageCorrectionPlugin extends AbstractPlugin {
       if (firstIncomingMessage && firstIncomingMessage.getAttrId() === attrIdToBeReplaced) {
          message.setOriginal(firstIncomingMessage);
 
-         contact.getTranscript().pushMessage(message);
-
          firstIncomingMessage.getLastVersion().setReplacedBy(message);
-
-         return [contact, undefined, stanza];
       }
 
       return [contact, message, stanza];
