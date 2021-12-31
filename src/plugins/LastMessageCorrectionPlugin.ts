@@ -49,74 +49,78 @@ export default class LastMessageCorrectionPlugin extends AbstractPlugin {
    constructor(pluginAPI: PluginAPI) {
       super(MIN_VERSION, MAX_VERSION, pluginAPI);
 
+      pluginAPI.registerCommand(CORRECTION_CMD, this.commandHandler, 'cmd_correction');
+
+      pluginAPI.addPreSendMessageStanzaProcessor(this.addReplaceElementToStanza, 90);
+
       pluginAPI.addAfterReceiveMessageProcessor(this.checkMessageCorrection, 90);
-
-      pluginAPI.registerCommand(
-         CORRECTION_CMD,
-         async (args, contact, messageString) => {
-            const originalMessage = contact.getTranscript().getFirstOutgoingMessage();
-
-            this.correctionRequests[contact.getUid()] = originalMessage;
-
-            if (!originalMessage) {
-               return false;
-            }
-
-            const chatWindow = contact.getChatWindow();
-            const message = new Message({
-               peer: contact.getJid(),
-               direction: Message.DIRECTION.OUT,
-               type: contact.getType(),
-               plaintextMessage: messageString.replace(/^\/fix /, ''),
-               attachment: chatWindow.getAttachment(),
-               unread: false,
-               original: originalMessage.getUid(),
-            });
-
-            contact.getTranscript().pushMessage(message);
-
-            chatWindow.clearAttachment();
-
-            let pipe = contact.getAccount().getPipe('preSendMessage');
-
-            return pipe
-               .run(contact, message)
-               .then(([contact, message]) => {
-                  originalMessage.getLastVersion().setReplacedBy(message);
-
-                  contact.getAccount().getConnection().sendMessage(message);
-
-                  return true;
-               })
-               .catch(err => {
-                  this.pluginAPI.Log.warn('Error during preSendMessage pipe', err);
-
-                  return false;
-               });
-         },
-         'cmd_correction'
-      );
-
-      pluginAPI.addPreSendMessageStanzaProcessor(async (message, xmlMsg) => {
-         const contact = this.pluginAPI.getContact(message.getPeer());
-         const originalMessage = this.correctionRequests[contact.getUid()];
-
-         if (!originalMessage || originalMessage.getLastVersion().getUid() !== message.getUid()) {
-            return [message, xmlMsg];
-         }
-
-         xmlMsg
-            .c('replace', {
-               xmlns: LMC,
-               id: originalMessage.getAttrId(),
-            })
-            .up();
-
-         return [message, xmlMsg];
-      }, 90);
    }
 
-   // review carbon copy
+   private commandHandler = async (args: string[], contact: IContact, messageString: string) => {
+      const originalMessage = contact.getTranscript().getFirstOutgoingMessage();
+
+      this.correctionRequests[contact.getUid()] = originalMessage;
+
+      if (!originalMessage || !contact.isChat()) {
+         return false;
+      }
+
+      const chatWindow = contact.getChatWindow();
+      const message = new Message({
+         peer: contact.getJid(),
+         direction: Message.DIRECTION.OUT,
+         type: contact.getType(),
+         plaintextMessage: messageString.replace(/^\/fix /, ''),
+         attachment: chatWindow.getAttachment(),
+         unread: false,
+         original: originalMessage.getUid(),
+      });
+
+      contact.getTranscript().pushMessage(message);
+
+      chatWindow.clearAttachment();
+
+      let pipe = contact.getAccount().getPipe('preSendMessage');
+
+      return pipe
+         .run(contact, message)
+         .then(([contact, message]) => {
+            originalMessage.getLastVersion().setReplacedBy(message);
+
+            contact.getAccount().getConnection().sendMessage(message);
+
+            return true;
+         })
+         .catch(err => {
+            this.pluginAPI.Log.warn('Error during preSendMessage pipe', err);
+
+            return false;
+         });
+   };
+
+   private addReplaceElementToStanza = async (
+      message: IMessage,
+      xmlMsg: Strophe.Builder
+   ): Promise<[IMessage, Strophe.Builder]> => {
+      const contact = this.pluginAPI.getContact(message.getPeer());
+      const originalMessage = this.correctionRequests[contact.getUid()];
+
+      if (!originalMessage || originalMessage.getLastVersion().getUid() !== message.getUid()) {
+         return [message, xmlMsg];
+      }
+
+      delete this.correctionRequests[contact.getUid()];
+
+      xmlMsg
+         .c('replace', {
+            xmlns: LMC,
+            id: originalMessage.getAttrId(),
+         })
+         .up();
+
+      return [message, xmlMsg];
+   };
+
    private checkMessageCorrection = async (
       contact: IContact,
       message: IMessage,

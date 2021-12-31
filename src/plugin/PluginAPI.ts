@@ -120,7 +120,7 @@ export default class PluginAPI implements IPluginAPI {
    }
 
    public addPreSendMessageStanzaProcessor(
-      processor: (message: Message, xmlMsg: Strophe.Builder) => Promise<[Message, Strophe.Builder]>,
+      processor: (message: IMessage, xmlMsg: Strophe.Builder) => Promise<[IMessage, Strophe.Builder]>,
       position?: number
    ) {
       this.account.getPipe('preSendMessageStanza').addProcessor(processor, position);
