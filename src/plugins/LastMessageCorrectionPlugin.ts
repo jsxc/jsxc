@@ -54,6 +54,10 @@ export default class LastMessageCorrectionPlugin extends AbstractPlugin {
       pluginAPI.addPreSendMessageStanzaProcessor(this.addReplaceElementToStanza, 90);
 
       pluginAPI.addAfterReceiveMessageProcessor(this.checkMessageCorrection, 90);
+
+      pluginAPI.registerChatMessageMenuItem({
+         generate: this.generateCorrectMessageMenuItem,
+      });
    }
 
    private commandHandler = async (args: string[], contact: IContact, messageString: string) => {
@@ -147,5 +151,35 @@ export default class LastMessageCorrectionPlugin extends AbstractPlugin {
       }
 
       return [contact, message, stanza];
+   };
+
+   private generateCorrectMessageMenuItem = (contact: IContact, message: IMessage) => {
+      if (message.isOutgoing()) {
+         const lastOutgoingMessage = contact.getTranscript().getFirstOutgoingMessage().getLastVersion();
+
+         if (lastOutgoingMessage.getUid() === message.getUid()) {
+            const chatWindow = contact.getChatWindow();
+
+            return {
+               id: 'lmc-edit',
+               label: '',
+               icon: 'edit',
+               handler: () => {
+                  let plaintextMessage = message.getPlaintextMessage();
+
+                  if (message.hasAttachment()) {
+                     const attachment = message.getAttachment();
+
+                     chatWindow.setAttachment(attachment);
+                     plaintextMessage = plaintextMessage.replace(attachment.getData() + '\n', '');
+                  }
+
+                  chatWindow.setInput(CORRECTION_CMD + ' ' + plaintextMessage);
+               },
+            };
+         }
+      }
+
+      return false;
    };
 }

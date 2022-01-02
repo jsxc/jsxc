@@ -12,6 +12,7 @@ import Pipe from '@util/Pipe';
 import CommandRepository, { CommandAction } from '@src/CommandRepository';
 import IStorage from '@src/Storage.interface';
 import CallManager from '@src/CallManager';
+import IMenuItemFactory from '@src/MenuItemFactory.interface';
 
 export interface IPluginAPI {
    Log: ILog;
@@ -105,4 +106,6 @@ export interface IPluginAPI {
    getAccountUid(): string;
 
    getCallManager(): CallManager;
+
+   registerChatMessageMenuItem(menuItem: IMenuItemFactory<[IContact, IMessage]>): void;
 }
