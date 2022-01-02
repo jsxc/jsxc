@@ -64,7 +64,7 @@
     padding-top: 2px;
   }
 
-  &__tag {
+  @at-root button.jsxc-bar__tag {
     background-color: #bbb;
     border: 0;
     border-radius: 0;
