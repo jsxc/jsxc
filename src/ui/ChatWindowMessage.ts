@@ -7,6 +7,8 @@ import LinkHandlerGeo from '@src/LinkHandlerGeo';
 import Color from '@util/Color';
 import Translation from '@util/Translation';
 import messageHistory from './dialogs/messageHistory';
+import MenuComponent from './MenuComponent';
+import onLongPress from './util/LongPress';
 
 let chatWindowMessageTemplate = require('../../template/chat-window-message.hbs');
 
@@ -27,6 +29,8 @@ export default class ChatWindowMessage {
 
       this.generateElement();
       this.registerHooks();
+
+      this.initMenu();
    }
 
    public getElement() {
@@ -235,6 +239,22 @@ export default class ChatWindowMessage {
       } else {
          AvatarSet.setPlaceholder(avatarElement, sender.name, sender.jid);
       }
+   }
+
+   private initMenu() {
+      if (this.message.isSystem()) {
+         return;
+      }
+
+      const messageMenu = this.chatWindow.getAccount().getChatMessageMenu();
+      const menuType = this.message.isOutgoing() ? 'vertical-right' : 'vertical-left';
+      const menu = new MenuComponent('more', menuType, messageMenu, [this.chatWindow.getContact(), this.message]);
+
+      this.element.append(menu.getElement());
+
+      onLongPress(this.element, () => {
+         menu.toggle();
+      });
    }
 
    private registerHooks() {

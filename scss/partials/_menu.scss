@@ -4,11 +4,13 @@
 
   &__button {
     align-items: flex-start;
+    color: "inherit";
     cursor: pointer;
     display: flex;
     flex-direction: column;
     height: 100%;
     justify-content: center;
+    text-decoration: none;
     user-select: none;
     white-space: nowrap;
 
@@ -65,7 +67,8 @@
   &--drop-bottom-left,
   &--drop-bottom-right,
   &--drop-right-top,
-  &--vertical-left {
+  &--vertical-left
+  &--vertical-right {
     .jsxc-menu__content {
       border-radius: 3px;
       max-height: 9999px;
@@ -120,6 +123,28 @@
         left: 100%;
         top: 14px;
         transform: rotate(-90deg);
+      }
+    }
+
+    ul {
+      display: flex;
+      padding: 0;
+    }
+
+    li {
+      height: 42px;
+    }
+  }
+
+  &--vertical-right {
+    .jsxc-menu__content {
+      left: 100%;
+      top: 0;
+
+      &::after {
+        right: 100%;
+        top: 14px;
+        transform: rotate(90deg);
       }
     }
 

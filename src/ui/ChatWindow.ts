@@ -190,6 +190,8 @@ export default class ChatWindow {
    public setInput(text: string) {
       this.inputElement.val(text);
       this.inputElement.trigger('focus');
+
+      this.resizeInputArea();
    }
 
    public appendTextToInput(text: string = '') {

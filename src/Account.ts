@@ -25,6 +25,7 @@ import CommandRepository from './CommandRepository';
 import AvatarSet from '@ui/AvatarSet';
 import { IAvatar } from './Avatar.interface';
 import CallManager from './CallManager';
+import MenuChatMessage from './MenuChatMessage';
 
 type ConnectionCallback = (status: number, condition?: string) => void;
 
@@ -58,6 +59,8 @@ export default class Account {
    private commandRepository: CommandRepository;
 
    private callManager: CallManager;
+
+   private chatMessageMenu: MenuChatMessage;
 
    private options: Options;
 
@@ -260,6 +263,14 @@ export default class Account {
       }
 
       return this.callManager;
+   }
+
+   public getChatMessageMenu(): MenuChatMessage {
+      if (!this.chatMessageMenu) {
+         this.chatMessageMenu = new MenuChatMessage();
+      }
+
+      return this.chatMessageMenu;
    }
 
    public getContact(jid?: IJID): IContact {
