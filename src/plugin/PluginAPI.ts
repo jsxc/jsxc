@@ -18,6 +18,7 @@ import IStorage from '@src/Storage.interface';
 import CommandRepository, { CommandAction } from '@src/CommandRepository';
 import { IAvatar } from '@src/Avatar.interface';
 import CallManager from '@src/CallManager';
+import IMenuItemFactory from '@src/MenuItemFactory.interface';
 
 export default class PluginAPI implements IPluginAPI {
    private storage: IStorage;
@@ -120,7 +121,7 @@ export default class PluginAPI implements IPluginAPI {
    }
 
    public addPreSendMessageStanzaProcessor(
-      processor: (message: Message, xmlMsg: Strophe.Builder) => Promise<[Message, Strophe.Builder]>,
+      processor: (message: IMessage, xmlMsg: Strophe.Builder) => Promise<[IMessage, Strophe.Builder]>,
       position?: number
    ) {
       this.account.getPipe('preSendMessageStanza').addProcessor(processor, position);
@@ -233,5 +234,9 @@ export default class PluginAPI implements IPluginAPI {
 
    public getCallManager(): CallManager {
       return this.account.getCallManager();
+   }
+
+   public registerChatMessageMenuItem(menuItem: IMenuItemFactory<[IContact, IMessage]>): void {
+      this.account.getChatMessageMenu().registerMenuItem(menuItem);
    }
 }

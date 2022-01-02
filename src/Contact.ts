@@ -15,6 +15,7 @@ import ChatWindow from './ui/ChatWindow';
 import ContactProvider from './ContactProvider';
 import DiscoInfo from './DiscoInfo';
 import { IJID } from './JID.interface';
+import { IMessage } from './Message.interface';
 
 export default class Contact implements IIdentifiable, IContact {
    protected storage: Storage;
@@ -111,7 +112,7 @@ export default class Contact implements IIdentifiable, IContact {
       return this.account;
    }
 
-   public addSystemMessage(messageString: string): Message {
+   public addSystemMessage(messageString: string): IMessage {
       let message = new Message({
          peer: this.getJid(),
          direction: Message.DIRECTION.SYS,

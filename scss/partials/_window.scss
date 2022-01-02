@@ -346,82 +346,113 @@
     }
   }
 
-  p {
-    clear: both;
-    font-size: 1em;
-    margin: 0;
+  .jsxc-content {
+    p {
+      clear: both;
+      font-size: 1em;
+      margin: 0;
 
-    +p {
-      margin-top: 0.7em;
-    }
-  }
-
-  a {
-    color: $chatmessage-a;
-    display: inline-block;
-    max-width: 100%;
-    position: relative;
-    text-decoration: underline;
-
-    &[download]::before {
-      background-color: rgba(255, 255, 255, 0.7);
-      background-image: url("../images/download_icon_black.svg");
-      background-position: center center;
-      background-repeat: no-repeat;
-      background-size: 3em;
-      border-radius: 3px;
-      bottom: 5px;
-      content: " ";
-      left: 0;
-      opacity: 0;
-      position: absolute;
-      right: 0;
-      top: 0;
-      transition: opacity 0.5s;
-    }
-
-    &[download]:hover {
-      &::before {
-        opacity: 0.6;
+      +p {
+        margin-top: 0.7em;
       }
     }
 
-    &.jsxc-geo {
-      background-color: #fff;
-      border-radius: 0.8em;
-      display: block;
-      padding: 1em 1em 1em 3em;
+    a {
+      color: $chatmessage-a;
+      display: inline-block;
+      max-width: 100%;
+      position: relative;
+      text-decoration: underline;
 
-      &::before {
-        background-color: #fff;
-        background-image: url("../images/location_icon.svg");
+      &[download]::before {
+        background-color: rgba(255, 255, 255, 0.7);
+        background-image: url("../images/download_icon_black.svg");
         background-position: center center;
         background-repeat: no-repeat;
-        background-size: contain;
-        content: "";
-        display: inline-block;
-        height: 2em;
-        margin-left: -2em;
-        vertical-align: bottom;
-        width: 2em;
+        background-size: 3em;
+        border-radius: 3px;
+        bottom: 5px;
+        content: " ";
+        left: 0;
+        opacity: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        transition: opacity 0.5s;
       }
+
+      &[download]:hover {
+        &::before {
+          opacity: 0.6;
+        }
+      }
+
+      &.jsxc-geo {
+        background-color: #fff;
+        border-radius: 0.8em;
+        display: block;
+        padding: 1em 1em 1em 3em;
+
+        &::before {
+          background-color: #fff;
+          background-image: url("../images/location_icon.svg");
+          background-position: center center;
+          background-repeat: no-repeat;
+          background-size: contain;
+          content: "";
+          display: inline-block;
+          height: 2em;
+          margin-left: -2em;
+          vertical-align: bottom;
+          width: 2em;
+        }
+      }
+    }
+
+    img {
+      max-width: 100%;
+    }
+
+    .jsxc-avatar {
+      display: none;
+    }
+
+    .jsxc-quote {
+      border-left: 3px solid #999;
+      display: inline-block;
+      opacity: 0.7;
+      padding: 0 3px 0 5px;
+      width: 100%; // margin-bottom: 5px;
     }
   }
 
-  img {
-    max-width: 100%;
+  &:hover .jsxc-menu__button {
+    visibility: visible !important;
   }
 
-  .jsxc-avatar {
+  .jsxc-menu {
     display: none;
-  }
+    position: absolute;
+    top: 0;
 
-  .jsxc-quote {
-    border-left: 3px solid #999;
-    display: inline-block;
-    opacity: 0.7;
-    padding: 0 3px 0 5px;
-    width: 100%; // margin-bottom: 5px;
+    .jsxc-menu__button {
+      height: 42px;
+      width: 42px;
+    }
+
+    &:not(.jsxc-menu--opened) .jsxc-menu__button {
+      visibility: hidden;
+    }
+
+    &.jsxc-menu--vertical-right {
+      display: block;
+      right: 100%;
+    }
+
+    &.jsxc-menu--vertical-left {
+      display: block;
+      left: 100%;
+    }
   }
 }
 
@@ -523,6 +554,23 @@
   .jsxc-transfer::before {
     @extend %jsxc-icon-font;
     content: map-get($jsxc-icons-map, "padlock-close");
+  }
+}
+
+.jsxc-chatmessage.jsxc-edited {
+  .jsxc-version::before {
+    @extend %jsxc-icon-font;
+    content: map-get($jsxc-icons-map, "edit");
+    cursor: pointer;
+  }
+}
+
+ul.jsxc-message-history {
+  padding: 0.5em 0 2em;
+  width: 250px;
+
+  .jsxc-version {
+    display: none;
   }
 }
 

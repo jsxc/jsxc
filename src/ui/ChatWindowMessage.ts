@@ -6,15 +6,31 @@ import Log from '../util/Log';
 import LinkHandlerGeo from '@src/LinkHandlerGeo';
 import Color from '@util/Color';
 import Translation from '@util/Translation';
+import messageHistory from './dialogs/messageHistory';
+import MenuComponent from './MenuComponent';
+import onLongPress from './util/LongPress';
 
 let chatWindowMessageTemplate = require('../../template/chat-window-message.hbs');
 
 export default class ChatWindowMessage {
-   private element;
+   private element: JQuery<HTMLElement>;
 
-   constructor(private message: IMessage, private chatWindow: ChatWindow) {
+   private message: IMessage;
+
+   constructor(private originalMessage: IMessage, private chatWindow: ChatWindow, useLastVersion: boolean = true) {
+      this.message = useLastVersion ? originalMessage.getLastVersion() : originalMessage;
+
+      let template = chatWindowMessageTemplate({
+         id: this.message.getCssId(),
+         direction: this.message.getDirectionString(),
+      });
+
+      this.element = $(template);
+
       this.generateElement();
       this.registerHooks();
+
+      this.initMenu();
    }
 
    public getElement() {
@@ -36,35 +52,30 @@ export default class ChatWindowMessage {
    }
 
    private getNextMessage() {
-      let nextId = this.message.getNextId();
+      let nextId = this.originalMessage.getNextId();
 
-      if (!nextId) {
-         return;
+      while (nextId) {
+         let nextMessage = this.chatWindow.getTranscript().getMessage(nextId);
+
+         if (!nextMessage) {
+            Log.warn('Couldnt find next message.');
+            return;
+         }
+
+         if (!nextMessage.isReplacement()) {
+            return nextMessage;
+         }
+
+         nextId = nextMessage.getNextId();
       }
-
-      let nextMessage = this.chatWindow.getTranscript().getMessage(nextId);
-
-      if (!nextMessage) {
-         Log.warn('Couldnt find next message.');
-         return;
-      }
-
-      return nextMessage;
    }
 
    private async generateElement() {
-      let template = chatWindowMessageTemplate({
-         id: this.message.getCssId(),
-         direction: this.message.getDirectionString(),
-      });
-
-      this.element = $(template);
-
       let bodyElement = $(await this.message.getProcessedBody());
 
       LinkHandlerGeo.get().detect(bodyElement);
 
-      this.element.find('.jsxc-content').html(bodyElement);
+      this.element.find('.jsxc-content').html(bodyElement.get(0));
 
       let timestampElement = this.element.find('.jsxc-timestamp');
       DateTime.stringify(this.message.getStamp().getTime(), timestampElement);
@@ -84,6 +95,18 @@ export default class ChatWindowMessage {
       if (this.message.isUnread()) {
          this.element.addClass('jsxc-unread');
       }
+
+      if (this.message.isReplacement()) {
+         this.element.addClass('jsxc-edited');
+      }
+
+      this.element.find('.jsxc-version').on('click', () => {
+         if (!this.element.hasClass('jsxc-edited')) {
+            return;
+         }
+
+         messageHistory(this.originalMessage, this.chatWindow);
+      });
 
       if (this.message.getErrorMessage()) {
          this.element.addClass('jsxc-error');
@@ -218,7 +241,29 @@ export default class ChatWindowMessage {
       }
    }
 
+   private initMenu() {
+      if (this.message.isSystem()) {
+         return;
+      }
+
+      const messageMenu = this.chatWindow.getAccount().getChatMessageMenu();
+      const menuType = this.message.isOutgoing() ? 'vertical-right' : 'vertical-left';
+      const menu = new MenuComponent('more', menuType, messageMenu, [this.chatWindow.getContact(), this.message]);
+
+      this.element.append(menu.getElement());
+
+      onLongPress(this.element, () => {
+         menu.toggle();
+      });
+   }
+
    private registerHooks() {
+      this.message.registerHook('replacedBy', () => {
+         const chatWindowMessageReplacement = new ChatWindowMessage(this.originalMessage, this.chatWindow);
+
+         this.element.replaceWith(chatWindowMessageReplacement.getElement());
+      });
+
       this.message.registerHook('encrypted', encrypted => {
          if (encrypted) {
             this.element.addClass('jsxc-encrypted');
