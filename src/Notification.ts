@@ -55,6 +55,12 @@ export default class Notification {
    }
 
    public static async notify(settings: INotificationSettings) {
+      if (typeof NotificationAPI === 'undefined') {
+         Log.debug('Drop notification, because notification API not available');
+
+         return;
+      }
+
       if (!Notification.getOption('enable')) {
          Log.debug('Drop notification, because notifications are disabled.');
 
