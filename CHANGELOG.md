@@ -6,6 +6,48 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## 4.4.0-beta.1 (2022-01-04)
+### Added
+- add chat message context menu
+- add Last Message Correction (XEP-0308)
+- add generic type to storage interface
+- add User Avatar (XEP-0084)
+
+### Fixed
+- style of roster tags
+- [#1063](https://github.com/jsxc/jsxc/issues/1063) check for notification api
+- creation of multi html element msg
+- type of hook repository
+- after receive message pipe
+- [#1021](https://github.com/jsxc/jsxc/issues/1021) pep based avatars
+- xml jquery type in vcard
+- display of load mam button (mam)
+- load button after history was cleared (mam)
+- add loadbutton to clear event (mam)
+- show "Load Button" if messare area is empty (mam)
+- translations
+- info msg for contacts without omemo (omemo)
+- qr code without devices (omemo)
+- user media request
+- [#1028](https://github.com/jsxc/jsxc/issues/1028) jingle message initiation
+- [#1050](https://github.com/jsxc/jsxc/issues/1050) escape nickname (muc)
+- create rooms (muc)
+- use random nickname for bookmarks without nick
+- video removal
+- display of remote stream
+- offline contacts translation
+- fix darkmode
+- fix own avatar on sm
+- fix main menu height on sm
+
+### Misc
+- improve code structure
+- fix style format
+- fix code style
+- update demo domain
+- fix demo script
+- update locales
+
 ## 4.3.1 (2021-07-08)
 ### Fixed
 - types for client interface
