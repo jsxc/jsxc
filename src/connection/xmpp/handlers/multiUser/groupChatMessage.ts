@@ -37,6 +37,10 @@ export default class extends AbstractHandler {
       ) {
          retractId = messageElement.find('apply-to[xmlns="urn:xmpp:fasten:0"]').attr('id');
       }
+      if (retractId !==null && (body === null || body === undefined || body ===''))
+      {
+         body="This person attempted to retract a previous message, but it's unsupported by your client.";
+      }
 
       let styled = messageElement.find('unstyled[xmlns="urn:xmpp:styling:0"]').length > 0 ? false : true;
 

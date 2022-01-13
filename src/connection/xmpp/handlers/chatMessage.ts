@@ -55,6 +55,10 @@ export default class extends AbstractHandler {
       message.setReplaceId(messageElement.getReplaceId());
       message.setOccupantId(messageElement.getOccupantId());
       message.setRetractId(messageElement.getRetractId());
+      if (messageElement.getRetractId()!==null && (messageElement.getPlaintextBody()=== null || messageElement.getPlaintextBody() === undefined || messageElement.getPlaintextBody() === ''))
+      {
+         message.setPlaintextMessage("This person attempted to retract a previous message, but it's unsupported by your client.");
+      }
 
       let pipe = this.account.getPipe('afterReceiveMessage');
 
