@@ -62,7 +62,7 @@ export default class NotificationPlugin extends AbstractPlugin {
       if (
          (message.getPlaintextMessage() || message.getAttachment()) &&
          message.isIncoming() &&
-         message.getRetractId() === undefined
+         (message.getRetractId() === undefined || message.getRetractId()===null)
       ) {
          Notification.notify({
             title: Translation.t('New_message_from', {
