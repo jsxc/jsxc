@@ -624,7 +624,11 @@ export default class ChatWindow {
 
       chatWindowMessage.restoreNextMessage();
 
-      setTimeout(() => this.scrollMessageAreaToBottom(), 500);
+      let anchorElement = this.element.find('.jsxc-message-area-anchor');
+      if (!anchorElement.is(":visible"))
+      {
+         setTimeout(() => this.scrollMessageAreaToBottom(), 500);
+      }
 
       return chatWindowMessage;
    }
