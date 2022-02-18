@@ -3,22 +3,57 @@ import MultiUserContact from '../../../../MultiUserContact';
 import showSelectionDialog from '../../../../ui/dialogs/selection';
 import showRoomConfigurationDialog, { CANCELED } from '../../../../ui/dialogs/multiUserRoomConfiguration';
 import { DIRECTION } from '@src/Message.interface';
+import { MUC_SYS_MESSAGE } from '@ui/dialogs/settings';
+import Client from '@src/Client';
 
 export default class MultiUserStatusCodeHandler {
    public static processCodes(codes: string[], multiUserContact: MultiUserContact, nickname?: string) {
       let statusCodeHandler = new MultiUserStatusCodeHandler(multiUserContact, codes.indexOf('110') > -1, nickname);
+      let mucSYSMessageMask = Client.getOption('mucSYSMessageMask') || MUC_SYS_MESSAGE.NONE;
+
 
       for (let code of codes) {
          let msg = statusCodeHandler.processCode(code);
 
          if (typeof msg === 'string') {
-            let firstmsg = multiUserContact.getTranscript().getFirstMessage();
-            if (firstmsg !== undefined && firstmsg.getDirection() === DIRECTION.SYS) {
-               if (firstmsg.getPlaintextMessage() !== msg) {
+            
+            let addMsg = true;
+            
+            if (codes.indexOf('110') === -1)
+            {
+               switch(parseInt(code))
+               {
+                  case 100:
+                  case 172:
+                  case 173:
+                     addMsg = (mucSYSMessageMask & MUC_SYS_MESSAGE.JID) === MUC_SYS_MESSAGE.JID? true:false;
+                  break;
+                  case 301: 
+                     addMsg = (mucSYSMessageMask & MUC_SYS_MESSAGE.BAN) === MUC_SYS_MESSAGE.BAN? true:false;
+                  break;
+                  case 307:
+                  case 321:
+                  case 322:
+                     addMsg = (mucSYSMessageMask & MUC_SYS_MESSAGE.KICK) === MUC_SYS_MESSAGE.KICK? true:false;
+                  break;
+
+                  default:
+                     addMsg = (mucSYSMessageMask & MUC_SYS_MESSAGE.UNKNOWN) === MUC_SYS_MESSAGE.UNKNOWN? true:false;
+                  break;
+               }
+            }
+
+            if (addMsg)
+            {
+               let firstmsg = multiUserContact.getTranscript().getFirstMessage();
+         
+               if (firstmsg !== undefined && firstmsg.getDirection() === DIRECTION.SYS) {
+                  if (firstmsg.getPlaintextMessage() !== msg) {
+                     multiUserContact.addSystemMessage(msg);
+                  }
+               } else {
                   multiUserContact.addSystemMessage(msg);
                }
-            } else {
-               multiUserContact.addSystemMessage(msg);
             }
          }
       }

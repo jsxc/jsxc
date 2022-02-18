@@ -159,7 +159,7 @@ export let enableGeocode = true;
 
 export let keepWindowSizeOnResize = false;
 
-export let disableJoinLeaveMessages = false;
+export let mucSYSMessageMask = 0;
 
 export let allowAllMessagesCorrection = false;
 

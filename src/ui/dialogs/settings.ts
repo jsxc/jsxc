@@ -12,6 +12,15 @@ import Account from '@src/Account';
 
 const ENOUGH_BITS_OF_ENTROPY = 50;
 
+export enum MUC_SYS_MESSAGE {
+   NONE = 0,
+   UNKNOWN = 1, 
+   LEAVE_JOIN = 2,
+   JID = 4,
+   KICK = 8,
+   BAN = 16,
+}
+
 export default function () {
    let dialog = new Dialog('', false, 'settings');
    let dom = dialog.open();
@@ -57,11 +66,11 @@ class ClientSection extends Section {
 
       contentElement.append(
          new ListItem(
-            Translation.t('disableJoinLeaveMessages'),
+            Translation.t('mucSYSMessageMask'),
+            Translation.t('mucSYSMessageMaskDesc'),
             undefined,
             undefined,
-            undefined,
-            this.getDisableJoinLeaveMessagesElement()
+            this.getMUCSysMessagesElement()
          )
       );
 
@@ -225,19 +234,68 @@ class ClientSection extends Section {
       return element;
    }
 
-   private getDisableJoinLeaveMessagesElement(): JQuery {
-      let element = $('<input type="checkbox" style="margin-left:10px;">');
+   private getMUCSysMessagesElement(): JQuery {
+      
+      let multiselectTemplate = require('../../../template/multiselect.hbs');
+      let mucSYSMessageMask = Client.getOption('mucSYSMessageMask') || MUC_SYS_MESSAGE.NONE;
 
-      element.on('change', () => {
-         let value = element.prop('checked');
-         element.val(value);
-         Client.setOption('disableJoinLeaveMessages', value ? value : undefined);
+      let element = $(multiselectTemplate({
+         values: [
+            {
+               value: MUC_SYS_MESSAGE.UNKNOWN,
+               checked: ((mucSYSMessageMask & MUC_SYS_MESSAGE.UNKNOWN) === MUC_SYS_MESSAGE.UNKNOWN ? "checked" : ""),
+               name: Translation.t('Unkown')
+            },
+            {
+               value: MUC_SYS_MESSAGE.LEAVE_JOIN,
+               checked: ((mucSYSMessageMask & MUC_SYS_MESSAGE.LEAVE_JOIN) === MUC_SYS_MESSAGE.LEAVE_JOIN ? "checked" : ""),
+               name: Translation.t('Join_Leave')
+            },
+            {
+               value: MUC_SYS_MESSAGE.JID,
+               checked: ((mucSYSMessageMask & MUC_SYS_MESSAGE.JID) === MUC_SYS_MESSAGE.JID ? "checked" : ""),
+               name: Translation.t('JIDPublicity')
+            },
+            {
+               value: MUC_SYS_MESSAGE.KICK,
+               checked: ((mucSYSMessageMask & MUC_SYS_MESSAGE.KICK) === MUC_SYS_MESSAGE.KICK ? "checked" : ""),
+               name: Translation.t('Kick')
+            },
+            {
+               value: MUC_SYS_MESSAGE.BAN,
+               checked: ((mucSYSMessageMask & MUC_SYS_MESSAGE.BAN) === MUC_SYS_MESSAGE.BAN ? "checked" : ""),
+               name: Translation.t('Ban')
+            },
+         ]
+      }));
+
+      element.find('.jsxc-selectbox').on('click',function(e){
+         let expanded = ($(this).parent().find('.bitmaskchoice').css('display')==='block'||$(this).parent().find('.bitmaskchoice').css('display')==='')?true:false;
+         if (!expanded)
+         {
+            $(this).parent().find('.bitmaskchoice').css('display','block');
+         }
+         else
+         {
+            $(this).parent().find('.bitmaskchoice').css('display','none');
+         }
       });
 
-      let disableJoinLeaveMessages = Client.getOption('disableJoinLeaveMessages') || false;
-      element.prop('checked', disableJoinLeaveMessages);
-      element.val(disableJoinLeaveMessages);
 
+      element.find('input').on('change', function(e) {
+         let checked = $(this).prop('checked');
+         let val = Client.getOption('mucSYSMessageMask') || MUC_SYS_MESSAGE.NONE;
+         if (checked)
+         {
+            val |= <number>$(this).val();
+         }
+         else 
+         {
+            val &= ~<number>$(this).val();
+         }
+         Client.setOption('mucSYSMessageMask', val);
+      });
+    
       return element;
    }
 
