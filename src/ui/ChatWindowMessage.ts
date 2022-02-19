@@ -7,8 +7,6 @@ import LinkHandlerGeo from '@src/LinkHandlerGeo';
 import Color from '@util/Color';
 import Translation from '@util/Translation';
 import showLogDialog from './dialogs/xep308log';
-import Client from '@src/Client';
-import { MucSysMessage } from './dialogs/settings';
 
 let chatWindowMessageTemplate = require('../../template/chat-window-message.hbs');
 
@@ -38,30 +36,6 @@ export default class ChatWindowMessage {
 
       if (!this.chatWindow.getChatWindowMessage(nextMessage)) {
          element.hide(); // hide old outgoing message if > 1 client with same bare jid have same nickname
-      }
-
-      if (nextMessage.getDirection() === DIRECTION.SYS) {
-         let mucSYSMessageMask = Client.getOption('mucSYSMessageMask') || MucSysMessage.NONE;
-         if (mucSYSMessageMask !== MucSysMessage.NONE) {
-            if (
-               (nextMessage.getPlaintextMessage().indexOf(
-                  Translation.t('entered_the_room', {
-                     nickname: '',
-                     escapeInterpolation: true,
-                  })
-               ) > -1 ||
-                  nextMessage.getPlaintextMessage().indexOf(
-                     Translation.t('left_the_building', {
-                        nickname: '',
-                        escapeInterpolation: true,
-                     })
-                  ) > -1 ||
-                  nextMessage.getPlaintextMessage().indexOf(Translation.t('You_left_the_building')) > -1) &&
-               (mucSYSMessageMask & MucSysMessage.LEAVE_JOIN) !== MucSysMessage.LEAVE_JOIN
-            ) {
-               element.hide();
-            }
-         }
       }
 
       this.getElement().after(element);
@@ -170,26 +144,6 @@ export default class ChatWindowMessage {
             newtimestampElement.insertBefore(timestampElement);
             timestampElement.remove(); // to kill the timer
             DateTime.stringify(this.message.getReplaceTime(), newtimestampElement);
-         }
-      } else {
-         let mucSYSMessageMask = Client.getOption('mucSYSMessageMask') || 0;
-         if (
-            (this.message.getPlaintextMessage().indexOf(
-               Translation.t('entered_the_room', {
-                  nickname: '',
-                  escapeInterpolation: true,
-               })
-            ) > -1 ||
-               this.message.getPlaintextMessage().indexOf(
-                  Translation.t('left_the_building', {
-                     nickname: '',
-                     escapeInterpolation: true,
-                  })
-               ) > -1 ||
-               this.message.getPlaintextMessage().indexOf(Translation.t('You_left_the_building')) > -1) &&
-            (mucSYSMessageMask & MucSysMessage.LEAVE_JOIN) !== MucSysMessage.LEAVE_JOIN
-         ) {
-            this.element.hide();
          }
       }
    }

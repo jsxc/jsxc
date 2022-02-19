@@ -39,7 +39,7 @@ export default class MultiUserStatusCodeHandler {
                   addMsg = (mucSYSMessageMask & MucSysMessage.UNKNOWN) === MucSysMessage.UNKNOWN ? true : false;
                   break;
             }
-           
+
             if (addMsg) {
                let firstmsg = multiUserContact.getTranscript().getFirstMessage();
 
