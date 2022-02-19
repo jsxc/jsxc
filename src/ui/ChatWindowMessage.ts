@@ -8,7 +8,7 @@ import Color from '@util/Color';
 import Translation from '@util/Translation';
 import showLogDialog from './dialogs/xep308log';
 import Client from '@src/Client';
-import { MUC_SYS_MESSAGE } from './dialogs/settings';
+import { MucSysMessage } from './dialogs/settings';
 
 let chatWindowMessageTemplate = require('../../template/chat-window-message.hbs');
 
@@ -41,27 +41,27 @@ export default class ChatWindowMessage {
       }
 
       if (nextMessage.getDirection() === DIRECTION.SYS) {
-         let mucSYSMessageMask = Client.getOption('mucSYSMessageMask') || MUC_SYS_MESSAGE.NONE;
-         if (mucSYSMessageMask!==MUC_SYS_MESSAGE.NONE) {
-            if ((
-               nextMessage.getPlaintextMessage().indexOf(
+         let mucSYSMessageMask = Client.getOption('mucSYSMessageMask') || MucSysMessage.NONE;
+         if (mucSYSMessageMask !== MucSysMessage.NONE) {
+            if (
+               (nextMessage.getPlaintextMessage().indexOf(
                   Translation.t('entered_the_room', {
                      nickname: '',
                      escapeInterpolation: true,
                   })
                ) > -1 ||
-               nextMessage.getPlaintextMessage().indexOf(
-                  Translation.t('left_the_building', {
-                     nickname: '',
-                     escapeInterpolation: true,
-                  })
-               ) > -1 ||
-               nextMessage.getPlaintextMessage().indexOf(Translation.t('You_left_the_building')) > -1
-            ) && ((mucSYSMessageMask & MUC_SYS_MESSAGE.LEAVE_JOIN) !== MUC_SYS_MESSAGE.LEAVE_JOIN) ) {
+                  nextMessage.getPlaintextMessage().indexOf(
+                     Translation.t('left_the_building', {
+                        nickname: '',
+                        escapeInterpolation: true,
+                     })
+                  ) > -1 ||
+                  nextMessage.getPlaintextMessage().indexOf(Translation.t('You_left_the_building')) > -1) &&
+               (mucSYSMessageMask & MucSysMessage.LEAVE_JOIN) !== MucSysMessage.LEAVE_JOIN
+            ) {
                element.hide();
             }
          }
-
       }
 
       this.getElement().after(element);
@@ -173,21 +173,22 @@ export default class ChatWindowMessage {
          }
       } else {
          let mucSYSMessageMask = Client.getOption('mucSYSMessageMask') || 0;
-         if ((
-            this.message.getPlaintextMessage().indexOf(
+         if (
+            (this.message.getPlaintextMessage().indexOf(
                Translation.t('entered_the_room', {
                   nickname: '',
                   escapeInterpolation: true,
                })
             ) > -1 ||
-            this.message.getPlaintextMessage().indexOf(
-               Translation.t('left_the_building', {
-                  nickname: '',
-                  escapeInterpolation: true,
-               })
-            ) > -1 ||
-            this.message.getPlaintextMessage().indexOf(Translation.t('You_left_the_building')) > -1
-         ) && ((mucSYSMessageMask & MUC_SYS_MESSAGE.LEAVE_JOIN) !== MUC_SYS_MESSAGE.LEAVE_JOIN) ) {
+               this.message.getPlaintextMessage().indexOf(
+                  Translation.t('left_the_building', {
+                     nickname: '',
+                     escapeInterpolation: true,
+                  })
+               ) > -1 ||
+               this.message.getPlaintextMessage().indexOf(Translation.t('You_left_the_building')) > -1) &&
+            (mucSYSMessageMask & MucSysMessage.LEAVE_JOIN) !== MucSysMessage.LEAVE_JOIN
+         ) {
             this.element.hide();
          }
       }

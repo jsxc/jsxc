@@ -24,7 +24,7 @@ import MultiUserContact from '@src/MultiUserContact';
 import UUID from '@util/UUID';
 import alertDialog from './dialogs/AlertDialog';
 import confirmDialog from './dialogs/confirm';
-import { MUC_SYS_MESSAGE } from './dialogs/settings';
+import { MucSysMessage } from './dialogs/settings';
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
@@ -600,33 +600,32 @@ export default class ChatWindow {
       }
 
       if (message.getDirection() === DIRECTION.SYS) {
-         let mucSYSMessageMask = Client.getOption('mucSYSMessageMask') || MUC_SYS_MESSAGE.NONE;
-       
-         if ((
-            message.getPlaintextMessage().indexOf(
+         let mucSYSMessageMask = Client.getOption('mucSYSMessageMask') || MucSysMessage.NONE;
+
+         if (
+            (message.getPlaintextMessage().indexOf(
                Translation.t('entered_the_room', {
                   nickname: '',
                   escapeInterpolation: true,
                })
             ) > -1 ||
-            message.getPlaintextMessage().indexOf(
-               Translation.t('left_the_building', {
-                  nickname: '',
-                  escapeInterpolation: true,
-               })
-            ) > -1 ||
-            message.getPlaintextMessage().indexOf(Translation.t('You_left_the_building')) > -1
-         ) && ((mucSYSMessageMask&MUC_SYS_MESSAGE.LEAVE_JOIN)!==MUC_SYS_MESSAGE.LEAVE_JOIN)) {
+               message.getPlaintextMessage().indexOf(
+                  Translation.t('left_the_building', {
+                     nickname: '',
+                     escapeInterpolation: true,
+                  })
+               ) > -1 ||
+               message.getPlaintextMessage().indexOf(Translation.t('You_left_the_building')) > -1) &&
+            (mucSYSMessageMask & MucSysMessage.LEAVE_JOIN) !== MucSysMessage.LEAVE_JOIN
+         ) {
             messageElement.hide();
          }
-
       }
 
       chatWindowMessage.restoreNextMessage();
 
       let anchorElement = this.element.find('.jsxc-message-area-anchor');
-      if (!anchorElement.is(":visible"))
-      {
+      if (!anchorElement.is(':visible')) {
          setTimeout(() => this.scrollMessageAreaToBottom(), 500);
       }
 

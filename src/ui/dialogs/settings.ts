@@ -12,13 +12,14 @@ import Account from '@src/Account';
 
 const ENOUGH_BITS_OF_ENTROPY = 50;
 
-export enum MUC_SYS_MESSAGE {
+export enum MucSysMessage {
    NONE = 0,
-   UNKNOWN = 1, 
+   UNKNOWN = 1,
    LEAVE_JOIN = 2,
    JID = 4,
    KICK = 8,
    BAN = 16,
+   LOGGING = 32,
 }
 
 export default function () {
@@ -235,67 +236,70 @@ class ClientSection extends Section {
    }
 
    private getMUCSysMessagesElement(): JQuery {
-      
       let multiselectTemplate = require('../../../template/multiselect.hbs');
-      let mucSYSMessageMask = Client.getOption('mucSYSMessageMask') || MUC_SYS_MESSAGE.NONE;
+      let mucSYSMessageMask = Client.getOption('mucSYSMessageMask') || MucSysMessage.NONE;
 
-      let element = $(multiselectTemplate({
-         values: [
-            {
-               value: MUC_SYS_MESSAGE.UNKNOWN,
-               checked: ((mucSYSMessageMask & MUC_SYS_MESSAGE.UNKNOWN) === MUC_SYS_MESSAGE.UNKNOWN ? "checked" : ""),
-               name: Translation.t('Unkown')
-            },
-            {
-               value: MUC_SYS_MESSAGE.LEAVE_JOIN,
-               checked: ((mucSYSMessageMask & MUC_SYS_MESSAGE.LEAVE_JOIN) === MUC_SYS_MESSAGE.LEAVE_JOIN ? "checked" : ""),
-               name: Translation.t('Join_Leave')
-            },
-            {
-               value: MUC_SYS_MESSAGE.JID,
-               checked: ((mucSYSMessageMask & MUC_SYS_MESSAGE.JID) === MUC_SYS_MESSAGE.JID ? "checked" : ""),
-               name: Translation.t('JIDPublicity')
-            },
-            {
-               value: MUC_SYS_MESSAGE.KICK,
-               checked: ((mucSYSMessageMask & MUC_SYS_MESSAGE.KICK) === MUC_SYS_MESSAGE.KICK ? "checked" : ""),
-               name: Translation.t('Kick')
-            },
-            {
-               value: MUC_SYS_MESSAGE.BAN,
-               checked: ((mucSYSMessageMask & MUC_SYS_MESSAGE.BAN) === MUC_SYS_MESSAGE.BAN ? "checked" : ""),
-               name: Translation.t('Ban')
-            },
-         ]
-      }));
+      let element = $(
+         multiselectTemplate({
+            values: [
+               {
+                  value: MucSysMessage.UNKNOWN,
+                  checked: (mucSYSMessageMask & MucSysMessage.UNKNOWN) === MucSysMessage.UNKNOWN ? 'checked' : '',
+                  name: Translation.t('Unkown'),
+               },
+               {
+                  value: MucSysMessage.LEAVE_JOIN,
+                  checked: (mucSYSMessageMask & MucSysMessage.LEAVE_JOIN) === MucSysMessage.LEAVE_JOIN ? 'checked' : '',
+                  name: Translation.t('Join_Leave'),
+               },
+               {
+                  value: MucSysMessage.JID,
+                  checked: (mucSYSMessageMask & MucSysMessage.JID) === MucSysMessage.JID ? 'checked' : '',
+                  name: Translation.t('JIDPublicity'),
+               },
+               {
+                  value: MucSysMessage.KICK,
+                  checked: (mucSYSMessageMask & MucSysMessage.KICK) === MucSysMessage.KICK ? 'checked' : '',
+                  name: Translation.t('Kick'),
+               },
+               {
+                  value: MucSysMessage.BAN,
+                  checked: (mucSYSMessageMask & MucSysMessage.BAN) === MucSysMessage.BAN ? 'checked' : '',
+                  name: Translation.t('Ban'),
+               },
+               {
+                  value: MucSysMessage.LOGGING,
+                  checked: (mucSYSMessageMask & MucSysMessage.LOGGING) === MucSysMessage.LOGGING ? 'checked' : '',
+                  name: Translation.t('Logging'),
+               },
+            ],
+         })
+      );
 
-      element.find('.jsxc-selectbox').on('click',function(e){
-         let expanded = ($(this).parent().find('.bitmaskchoice').css('display')==='block'||$(this).parent().find('.bitmaskchoice').css('display')==='')?true:false;
-         if (!expanded)
-         {
-            $(this).parent().find('.bitmaskchoice').css('display','block');
-         }
-         else
-         {
-            $(this).parent().find('.bitmaskchoice').css('display','none');
+      element.find('.jsxc-selectbox').on('click', function (e) {
+         let expanded =
+            $(this).parent().find('.bitmaskchoice').css('display') === 'block' ||
+            $(this).parent().find('.bitmaskchoice').css('display') === ''
+               ? true
+               : false;
+         if (!expanded) {
+            $(this).parent().find('.bitmaskchoice').css('display', 'block');
+         } else {
+            $(this).parent().find('.bitmaskchoice').css('display', 'none');
          }
       });
 
-
-      element.find('input').on('change', function(e) {
+      element.find('input').on('change', function (e) {
          let checked = $(this).prop('checked');
-         let val = Client.getOption('mucSYSMessageMask') || MUC_SYS_MESSAGE.NONE;
-         if (checked)
-         {
+         let val = Client.getOption('mucSYSMessageMask') || MucSysMessage.NONE;
+         if (checked) {
             val |= <number>$(this).val();
-         }
-         else 
-         {
-            val &= ~<number>$(this).val();
+         } else {
+            val &= ~(<number>$(this).val());
          }
          Client.setOption('mucSYSMessageMask', val);
       });
-    
+
       return element;
    }
 

@@ -1,342 +1,400 @@
 .jsxc-exstatus-textarea {
-    resize: none;
-    width: 100%;
+  resize: none;
+  width: 100%;
 }
 
 .jsxc-dialog-wrapper {
-    background-color: $main-bg-translucent;
-    bottom: 0;
-    display: flex;
-    left: 0;
-    overflow-y: auto;
-    position: fixed;
-    right: 0;
-    top: 0;
-    z-index: 999;
+  background-color: $main-bg-translucent;
+  bottom: 0;
+  display: flex;
+  left: 0;
+  overflow-y: auto;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 999;
 }
 
 .jsxc-memberlist-textarea,
 .jsxc-blocklist-textarea {
-    background-color: var(--jsxc-color-background-main);
-    color: var(--jsxc-color-main-text);
-    margin-left: 15px;
-    min-height: 300px !important;
-    min-width: 500px !important;
-    padding: 5px !important;
-    width: 100% !important;
+  background-color: var(--jsxc-color-background-main);
+  color: var(--jsxc-color-main-text);
+  margin-left: 15px;
+  min-height: 300px !important;
+  min-width: 500px !important;
+  padding: 5px !important;
+  width: 100% !important;
 }
 
 .jsxc-dialog {
-    background: $main-bg;
-    border: 1px solid $bg-darker;
-    color: var(--jsxc-color-main-text);
-    display: inline-block;
-    margin: auto;
-    max-width: 100%;
-    position: relative;
-    text-align: left;
-    width: auto;
-    &__content {
-        min-width: 320px;
-        padding: 4vh 4vw;
-    }
-    ul {
-        list-style: none;
-    }
-    li>ul {
-        padding-left: 1em;
-    }
-    ul,
-    li {
-        margin: 0;
-        padding: 0;
-    }
-    p {
-        margin-bottom: 1em;
-        input {
-            margin-bottom: 5px;
-            outline: none;
-            width: 60%;
-        }
-        input[type="submit"] {
-            width: auto;
-        }
-    }
-    table {
-        margin-bottom: 1em;
-    }
-    hr {
-        border: 0;
-        border-top: 1px solid $bg-darker;
-        margin-bottom: 3em;
-        margin-top: 3em;
-    }
-    h3 {
-        font-size: 120%;
-        font-weight: bold;
-        margin-bottom: 1em;
-        margin-top: 3em;
-    }
-    .jsxc-right {
-        margin-top: 20px;
-    }
-    legend {
-        border: 0;
-        font-size: 20px;
-    }
+  background: $main-bg;
+  border: 1px solid $bg-darker;
+  color: var(--jsxc-color-main-text);
+  display: inline-block;
+  margin: auto;
+  max-width: 100%;
+  position: relative;
+  text-align: left;
+  width: auto;
+
+  &__content {
+    min-width: 320px;
+    padding: 4vh 4vw;
+  }
+
+  ul {
+    list-style: none;
+  }
+
+  li>ul {
+    padding-left: 1em;
+  }
+
+  ul,
+  li {
+    margin: 0;
+    padding: 0;
+  }
+
+  p {
+    margin-bottom: 1em;
+
     input {
-        border-radius: 0;
-        outline: none;
-        &:invalid {
-            border: 1px solid $dialog-input-invalid;
-        }
+      margin-bottom: 5px;
+      outline: none;
+      width: 60%;
     }
-    .jsxc-button-group button {
-        margin-right: 0;
+
+    input[type="submit"] {
+      width: auto;
     }
-    input[readonly] {
-        background-color: $dialog-input-readonly-bg;
+  }
+
+  table {
+    margin-bottom: 1em;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid $bg-darker;
+    margin-bottom: 3em;
+    margin-top: 3em;
+  }
+
+  h3 {
+    font-size: 120%;
+    font-weight: bold;
+    margin-bottom: 1em;
+    margin-top: 3em;
+  }
+
+  .jsxc-right {
+    margin-top: 20px;
+  }
+
+  legend {
+    border: 0;
+    font-size: 20px;
+  }
+
+  input {
+    border-radius: 0;
+    outline: none;
+
+    &:invalid {
+      border: 1px solid $dialog-input-invalid;
     }
-    .jsxc-inputinfo {
-        font-style: italic;
-        margin: 0;
-        padding: 0;
+  }
+
+  .jsxc-button-group button {
+    margin-right: 0;
+  }
+
+  input[readonly] {
+    background-color: $dialog-input-readonly-bg;
+  }
+
+  .jsxc-inputinfo {
+    font-style: italic;
+    margin: 0;
+    padding: 0;
+  }
+
+  .jsxc-libraries,
+  .jsxc-credits {
+    max-width: 300px;
+  }
+
+  .jsxc-warning {
+    background-color: $warning-bg;
+    border-radius: 3px;
+    display: block;
+    padding: 3px 10px;
+  }
+
+  &-close {
+    cursor: pointer;
+    font-size: 42px;
+    height: 42px;
+    line-height: 33px;
+    opacity: 0.5;
+    position: absolute;
+    right: 10px;
+    text-align: center;
+    top: 10px;
+    width: 42px;
+
+    &:hover {
+      opacity: 1;
     }
-    .jsxc-libraries,
-    .jsxc-credits {
-        max-width: 300px;
-    }
-    .jsxc-warning {
-        background-color: $warning-bg;
-        border-radius: 3px;
-        display: block;
-        padding: 3px 10px;
-    }
-    &-close {
-        cursor: pointer;
-        font-size: 42px;
-        height: 42px;
-        line-height: 33px;
-        opacity: 0.5;
-        position: absolute;
-        right: 10px;
-        text-align: center;
-        top: 10px;
-        width: 42px;
-        &:hover {
-            opacity: 1;
-        }
-    }
+  }
 }
 
 .jsxc-page {
-    font-size: 1em;
-    h1 {
-        font-size: 1.5em;
-        font-weight: bold;
-        margin: 0;
-        &.jsxc-clickable {
-            cursor: pointer;
-            &::before {
-                content: "◄ ";
-            }
-        }
+  font-size: 1em;
+
+  h1 {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 0;
+
+    &.jsxc-clickable {
+      cursor: pointer;
+
+      &::before {
+        content: "◄ ";
+      }
     }
-    h2,
-    &__subheadline {
-        background-color: transparent;
-        border: 0;
-        color: var(--jsxc-color-main-text);
-        font-size: 0.8em;
-        font-weight: bold;
-        margin: 0;
-        opacity: 0.8;
-        outline: none;
-        padding: 0.5em 0.5em 1.5em 0;
-        text-align: left;
-        width: 100%;
-    }
-    section {
-        border-top: 1px solid $bg-darker;
-        margin-top: 1em;
-    }
+  }
+
+  h2,
+  &__subheadline {
+    background-color: transparent;
+    border: 0;
+    color: var(--jsxc-color-main-text);
+    font-size: 0.8em;
+    font-weight: bold;
+    margin: 0;
+    opacity: 0.8;
+    outline: none;
+    padding: 0.5em 0.5em 1.5em 0;
+    text-align: left;
+    width: 100%;
+  }
+
+  section {
+    border-top: 1px solid $bg-darker;
+    margin-top: 1em;
+  }
 }
 
 button.jsxc-page__subheadline {
-    &::after {
-        content: "\002B";
-        float: right;
-        padding: 0 0.5em;
-    }
-    &:hover {
-        background-color: var(--jsxc-color-background-hover);
-    }
+  &::after {
+    content: "\002B";
+    float: right;
+    padding: 0 0.5em;
+  }
+
+  &:hover {
+    background-color: var(--jsxc-color-background-hover);
+  }
+
+  +.jsxc-section__body {
+    display: none;
+  }
+
+  &.jsxc-show-sibling {
     +.jsxc-section__body {
-        display: none;
+      display: initial;
     }
-    &.jsxc-show-sibling {
-        +.jsxc-section__body {
-            display: initial;
-        }
-        &::after {
-            content: "\2212";
-        }
+
+    &::after {
+      content: "\2212";
     }
+  }
 }
 
 .jsxc-list {
-    &__item {
-        align-items: center;
-        display: flex;
-        padding: 0.5em 1.5em !important;
-        &--clickable {
-            cursor: pointer;
-            &:hover {
-                background-color: $bg-hover;
-            }
-        }
-        a.jsxc-badge {
-            background-color: #e1e1e1;
-            border-radius: 0.6em;
-            color: #777;
-            display: inline-block;
-            font-size: 0.6em;
-            line-height: 1;
-            margin-left: 1em;
-            padding: 0.2em 0.6em;
-            text-decoration: none;
-            vertical-align: top;
-            &:hover {
-                background-color: #f1f1f1;
-            }
-        }
+  &__item {
+    align-items: center;
+    display: flex;
+    padding: 0.5em 1.5em !important;
+
+    &--clickable {
+      cursor: pointer;
+
+      &:hover {
+        background-color: $bg-hover;
+      }
     }
-    &__avatar {
-        align-self: flex-start;
-        margin-right: 0.5em;
-        &.jsxc-avatar {
-            margin: 0;
-            margin-left: -0.5em;
-            margin-right: 0.5em;
-        }
+
+    a.jsxc-badge {
+      background-color: #e1e1e1;
+      border-radius: 0.6em;
+      color: #777;
+      display: inline-block;
+      font-size: 0.6em;
+      line-height: 1;
+      margin-left: 1em;
+      padding: 0.2em 0.6em;
+      text-decoration: none;
+      vertical-align: top;
+
+      &:hover {
+        background-color: #f1f1f1;
+      }
     }
-    &__text {
-        flex-grow: 1;
+  }
+
+  &__avatar {
+    align-self: flex-start;
+    margin-right: 0.5em;
+
+    &.jsxc-avatar {
+      margin: 0;
+      margin-left: -0.5em;
+      margin-right: 0.5em;
     }
-    &__text__secondary {
-        max-width: 700px;
-        opacity: 0.7;
-    }
-    &__secondary-action {
-        align-self: flex-start;
-        background-color: var(--jsxc-color-main-background);
-        color: var(--jsxc-color-main-text);
-    }
+  }
+
+  &__text {
+    flex-grow: 1;
+  }
+
+  &__text__secondary {
+    max-width: 700px;
+    opacity: 0.7;
+  }
+
+  &__secondary-action {
+    align-self: flex-start;
+    background-color: var(--jsxc-color-main-background);
+    color: var(--jsxc-color-main-text);
+  }
 }
 
 .jsxc-content {
-    h1 {
-        font-size: 1.5em;
-        margin-top: 3em;
-    }
+  h1 {
+    font-size: 1.5em;
+    margin-top: 3em;
+  }
 }
 
 .jsxc-searchresults-table {
-    max-height: 600px;
-    overflow: auto;
-    width: 100%;
-    thead {
-        background-color: var(--jsxc-color-background-darker);
-    }
-    tr:nth-child(even) {
-        background-color: var(--jsxc-color-background-dark);
-    }
-    th {
-        text-align: center;
-    }
-    td {
-        padding: 5px;
-        text-align: center;
-    }
+  max-height: 600px;
+  overflow: auto;
+  width: 100%;
+
+  thead {
+    background-color: var(--jsxc-color-background-darker);
+  }
+
+  tr:nth-child(even) {
+    background-color: var(--jsxc-color-background-dark);
+  }
+
+  th {
+    text-align: center;
+  }
+
+  td {
+    padding: 5px;
+    text-align: center;
+  }
 }
 
 .jsxc-account-choice-block {
-    height: 30px;
-    margin-bottom: 2em;
+  height: 30px;
+  margin-bottom: 2em;
 }
 
 .jsxc-account-choice {
-    height: 30px;
+  height: 30px;
 }
 
 .jsxc-dialog .jsxc-avatarimage {
-    display: flex;
-    justify-content: center;
-    margin: 2em 0;
-    .jsxc-avatar-upload-placeholer {
-        background-image: url("../images/icons/placeholder.svg");
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: contain;
-        height: 96px;
-        width: 96px;
+  display: flex;
+  justify-content: center;
+  margin: 2em 0;
+
+  .jsxc-avatar-upload-placeholer {
+    background-image: url("../images/icons/placeholder.svg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    height: 96px;
+    width: 96px;
+  }
+
+  input[type="file"] {
+    display: none;
+  }
+
+  label {
+    cursor: pointer;
+    position: relative;
+
+    button {
+      padding: 0;
+      position: absolute;
+      right: -11px;
+      top: -11px;
     }
-    input[type="file"] {
-        display: none;
-    }
-    label {
-        cursor: pointer;
-        position: relative;
-        button {
-            padding: 0;
-            position: absolute;
-            right: -11px;
-            top: -11px;
-        }
-    }
+  }
 }
 
 .jsxc-dialog .jsxc-vcard-data {
-    margin-top: 2em;
-    >li {
-        border: 1px solid var(--jsxc-color-border-dark);
-        display: block;
-        margin-top: 0.5em;
-        padding-left: 0.25em;
-        padding-right: 0.25em;
-    }
-    li>div {
-        float: right;
-    }
+  margin-top: 2em;
+
+  >li {
+    border: 1px solid var(--jsxc-color-border-dark);
+    display: block;
+    margin-top: 0.5em;
+    padding-left: 0.25em;
+    padding-right: 0.25em;
+  }
+
+  li>div {
+    float: right;
+  }
 }
 
 .jsxc-multiselect {
-    width: 200px;
-    margin-left: auto;
-    margin-right: auto;
-    .jsxc-selectbox {
-        position: relative;
-        select {
-            width: 100%;
-            font-weight: bold;
-        }
-        .jsxc-overselect {
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            bottom: 0;
-        }
+  margin-left: auto;
+  margin-right: auto;
+  width: 200px;
+
+  .jsxc-selectbox {
+    position: relative;
+
+    select {
+      font-weight: bold;
+      width: 100%;
     }
-    div.bitmaskchoice {
-        display: none;
-        border: 1px #dadada solid;
-        label {
-            display: block;
-            padding-left: 5px;
-        }
-        label:hover {
-            background-color: #1e90ff;
-        }
+
+    .jsxc-overselect {
+      bottom: 0;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
     }
+  }
+
+  div.bitmaskchoice {
+    border: 1px #dadada solid;
+    display: none;
+
+    label {
+      display: block;
+
+      input {
+        margin: 4px;
+      }
+    }
+
+    label:hover {
+      background-color: #1e90ff;
+    }
+  }
 }

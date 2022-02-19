@@ -7,7 +7,7 @@ import AbstractHandler from '../../AbstractHandler';
 import { MessageMark } from '@src/Message.interface';
 import MultiUserStatusCodeHandler from './StatusCodeHandler';
 import Client from '@src/Client';
-import { MUC_SYS_MESSAGE } from '@ui/dialogs/settings';
+import { MucSysMessage } from '@ui/dialogs/settings';
 
 // body.replace(/^\/me /, '<i title="/me">' + Utils.removeHTML(this.sender.getName()) + '</i> ');
 
@@ -39,9 +39,8 @@ export default class extends AbstractHandler {
       ) {
          retractId = messageElement.find('apply-to[xmlns="urn:xmpp:fasten:0"]').attr('id');
       }
-      if (retractId !==null && (body === null || body === undefined || body ===''))
-      {
-         body="This person attempted to retract a previous message, but it's unsupported by your client.";
+      if (retractId !== null && (body === null || body === undefined || body === '')) {
+         body = "This person attempted to retract a previous message, but it's unsupported by your client.";
       }
 
       let styled = messageElement.find('unstyled[xmlns="urn:xmpp:styling:0"]').length > 0 ? false : true;
@@ -89,10 +88,9 @@ export default class extends AbstractHandler {
                });
             }
 
-            let mucSYSMessageMask = Client.getOption('mucSYSMessageMask') || MUC_SYS_MESSAGE.NONE;
-            if ((mucSYSMessageMask & MUC_SYS_MESSAGE.UNKNOWN) === MUC_SYS_MESSAGE.UNKNOWN)
-            {
-               contact.addSystemMessage(':page_with_curl: "' + translatedMessage.replaceAll('&quot;','"')+'"');
+            let mucSYSMessageMask = Client.getOption('mucSYSMessageMask') || MucSysMessage.NONE;
+            if ((mucSYSMessageMask & MucSysMessage.UNKNOWN) === MucSysMessage.UNKNOWN) {
+               contact.addSystemMessage(':page_with_curl: "' + translatedMessage.replaceAll('&quot;', '"') + '"');
             }
          }
 

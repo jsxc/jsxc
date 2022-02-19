@@ -41,20 +41,17 @@ export default class MeCommandPlugin extends AbstractPlugin {
       let meRegex = /^\/me /;
 
       if (direction === DIRECTION.OUT) {
-         if (contact!==undefined)
-         {
+         if (contact !== undefined) {
             let name = senderName || contact.getAccount().getContact().getName();
 
             if (name.indexOf('@') > -1) {
                name = name.slice(0, name.indexOf('@'));
             }
-   
+
             return plaintext.replace(meRegex, `<i title="/me" style="font-weight: bold;">${name}</i> `);
-         }
-         else 
-         {
+         } else {
             return plaintext.replace(meRegex, `<i>/me</i> `);
-         }                  
+         }
       }
 
       if (!senderName && !contact) {
