@@ -116,19 +116,26 @@ export default class MultiUserContact extends Contact {
       this.data.set('memberListComplete', false);
       this.removeAllMembers();
 
-      try {
-         this.refreshFeatures();
-      } catch (e) {
-         //console.error('Features not received, cause room was not found.', e)
+      this.refreshFeatures();
+      let nick = this.getNickname();
+      if (nick === null || nick === undefined) {
+         nick = this.getAccount().getDefaultNickname();
+         if (nick === null || nick === undefined) {
+            nick = this.getAccount().getJID().node;
+         }
+         this.setNickname(nick);
       }
 
-      return this.getService().joinMultiUserRoom(new JID(this.jid.bare, this.getNickname()), this.data.get('password'));
+      return this.getService().joinMultiUserRoom(new JID(this.jid.bare, nick), this.data.get('password'));
    }
 
    public leave() {
-      this.chatWindow.close();
-      this.chatWindow.getController().close();
-      this.chatWindow = null;
+      this.data.set('resources', {});
+      this.data.set('presence', Presence.offline);
+
+      this.setNickname(null);
+      this.removeAllMembers();
+
       return this.getService().leaveMultiUserRoom(this.getJid());
    }
 
@@ -251,14 +258,8 @@ export default class MultiUserContact extends Contact {
       return isNewMember;
    }
 
-   public removeMember(nickname: string, shutdown: boolean = true) {
+   public removeMember(nickname: string) {
       this.getMembers().remove(nickname);
-
-      if (nickname === this.getNickname()) {
-         if (shutdown) {
-            this.shutdown();
-         }
-      }
    }
 
    public getMemberIds(): string[] {

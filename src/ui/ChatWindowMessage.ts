@@ -205,10 +205,12 @@ export default class ChatWindowMessage {
       }
 
       if (attachment.hasData()) {
-         attachmentElement = $('<a target="_blank" class="jsxc-image-download" rel="noopener noreferrer">').append(attachmentElement);
+         attachmentElement = $('<a target="_blank" class="jsxc-image-download" rel="noopener noreferrer">').append(
+            attachmentElement
+         );
          attachmentElement.attr('href', attachment.getData());
-         
-         if (!attachment.isImage()||!attachment.getData().startsWith('http')) 
+
+         if (!attachment.isImage() || !attachment.getData().startsWith('http'))
             attachmentElement.attr('download', attachment.getName());
 
          if (attachment.getHandler()) {

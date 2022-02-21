@@ -8,6 +8,21 @@ export default class Utils {
       return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
    }
 
+   public static decodeEntities(str: string) {
+
+      if(str && typeof str === 'string') {
+        // strip script/html tags
+        let element = document.createElement('div');
+        str = str.replace(/<script[^>]*>([\S\s]*?)<\/script>/gmi, '');
+        str = str.replace(/<\/?\w(?:[^"'>]|"[^"]*"|'[^']*')*>/gmi, '');
+        element.innerHTML = str;
+        str = element.textContent;
+        element.textContent = '';
+      }
+  
+      return str;
+   };
+
    public static diffArray(newArray: any[], oldArray: any[]): { newValues: any[]; deletedValues: any[] } {
       newArray = newArray || [];
       oldArray = oldArray || [];

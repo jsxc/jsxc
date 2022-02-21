@@ -452,31 +452,23 @@ function convertUrlToLink(text: string) {
    return text.replace(CONST.REGEX.URL, function (url) {
       let href = url.match(/^https?:\/\//i) ? url : 'http://' + url;
       let parts = href.split('.');
-      let trustedDomains=Client.getOption('trustedDomains') || false;
+      let trustedDomains = Client.getOption('trustedDomains') || false;
       let isTrusted = false;
-   
-      if (trustedDomains)
-      {
-         for (let dom in trustedDomains)
-         {
-            let regex = new RegExp(':.*\/\/.*'+dom);
-            if (regex.test(url))
-            {
-               isTrusted=true;
+
+      if (trustedDomains) {
+         for (let dom in trustedDomains) {
+            let regex = new RegExp(':.*//.*' + dom);
+            if (regex.test(url)) {
+               isTrusted = true;
                break;
             }
          }
       }
-      
-      if (parts.length>1&&/(jpeg|jpg|gif|png|svg)/i.test(parts[parts.length-1])&&isTrusted)
-      {
+
+      if (parts.length > 1 && /(jpeg|jpg|gif|png|svg)/i.test(parts[parts.length - 1]) && isTrusted) {
          return Attachment.generateLightImageAttachement(url);
-      }
-      else
-      {
-      
-         return '<a href="' + href + '" target="_blank" rel="noopener noreferrer">' +url+ '</a>';
-         
+      } else {
+         return '<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + url + '</a>';
       }
    });
 }
@@ -539,17 +531,13 @@ function transformBold(text: string): string {
 }
 
 function transformItalic(text: string): string {
-   if (!text.startsWith('<a'))
-      return transformText(text, /\_(?=[\S])/, /(?<=[^\_\s])(\_)/, '<i>', '</i>');
-   else
-      return text;
+   if (!text.startsWith('<a')) return transformText(text, /\_(?=[\S])/, /(?<=[^\_\s])(\_)/, '<i>', '</i>');
+   else return text;
 }
 
 function transformStrike(text: string): string {
-   if (!text.startsWith('<a'))
-      return transformText(text, /\~(?=[\S])/, /(?<=[^\~\s])(\~)/, '<s>', '</s>');
-   else
-      return text;
+   if (!text.startsWith('<a')) return transformText(text, /\~(?=[\S])/, /(?<=[^\~\s])(\~)/, '<s>', '</s>');
+   else return text;
 }
 
 function transformPre(text: string): string {

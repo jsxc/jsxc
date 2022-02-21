@@ -66,6 +66,12 @@ export default class RosterItem {
             Client.getChatWindowList().minimizeAll();
          }
 
+         if (contact.isGroupChat()) {
+            let mContact = <MultiUserContact>contact;
+            if (mContact.getNickname() === null || mContact.getNickname() === undefined) {
+               mContact.join();
+            }
+         }
          chatWindow.openProminently();
       });
 
@@ -137,6 +143,8 @@ export default class RosterItem {
          setNonAnonymous();
       }
 
+     
+
       const updateLastMessage = (message: IMessage) => {
          if (!message.getPlaintextMessage() && message.hasAttachment()) {
             let attachment = message.getAttachment();
@@ -152,7 +160,7 @@ export default class RosterItem {
                   Emoticons.toUnicode(':speech_balloon:') +
                      ' ' +
                      (!message.getRetractId()
-                        ? message.getPlaintextEmoticonMessage('unicode')
+                        ? Utils.decodeEntities(message.getPlaintextEmoticonMessage('unicode'))
                         : Translation.t('RETRACTION_BODY'))
                );
             this.element

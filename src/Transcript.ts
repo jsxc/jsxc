@@ -12,8 +12,6 @@ export default class Transcript {
 
    private firstMessage: IMessage;
 
-   private lastMessage: IMessage;
-
    private messages: { [index: string]: IMessage } = {};
 
    constructor(storage: Storage, private contact: Contact) {
@@ -83,8 +81,6 @@ export default class Transcript {
       }
 
       message.setNext(undefined);
-
-      this.lastMessage = message;
    }
 
    public convertToIndexArray(messages: { [key: string]: IMessage }): IMessage[] {
@@ -299,9 +295,6 @@ export default class Transcript {
    }
 
    public getLastMessage(): IMessage {
-      if (this.lastMessage) {
-         return this.lastMessage;
-      }
 
       let ids = [];
       let lastMessage = this.getFirstMessage();
@@ -319,24 +312,30 @@ export default class Transcript {
          lastMessage = this.getMessage(id);
       }
 
-      return (this.lastMessage = lastMessage);
+      return lastMessage;
    }
 
    public getMessage(id: string): IMessage {
-      if (!this.messages[id] && id) {
-         try {
-            this.messages[id] = new Message(id);
+      try {
+         if (!this.messages[id] && id) {
+            try {
+               this.messages[id] = new Message(id);
 
-            this.messages[id].registerHook('unread', unread => {
-               if (!unread) {
-                  this.removeMessageFromUnreadMessages(this.messages[id]);
-               }
-            });
-         } catch (err) {
-            Log.warn(err);
+               this.messages[id].registerHook('unread', unread => {
+                  if (!unread) {
+                     this.removeMessageFromUnreadMessages(this.messages[id]);
+                  }
+               });
+            } catch (err) {
+               Log.warn(err);
 
-            return undefined;
+               return undefined;
+            }
          }
+      } catch (err) {
+         Log.warn(err);
+
+         return undefined;
       }
 
       return this.messages[id];
@@ -349,17 +348,21 @@ export default class Transcript {
    public *getGenerator() {
       let message = this.getFirstMessage();
 
-      while (message) {
+      while (message !== undefined && message !== null) {
          yield message;
 
          let nextId = message.getNextId();
 
-         message = nextId ? this.getMessage(nextId) : undefined;
+         message = nextId !== undefined && nextId !== null ? this.getMessage(nextId) : undefined;
       }
    }
 
    public findMessageByAttrId(attrId: string): IMessage {
       for (let message of this.getGenerator()) {
+         if (message === undefined || message === null)
+         {
+            return undefined;
+         }
          if (message.getAttrId() === attrId) {
             return message;
          }
@@ -406,7 +409,6 @@ export default class Transcript {
 
       this.messages = {};
       this.firstMessage = undefined;
-      this.lastMessage = undefined;
 
       this.properties.remove('firstMessageId');
    }

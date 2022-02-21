@@ -40,7 +40,7 @@ export default class Roster extends AbstractService {
       let waitForRoster = this.addContactToRoster(jid, alias);
 
       this.sendSubscriptionRequest(jid);
-      this.sendSubscriptionAnswer(jid,true);
+      this.sendSubscriptionAnswer(jid, true);
 
       return waitForRoster;
    }

@@ -93,7 +93,9 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
 
    private syncMUCConversation(contact: IContact) {
       let archive = this.getArchive(contact.getJid());
-      archive.lastMessages();
+      Promise.resolve(archive.newMessages()).then(()=>{
+         archive.lastMessages();
+      });
    }
 
    private syncConversations() {
@@ -112,7 +114,9 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
                return;
             }
             let archive = this.getArchive(jid);
-            archive.lastMessages();
+            Promise.resolve(archive.newMessages()).then(()=>{
+               archive.lastMessages();         
+            });
          } catch (err) {
             //console.error('Error while syncing conversation with user: '+id,err);
          }

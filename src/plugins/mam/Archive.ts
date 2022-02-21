@@ -7,7 +7,7 @@ import Utils from '../../util/Utils';
 import Log from '../../util/Log';
 import Translation from '../../util/Translation';
 import * as Namespace from '../../connection/xmpp/namespace';
-import { DIRECTION, IMessage, MessageMark } from '@src/Message.interface';
+import { IMessage, MessageMark } from '@src/Message.interface';
 import { IJID } from '@src/JID.interface';
 import MultiUserContact from '@src/MultiUserContact';
 
@@ -68,18 +68,52 @@ export default class Archive {
       let connection = this.plugin.getConnection();
 
       let lastMessage = this.contact.getTranscript().getLastMessage();
-      while (
-         lastMessage !== undefined &&
-         (<any>lastMessage).data !== undefined &&
-         lastMessage.getDirection() === DIRECTION.SYS
-      ) {
-         lastMessage = this.contact.getTranscript().getMessage(lastMessage.getNextId());
-         if (lastMessage === undefined) {
-            break;
-         }
-      }
+      
       if (lastMessage !== undefined && lastMessage !== null && (<any>lastMessage).data !== undefined) {
+         console.debug('load from MAM before: '+lastMessage.getPlaintextMessage()+' ('+lastMessage.getStamp()+')');
          let startDate = lastMessage.getStamp();
+         startDate.setSeconds(startDate.getSeconds() + 1);
+         this.plugin
+            .determineServerSupport(this.archiveJid)
+            .then(version => {
+               if (!version) {
+                  throw new Error(`Archive JID ${this.archiveJid.full} has no support for MAM.`);
+               }
+
+               return connection.queryArchiveSync(
+                  startDate,
+                  this.archiveJid,
+                  <string>version,
+                  queryId,
+                  this.contact.getJid().bare
+               );
+            })
+            .then(this.onCompleteSync)
+            .catch(stanza => {
+               Log.warn('Error while requesting archive', stanza);
+            });
+      }
+   }
+
+   public newMessages() {
+      if (this.messageCache.length > 0) {
+         Log.debug('Ongoing message retrieval');
+         return false;
+      }
+
+      let messages = this.contact.getTranscript().getMessages();
+      if (messages === undefined || messages === null) return;
+
+      let queryId = UUID.v4();
+
+      this.plugin.addQueryContactRelation(queryId, this.contact);
+      let connection = this.plugin.getConnection();
+
+      let firstMessage = this.contact.getTranscript().getFirstChatMessage();
+      
+      if (firstMessage !== undefined && firstMessage !== null && (<any>firstMessage).data !== undefined) {
+         console.debug('load from MAM after: '+firstMessage.getPlaintextMessage()+' ('+firstMessage.getStamp()+')');
+         let startDate = firstMessage.getStamp();
          startDate.setSeconds(startDate.getSeconds() + 1);
          this.plugin
             .determineServerSupport(this.archiveJid)
@@ -124,18 +158,12 @@ export default class Archive {
       if (!firstResultId) {
          let lastMessage = this.contact.getTranscript().getLastMessage();
          if (lastMessage !== undefined && (<any>lastMessage).data !== undefined) {
-            while (lastMessage.getDirection() === DIRECTION.SYS) {
-               lastMessage = this.contact.getTranscript().getBefore(lastMessage);
-               if (lastMessage === undefined || (<any>lastMessage).data === undefined) {
-                  endDate = undefined;
-                  break;
-               }
-            }
-            if (lastMessage !== undefined && (<any>lastMessage).data !== undefined) {
-               endDate = lastMessage.getStamp();
-               endDate.setSeconds(endDate.getSeconds() - 1);
-            }
+            console.debug('load from MAM before: '+lastMessage.getPlaintextMessage()+' ('+lastMessage.getStamp()+')');
+            endDate = lastMessage.getStamp();
+            endDate.setSeconds(endDate.getSeconds() - 1);
+            
          } else {
+            console.debug('load from MAM');
             endDate = undefined;
          }
       }
