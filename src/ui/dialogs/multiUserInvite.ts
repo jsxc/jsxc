@@ -36,6 +36,10 @@ export default function (contact: MultiUserContact | IContact) {
 
       let reason = <string>dom.find('input[name="reason"]').val();
       let jidString = <string>dom.find('input[name="jid"]').val();
+      if (jidString.indexOf('@')===-1)
+      {
+         jidString+='@'+contact.getAccount().getContact().getJid().domain; // we assume that the user is from same server, so get the domain from account
+      }
       let jid = new JID(jidString);
 
       if (contact instanceof MultiUserContact) {
