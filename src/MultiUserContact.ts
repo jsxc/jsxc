@@ -246,10 +246,6 @@ export default class MultiUserContact extends Contact {
 
    public removeMember(nickname: string) {
       this.getMembers().remove(nickname);
-
-      if (nickname === this.getNickname()) {
-         this.shutdown();
-      }
    }
 
    public getMemberIds(): string[] {
