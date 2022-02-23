@@ -483,7 +483,9 @@
         "Join_Leave": "Join/Leave",
         "JIDPublicity": "JID Publicity",
         "Logging": "Logginginfos",
-        "Select_an_option": "Select an option"
+        "Select_an_option": "Select an option",
+        "warningomemo": "Info: Encrypted messages could not be loaded from archiv later.",
+        "noomemofrommam": "[OMEMO-Encrypted message from archive could not be decrypted!]"
     },
     "Notifications": "Notifications"
 }

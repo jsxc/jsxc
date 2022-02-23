@@ -219,6 +219,12 @@ export default class Archive {
          return;
       }
 
+      if (forwardedElement.find('encrypted[xmlns="eu.siacs.conversations.axolotl"]').length>0)
+      {
+         plaintextBody=Translation.t('noomemofrommam');
+         htmlBody=$('<b>'+Translation.t('noomemofrommam')+'</b>');
+      }
+
       let direction =
          this.contact.getJid().bare === to.bare ? Message.DIRECTION.PROBABLY_OUT : Message.DIRECTION.PROBABLY_IN;
 

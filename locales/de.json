@@ -483,7 +483,9 @@
         "Join_Leave": "Betreten / Verlassen",
         "JIDPublicity": "JID Info",
         "Logging": "Logginginfos",
-        "Select_an_option": "Auswählen"
+        "Select_an_option": "Auswählen",
+        "warningomemo": "Hinweis: Verschlüsselte Nachrichten können später nicht aus dem Archiv geladen werden.",
+        "noomemofrommam": "[Ende zu Ende verschlüsselte Nachrichten aus dem Archiv können nicht entschlüsselt werden!]"
     },
     "Notifications": "Benachrichtigungen"
 }

@@ -12,6 +12,7 @@ import Translation from '@util/Translation';
 import ArrayBufferUtils from './util/ArrayBuffer';
 import Attachment from '@src/Attachment';
 import attachmentHandler from './AttachmentHandler';
+import AlertDialog from '@ui/dialogs/AlertDialog';
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '99.0.0';
@@ -45,9 +46,12 @@ export default class OMEMOPlugin extends EncryptionPlugin {
    }
 
    public static updateEncryptionState(contact: IContact, trust: Trust) {
-      let state = trust === Trust.confirmed ? EncryptionState.VerifiedEncrypted : EncryptionState.UnverifiedEncrypted;
-
+      let state = trust === Trust.confirmed ? EncryptionState.VerifiedEncrypted : EncryptionState.UnverifiedEncrypted;      
       contact.setEncryptionState(state, OMEMOPlugin.getId());
+      if (state===1)
+      {
+         AlertDialog('Info',Translation.t('warningomemo'),'Ok');
+      }
    }
 
    constructor(pluginAPI: IPluginAPI) {
