@@ -195,6 +195,10 @@ body.jsxc-fullscreen {
     min-width: auto;
     padding-top: 45px;
   }
+
+  .jsxc-sender {
+      color: var(--jsxc-color-text-lighter);
+  }
 }
 
 .jsxc-fullscreen-active-conversations {
