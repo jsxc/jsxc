@@ -182,10 +182,15 @@ export default class ChatMarkersPlugin extends AbstractPlugin {
       let carbonSentElement = stanzaElement.find(Namespace.getFilter('CARBONS', 'sent'));
       let isCarbon = carbonReceivedElement.length > 0 || carbonSentElement.length > 0;
 
-      if (isCarbon && stanzaElement.attr('from') !== this.pluginAPI.getConnection().getJID().bare) {
-         this.pluginAPI.Log.warn(`Received carbon copy from "${stanzaElement.attr('from')}". Ignoring.`);
 
-         return true;
+      if (isCarbon) {
+         let cfrom = stanzaElement.attr('from') !== undefined ? stanzaElement.attr('from') : stanzaElement.find('forwarded > message').attr('from');
+         if (cfrom !== this.pluginAPI.getConnection().getJID().bare)
+         {
+            this.pluginAPI.Log.warn(`Received carbon copy from "${(cfrom!==null?cfrom:'unknown')}". Ignoring.`);
+
+            return true;
+         }
       }
 
       let messageElement: JQuery<HTMLElement>;
