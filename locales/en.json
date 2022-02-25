@@ -452,7 +452,10 @@
     "Connection_interrupted": "Connection interrupted",
     "Declined": "declined",
     "setting-pep-avatar-enable": "PEP will be used for loading avatars",
-    "setting-lmc-enable": "Enables the ability to correct the last message"
+    "setting-lmc-enable": "Enables the ability to correct the last message",
+    "message_retracted": "Message retracted.",
+    "setting-mr-enable": "Enables the ability to retract messages"
+
   },
   "Notifications": "Notifications"
 }

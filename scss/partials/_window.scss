@@ -129,7 +129,6 @@
           opacity: 1;
         }
       }
-
       @media (min-width: 768px) {
         height: 30px;
         width: 30px;
@@ -294,7 +293,6 @@
   &:hover {
     opacity: 0.5;
   }
-
   @media (min-width: 768px) {
     width: 34px;
   }
@@ -423,9 +421,6 @@
       opacity: 0.7;
       padding: 0 3px 0 5px;
       width: 100%; // margin-bottom: 5px;
-      &:last-child {
-        margin-bottom: 1em;
-      }
     }
   }
 
@@ -564,6 +559,20 @@
   .jsxc-version::before {
     @extend %jsxc-icon-font;
     content: map-get($jsxc-icons-map, "edit");
+    cursor: pointer;
+  }
+}
+
+.jsxc-chatmessage.jsxc-retracted {
+  opacity: 0.6;
+
+  .jsxc-content {
+    font-size: 0.8em;
+  }
+
+  .jsxc-version::before {
+    @extend %jsxc-icon-font;
+    content: map-get($jsxc-icons-map, "delete");
     cursor: pointer;
   }
 }
@@ -831,7 +840,6 @@ ul.jsxc-message-history {
       }
     }
   }
-
   @media (min-width: 768px) {
     width: 34px;
   }

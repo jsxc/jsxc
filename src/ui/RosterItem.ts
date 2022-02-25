@@ -142,9 +142,16 @@ export default class RosterItem {
                .text(
                   Emoticons.toUnicode(':speech_balloon:') +
                      ' ' +
-                     Utils.decodeEntities(message.getPlaintextEmoticonMessage('unicode'))
+                     (message.getRetractedBy()
+                        ? Translation.t('message_retracted')
+                        : Utils.decodeEntities(message.getPlaintextEmoticonMessage('unicode')))
                );
-            this.element.find('.jsxc-bar__caption__secondary').attr('title', message.getPlaintextMessage());
+            this.element
+               .find('.jsxc-bar__caption__secondary')
+               .attr(
+                  'title',
+                  message.getRetractedBy() ? Translation.t('message_retracted') : message.getPlaintextMessage()
+               );
          }
       };
 

@@ -56,6 +56,8 @@ export default class Message implements IIdentifiable, IMessage {
 
    private replacedBy: IMessage;
 
+   private retractedBy: IMessage;
+
    private original: IMessage;
 
    public static readonly DIRECTION = DIRECTION;
@@ -394,8 +396,24 @@ export default class Message implements IIdentifiable, IMessage {
       return this.replacedBy;
    }
 
+   public getRetractedBy(): IMessage {
+      if (this.retractedBy) {
+         return this.retractedBy;
+      }
+
+      const retractedByUid = this.data.get('retractedBy');
+
+      this.retractedBy = retractedByUid ? new Message(retractedByUid) : undefined;
+
+      return this.retractedBy;
+   }
+
    public setReplacedBy(message: IMessage): void {
       this.data.set('replacedBy', message.getUid());
+   }
+
+   public setRetractedBy(message: IMessage): void {
+      this.data.set('retractedBy', message.getUid());
    }
 
    public getOriginal(): IMessage {

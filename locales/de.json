@@ -452,7 +452,9 @@
     "Connection_interrupted": "Verbindung unterbrochen",
     "Declined": "Verweigert",
     "setting-pep-avatar-enable": "Verwendet PEP zum Laden der Avatare",
-    "setting-lmc-enable": "Aktiviert die Möglichkeit zur Korrektur der letzten Nachricht"
+    "setting-lmc-enable": "Aktiviert die Möglichkeit zur Korrektur der letzten Nachricht",
+    "message_retracted": "Nachricht gelöscht.",
+    "setting-mr-enable": "Aktiviert die Möglichkeit zum Löschen von Nachrichten."
   },
   "Notifications": "Benachrichtigungen"
 }
