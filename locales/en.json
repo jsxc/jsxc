@@ -485,7 +485,8 @@
         "Logging": "Logginginfos",
         "Select_an_option": "Select an option",
         "warningomemo": "Info: Encrypted messages could not be loaded from archiv later.",
-        "noomemofrommam": "[OMEMO-Encrypted message from archive could not be decrypted!]"
+        "noomemofrommam": "[OMEMO-Encrypted message from archive could not be decrypted!]",
+        "setting-pep-avatar-enable": "Use PEP to get nice and shiny avatars from your contacts."
     },
     "Notifications": "Notifications"
 }

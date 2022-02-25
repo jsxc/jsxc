@@ -54,7 +54,7 @@ export default class PEP extends AbstractService {
       return this.sendIQ(iqStanza);
    }
 
-   public retrieveItems(node: string, jid?: string) {
+   public retrieveItems(node: string, jid?: string, id?: string) {
       let iq = $iq({
          to: jid,
          type: 'get',
@@ -66,6 +66,12 @@ export default class PEP extends AbstractService {
       iq.c('items', {
          node,
       });
+
+      if (id) {
+         iq.c('item', {
+            id,
+         });
+      }
 
       return this.sendIQ(iq);
    }

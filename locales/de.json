@@ -485,7 +485,8 @@
         "Logging": "Logginginfos",
         "Select_an_option": "Auswählen",
         "warningomemo": "Hinweis: Verschlüsselte Nachrichten können später nicht aus dem Archiv geladen werden.",
-        "noomemofrommam": "[Ende zu Ende verschlüsselte Nachrichten aus dem Archiv können nicht entschlüsselt werden!]"
+        "noomemofrommam": "[Ende zu Ende verschlüsselte Nachrichten aus dem Archiv können nicht entschlüsselt werden!]",
+        "setting-pep-avatar-enable": "PEP wird genutzt um Avatare der Kontakte zu laden."
     },
     "Notifications": "Benachrichtigungen"
 }

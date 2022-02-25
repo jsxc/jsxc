@@ -17,6 +17,7 @@ import CommandPlugin from '@src/plugins/CommandPlugin';
 import VersionPlugin from '@src/plugins/VersionPlugin';
 import TimePlugin from '../plugins/TimePlugin';
 import JingleMessageInitiationPlugin from '../plugins/JingleMessageInitiationPlugin';
+import AvatarPEPPlugin from '@src/plugins/AvatarPEPPlugin';
 import AdHocCommandPlugin from '@src/plugins/AdHocCommand';
 
 Client.addPlugin(OTRPlugin);
@@ -37,4 +38,5 @@ Client.addPlugin(CommandPlugin);
 Client.addPlugin(VersionPlugin);
 Client.addPlugin(TimePlugin);
 Client.addPlugin(JingleMessageInitiationPlugin);
+Client.addPlugin(AvatarPEPPlugin);
 Client.addPlugin(AdHocCommandPlugin);
