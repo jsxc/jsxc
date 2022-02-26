@@ -36,6 +36,7 @@ export interface IMessagePayload {
    unread?: boolean;
    encryptedHtmlMessage?: string;
    encryptedPlaintextMessage?: string;
+   styled?: boolean;
    sender?: {
       name: string;
       jid?: JID;
@@ -159,4 +160,8 @@ export interface IMessage {
    setOriginal(message: IMessage): void;
 
    isReplacement(): boolean;
+
+   setStyled(styled: boolean); //XEP - 0393
+
+   isStyled(); //XEP - 0393
 }

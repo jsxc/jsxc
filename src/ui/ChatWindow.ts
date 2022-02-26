@@ -21,11 +21,14 @@ import Location from '@util/Location';
 import interact from 'interactjs';
 import Translation from '../util/Translation';
 import MultiUserContact from '@src/MultiUserContact';
+import alertDialog from './dialogs/AlertDialog';
+import confirmDialog from './dialogs/confirm';
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
 const ENTER_KEY = 13;
 const ESC_KEY = 27;
+const UP_KEY = 38;
 
 export enum State {
    Open,
@@ -107,6 +110,178 @@ export default class ChatWindow {
       }
 
       this.getAccount().triggerChatWindowInitializedHook(this, contact);
+
+      let messageAreaElement = this.element.find('.jsxc-message-area');
+      let anchorElement = this.element.find('.jsxc-message-area-anchor');
+      messageAreaElement.on('scroll', function () {
+         if (messageAreaElement.text().trim().length > 0) {
+            let scrollHeight: number = messageAreaElement[0].scrollHeight;
+            let clientHeight: number = messageAreaElement[0].clientHeight;
+            let scrollTop: number = messageAreaElement[0].scrollTop;
+            if (scrollTop < 0) scrollTop = scrollTop * -1;
+
+            if (!(clientHeight + 42 < scrollHeight - scrollTop)) {
+               anchorElement.hide(400);
+            } else if (scrollTop > 50) {
+               anchorElement.show(400);
+            } else {
+               anchorElement.hide(400);
+            }
+         } else {
+            anchorElement.hide(400);
+         }
+      });
+      anchorElement.on('click', () => {
+         this.scrollMessageAreaToBottom();
+      });
+
+      let updateUnreadMessage = () => {
+         let unreadMessages = this.contact.getTranscript().getNumberOfUnreadMessages();
+
+         if (unreadMessages > 0 && this.element.hasClass('jsxc-minimized')) {
+            this.element.find('.jsxc-bar--window.jsxc-bar').addClass('jsxc-blink-unread-msg');
+         } else {
+            this.element.find('.jsxc-bar--window.jsxc-bar').removeClass('jsxc-blink-unread-msg');
+         }
+      };
+
+      this.initFormatTools();
+
+      this.contact.getTranscript().registerHook('unreadMessageIds', updateUnreadMessage);
+      updateUnreadMessage();
+   }
+
+   private initFormatTools(): void {
+      let formatTools = this.element.find('.jsxc-format-input');
+      let useFormatTools = Client.getOption('useFormatTools') || false;
+      if (useFormatTools) {
+         formatTools.removeClass('jsxc-hidden');
+      } else {
+         formatTools.addClass('jsxc-hidden');
+      }
+
+      formatTools.find('.jsxc-format-bold').on('click', () => {
+         this.insertFormatedText('bold');
+      });
+      formatTools.find('.jsxc-format-italic').on('click', () => {
+         this.insertFormatedText('italic');
+      });
+      formatTools.find('.jsxc-format-code').on('click', () => {
+         this.insertFormatedText('code');
+      });
+      formatTools.find('.jsxc-format-strike').on('click', () => {
+         this.insertFormatedText('strike');
+      });
+
+      formatTools.find('.jsxc-format-help').on('click', () => {
+         alertDialog(Translation.t('show_format_pref'), Translation.t('help_format_tools'), Translation.t('Close'));
+      });
+
+      formatTools.find('.jsxc-format-close').on('click', () => {
+         confirmDialog(Translation.t('close_toolbar_message'))
+            .getPromise()
+            .then(() => {
+               Client.setOption('useFormatTools', false);
+               formatTools.addClass('jsxc-hidden');
+            })
+            .catch(() => {
+               //console.debug('confirm canceled');
+            });
+      });
+   }
+
+   private insertFormatedText(type: string): void {
+      let BOLD: string = '*';
+      let ITALIC: string = '_';
+      let CODE: string = '`';
+      let STRIKE: string = '~';
+
+      let selStart = (<HTMLInputElement>this.inputElement[0]).selectionStart;
+      let selEnd = (<HTMLInputElement>this.inputElement[0]).selectionEnd;
+
+      let selected = selStart === selEnd ? false : true;
+
+      let selectedText = selected ? this.inputElement.val().toString().substring(selStart, selEnd) : '';
+
+      if (selectedText.trim().length < selectedText.length) {
+         selectedText = selectedText.trim();
+         selEnd = selStart + selectedText.length;
+      }
+
+      switch (type) {
+         case 'bold':
+            if (selectedText.length !== 0) {
+               let text = this.inputElement.val().toString();
+               text =
+                  text.substring(0, selStart) + BOLD + text.substring(selStart, selEnd) + BOLD + text.substring(selEnd);
+               this.inputElement.val(text);
+            } else {
+               let text = this.inputElement.val().toString();
+               text = [
+                  text.slice(0, (<HTMLInputElement>this.inputElement[0]).selectionStart),
+                  BOLD,
+                  text.slice((<HTMLInputElement>this.inputElement[0]).selectionStart),
+               ].join('');
+               this.inputElement.val(text);
+            }
+            return;
+         case 'italic':
+            if (selectedText.length !== 0) {
+               let text = this.inputElement.val().toString();
+               text =
+                  text.substring(0, selStart) +
+                  ITALIC +
+                  text.substring(selStart, selEnd) +
+                  ITALIC +
+                  text.substring(selEnd);
+               this.inputElement.val(text);
+            } else {
+               let text = this.inputElement.val().toString();
+               text = [
+                  text.slice(0, (<HTMLInputElement>this.inputElement[0]).selectionStart),
+                  ITALIC,
+                  text.slice((<HTMLInputElement>this.inputElement[0]).selectionStart),
+               ].join('');
+               this.inputElement.val(text);
+            }
+            return;
+         case 'code':
+            if (selectedText.length !== 0) {
+               let text = this.inputElement.val().toString();
+               text =
+                  text.substring(0, selStart) + CODE + text.substring(selStart, selEnd) + CODE + text.substring(selEnd);
+               this.inputElement.val(text);
+            } else {
+               let text = this.inputElement.val().toString();
+               text = [
+                  text.slice(0, (<HTMLInputElement>this.inputElement[0]).selectionStart),
+                  CODE,
+                  text.slice((<HTMLInputElement>this.inputElement[0]).selectionStart),
+               ].join('');
+               this.inputElement.val(text);
+            }
+            return;
+         case 'strike':
+            if (selectedText.length !== 0) {
+               let text = this.inputElement.val().toString();
+               text =
+                  text.substring(0, selStart) +
+                  STRIKE +
+                  text.substring(selStart, selEnd) +
+                  STRIKE +
+                  text.substring(selEnd);
+               this.inputElement.val(text);
+            } else {
+               let text = this.inputElement.val().toString();
+               text = [
+                  text.slice(0, (<HTMLInputElement>this.inputElement[0]).selectionStart),
+                  STRIKE,
+                  text.slice((<HTMLInputElement>this.inputElement[0]).selectionStart),
+               ].join('');
+               this.inputElement.val(text);
+            }
+            return;
+      }
    }
 
    public getTranscript(): Transcript {
@@ -217,7 +392,10 @@ export default class ChatWindow {
 
       chatWindowMessage.restoreNextMessage();
 
-      setTimeout(() => this.scrollMessageAreaToBottom(), 500);
+      let anchorElement = this.element.find('.jsxc-message-area-anchor');
+      if (!anchorElement.is(':visible')) {
+         setTimeout(() => this.scrollMessageAreaToBottom(), 500);
+      }
 
       return chatWindowMessage;
    }
@@ -420,6 +598,16 @@ export default class ChatWindow {
          this.getController().close();
       }
 
+      if (
+         ev.which === UP_KEY &&
+         (this.inputElement.val() === null || this.inputElement.val().toString().trim().length === 0)
+      ) {
+         let firstMessage = this.getTranscript().getFirstOutgoingMessage();
+         if (firstMessage) {
+            this.inputElement.val('/fix ' + firstMessage.getPlaintextMessage());
+         }
+      }
+
       let selectionStart = ev.target.selectionStart;
       let selectionEnd = ev.target.selectionEnd;
 
@@ -555,8 +743,13 @@ export default class ChatWindow {
       }
 
       if (inputElement.val()) {
+         this.element
+            .find('.jsxc-textinput-length')
+            .empty()
+            .text(Translation.t('message_length') + ': ' + inputElement.val().toString().length);
          inputElement.parent().addClass('jsxc-contains-val');
       } else {
+         this.element.find('.jsxc-textinput-length').empty();
          inputElement.parent().removeClass('jsxc-contains-val');
       }
 
@@ -659,6 +852,7 @@ export default class ChatWindow {
       let messageArea = this.element.find('.jsxc-message-area');
 
       messageArea[0].scrollTop = messageArea[0].scrollHeight;
+      this.element.find('.jsxc-message-area-anchor').hide(400);
    }
 
    private registerHooks() {
