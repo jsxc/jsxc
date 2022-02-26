@@ -62,6 +62,12 @@ export default class RosterItem {
             Client.getChatWindowList().minimizeAll();
          }
 
+         if (contact.isGroupChat()) {
+            let mContact = <MultiUserContact>contact;
+            if (mContact.getNickname() === null || mContact.getNickname() === undefined) {
+               mContact.join();
+            }
+         }
          chatWindow.openProminently();
       });
 
