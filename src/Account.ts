@@ -379,9 +379,9 @@ export default class Account {
       this.getSessionStorage().destroy();
       this.getNoticeManager().removeAll();
 
-      for (const name in this.pipes) {
+      /*for (const name in this.pipes) {
          this.pipes[name].destroy();
-      }
+      }*/
 
       if (this.getPluginRepository()) {
          this.getPluginRepository().destroyAllPlugins();
