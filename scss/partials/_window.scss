@@ -133,7 +133,6 @@
           opacity: 1;
         }
       }
-
       @media (min-width: 768px) {
         height: 30px;
         width: 30px;
@@ -299,7 +298,6 @@
   &:hover {
     opacity: 0.5;
   }
-
   @media (min-width: 768px) {
     width: 34px;
   }
@@ -702,6 +700,10 @@ ul.jsxc-message-history {
   max-width: 76%;
   position: relative;
 
+  .jsxc-avatar {
+    display: none;
+  }
+
   &.jsxc-received {
     &::before {
       bottom: 6px;
@@ -846,7 +848,6 @@ ul.jsxc-message-history {
       }
     }
   }
-
   @media (min-width: 768px) {
     width: 34px;
   }
