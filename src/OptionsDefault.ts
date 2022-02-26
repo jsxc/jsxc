@@ -152,3 +152,10 @@ export let automaticallyRestoreAccounts = true;
 export let trustedDomains: string[] = [];
 
 export let includeOSInVersionResponse = false;
+
+/* When rejoin a muc, jsxc syncs messages whose are written in absence, do to server implementations faults sometimes the order is reverse when
+   receiving the messages. This toggle will enable reverse the message list before adding messages to chatwindow. */
+export let mamReverse = false;
+
+/* This option enables auto sync if top is reached while scrolling. */
+export let autoLoadOnScrollToTop = false;

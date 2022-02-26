@@ -10,6 +10,7 @@ import * as Namespace from '../../connection/xmpp/namespace';
 import { IMessage, MessageMark } from '@src/Message.interface';
 import { IJID } from '@src/JID.interface';
 import MultiUserContact from '@src/MultiUserContact';
+import Client from '@src/Client';
 
 export default class Archive {
    private archiveJid: IJID;
@@ -212,7 +213,19 @@ export default class Archive {
 
       let transcript = this.contact.getTranscript();
       if (this.syncNewMessages) {
-         this.messageCache.reverse();
+         if (this.messageCache.length > 1) {
+            let firstStamp = this.messageCache[0].find('delay').attr('stamp');
+            let lastStamp = this.messageCache[this.messageCache.length - 1].find('delay').attr('stamp');
+            if (firstStamp && lastStamp) {
+               let reverse = Client.getOption('mamReverse') || false;
+               if (
+                  (!reverse && new Date(firstStamp).getTime() < new Date(lastStamp).getTime()) ||
+                  (reverse && new Date(firstStamp).getTime() > new Date(lastStamp).getTime())
+               ) {
+                  this.messageCache.reverse();
+               }
+            }
+         }
       }
 
       while (this.messageCache.length > 0) {
