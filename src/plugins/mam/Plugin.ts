@@ -62,6 +62,12 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
          }
       });
 
+      pluginAPI.registerConnectionHook((status: number, condition: string) => {
+         if (status === Strophe.Status.ATTACHED) {
+            this.syncConversations();
+         }
+      });
+
       pluginAPI.registerChatWindowClearedHook((chatWindow: ChatWindow, contact: Contact) => {
          let archiveJid = this.getArchiveJid(contact);
 
@@ -90,6 +96,31 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       Promise.resolve(archive.newMessages()).then(() => {
          this.pluginAPI.Log.debug('Finished MAM Sync');
       });
+   }
+
+   private syncConversations() {
+      let account = Client.getAccountManager().getAccount();
+      let storage = account.getStorage();
+      let cachedRoster = storage.getItem('roster', 'cache') || [];
+
+      for (let id of cachedRoster) {
+         let jid = new JID(id);
+         try {
+            let contact = account.getContact(jid);
+            while (contact === undefined) {
+               setTimeout(() => {
+                  this.syncConversations();
+               }, 50);
+               return;
+            }
+            let archive = this.getArchive(jid);
+            Promise.resolve(archive.newMessages()).then(() => {
+               this.pluginAPI.Log.debug('Finished MAM Sync');
+            });
+         } catch (err) {
+            this.pluginAPI.Log.error('Error while syncing conversation with user: ' + id, err);
+         }
+      }
    }
 
    public getStorage() {
@@ -239,6 +270,17 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       }
 
       let jid = new JID(bareJid);
+
+      let msg = forwardedElement.find('message');
+      if (msg) {
+         let to = new JID(msg.attr('to'));
+         let from = new JID(msg.attr('from'));
+
+         if (jid.bare !== to.bare && jid.bare !== from.bare) {
+            //filter messages to himself
+            return true;
+         }
+      }
 
       this.getArchive(jid).onForwardedMessage(forwardedElement);
 
