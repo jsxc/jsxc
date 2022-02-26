@@ -251,7 +251,7 @@
     "Loading_room_information": "Informationen über Gruppe werden geladen",
     "Destroy": "Auflösen",
     "Leave": "Verlassen",
-    "changed_subject_to": "__nickname__ hat das Thema auf __subject__ geändert",
+    "changed_subject_to": "__nickname__ hat das Thema auf \"__subject__\" geändert",
     "muc_removed_kicked": "Du wurdest aus der Gruppe entfernt",
     "muc_removed_info_kicked": "__nickname__ wurde aus der Gruppe entfernt",
     "muc_removed_banned": "Du wurdest aus der Gruppe ausgeschlossen",
