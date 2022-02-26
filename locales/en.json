@@ -244,7 +244,7 @@
     "Server": "Server",
     "Rooms_are_loaded": "Loading rooms",
     "Could_load_only": "Could load only __count__ rooms for autocomplete",
-    "muc_explanation": "Please enter room name and optionally a nickname to join a chat",
+    "muc_explanation": "Please enter room name and optionally a nickname to join or create a chat",
     "You_already_joined_this_room": "You already joined this room",
     "This_room_will_be_closed": "This room will be closed",
     "Room_not_found_": "A new room will be created",
@@ -439,7 +439,20 @@
     "Edit_avatar": "Edit avatar",
     "Every_member_can_see_your_full_JID": "Every member can see your full JID",
     "message_not_delivered": "Message not delivered",
-    "User_media_not_readable": "User media not readable. Is your device used by another application?"
+    "User_media_not_readable": "User media not readable. Is your device used by another application?",
+    "You_left_the_building": "You have left the room",
+    "muc_invitation": "Invitation",
+    "muc_invitation_explanation": "You have got a room invitation and you have the choice to deny or accept.",
+    "Open_window": "Open chat window",
+    "Configuration_canceled": "Room configuration canceled",
+    "Aborted": "Canceled by user",
+    "QRCode_description": "Scan QR-Code with mobile client to verify the key",
+    "QRCode_noqrcode": "QR-Code not available",
+    "setting-jmi-enable": "Enable the ability to initiate jingle messages",
+    "Connection_interrupted": "Connection interrupted",
+    "Declined": "declined",
+    "setting-pep-avatar-enable": "PEP will be used for loading avatars",
+    "setting-lmc-enable": "Enables the ability to correct the last message"
   },
   "Notifications": "Notifications"
 }

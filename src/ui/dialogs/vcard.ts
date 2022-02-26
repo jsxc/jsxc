@@ -67,7 +67,7 @@ export default function (contact: IContact) {
             return Promise.reject();
          })
          .catch(() => {
-            clientElement.text(Translation.t('Not_available'));
+            clientElement.text(Translation.t('not_available'));
          });
    }
 
