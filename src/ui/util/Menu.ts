@@ -17,6 +17,7 @@ export default class Menu {
 
    private timer;
    private listElement;
+   private enabled: boolean = true;
 
    constructor(private element: JQuery) {
       if (element.length !== 1) {
@@ -55,21 +56,31 @@ export default class Menu {
       return this.element.find('.jsxc-menu__button');
    }
 
+   public disable(): void {
+      this.enabled = false;
+      this.closeMenu();
+   }
+
+   public enable(): void {
+      this.enabled = true;
+   }
+
    private onClick = ev => {
       ev.stopPropagation();
       ev.preventDefault();
+      if (this.enabled) {
+         $('body').off('click', null, this.closeMenu);
 
-      $('body').off('click', null, this.closeMenu);
+         // hide other lists
+         $('body').click();
 
-      // hide other lists
-      $('body').click();
+         window.clearTimeout(this.timer);
 
-      window.clearTimeout(this.timer);
+         this.element.toggleClass(CLASSNAME_OPENED);
 
-      this.element.toggleClass(CLASSNAME_OPENED);
-
-      if (this.element.hasClass(CLASSNAME_OPENED)) {
-         $('body').on('click', this.closeMenu);
+         if (this.element.hasClass(CLASSNAME_OPENED)) {
+            $('body').on('click', this.closeMenu);
+         }
       }
    };
 
