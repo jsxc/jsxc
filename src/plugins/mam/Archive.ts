@@ -14,6 +14,7 @@ import MultiUserContact from '@src/MultiUserContact';
 export default class Archive {
    private archiveJid: IJID;
    private messageCache: JQuery<HTMLElement>[] = [];
+   private syncNewMessages: boolean = false;
 
    constructor(private plugin: MessageArchiveManagementPlugin, private contact: Contact) {
       let jid = contact.isGroupChat() ? contact.getJid() : plugin.getConnection().getJID();
@@ -53,6 +54,38 @@ export default class Archive {
       storage.registerHook(key, hook);
    }
 
+   public newMessages() {
+      if (this.messageCache.length > 0) {
+         Log.debug('Ongoing message retrieval');
+         return false;
+      }
+
+      let queryId = UUID.v4();
+
+      this.plugin.addQueryContactRelation(queryId, this.contact);
+      let connection = this.plugin.getConnection();
+
+      let firstMessage = this.contact.getTranscript().getFirstChatMessage();
+
+      if (firstMessage !== undefined && firstMessage !== null && (<any>firstMessage).data !== undefined) {
+         let startDate = firstMessage.getStamp();
+         startDate.setMilliseconds(startDate.getMilliseconds() + 1);
+         this.plugin
+            .determineServerSupport(this.archiveJid)
+            .then(version => {
+               if (!version) {
+                  throw new Error(`Archive JID ${this.archiveJid.full} has no support for MAM.`);
+               }
+               this.syncNewMessages = true;
+               return connection.queryArchiveNewMessages(startDate, this.archiveJid, <string>version, queryId);
+            })
+            .then(this.onComplete)
+            .catch(stanza => {
+               Log.warn('Error while requesting archive', stanza);
+            });
+      }
+   }
+
    public nextMessages() {
       if (this.isExhausted()) {
          Log.debug('No more archived messages.');
@@ -90,7 +123,7 @@ export default class Archive {
             }
 
             let jid = !this.contact.isGroupChat() ? this.contact.getJid() : undefined;
-
+            this.syncNewMessages = false;
             return connection.queryArchive(this.archiveJid, <string>version, queryId, jid, firstResultId, endDate);
          })
          .then(this.onComplete)
@@ -178,6 +211,9 @@ export default class Archive {
       }
 
       let transcript = this.contact.getTranscript();
+      if (this.syncNewMessages) {
+         this.messageCache.reverse();
+      }
 
       while (this.messageCache.length > 0) {
          let messageElement = this.messageCache.pop();
@@ -185,7 +221,13 @@ export default class Archive {
          try {
             let message = await this.parseForwardedMessage(messageElement);
 
-            transcript.unshiftMessage(message);
+            if (this.syncNewMessages) {
+               if (!transcript.findMessageByAttrId(message.getAttrId())) {
+                  transcript.pushMessage(message);
+               }
+            } else {
+               transcript.unshiftMessage(message);
+            }
          } catch (err) {
             continue;
          }
@@ -204,7 +246,17 @@ export default class Archive {
             unread: false,
          });
 
-         transcript.unshiftMessage(archiveExhaustedMessage);
+         if (this.syncNewMessages) {
+            if (
+               !transcript.getFirstMessage().isSystem() ||
+               (transcript.getFirstMessage().isSystem() &&
+                  transcript.getFirstMessage().getPlaintextMessage() !== Translation.t('Archive_exhausted'))
+            ) {
+               transcript.pushMessage(archiveExhaustedMessage);
+            }
+         } else {
+            transcript.unshiftMessage(archiveExhaustedMessage);
+         }
       }
 
       this.setExhausted(isArchiveExhausted);

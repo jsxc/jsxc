@@ -9,6 +9,7 @@ import Archive from './Archive';
 import Contact from '@src/Contact';
 import PluginAPI from '@src/plugin/PluginAPI';
 import { IContact } from '@src/Contact.interface';
+import Client from '@src/Client';
 
 const MIN_VERSION = '4.0.0';
 const MAX_VERSION = '99.0.0';
@@ -56,17 +57,39 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
 
       pluginAPI.registerChatWindowInitializedHook((chatWindow: ChatWindow, contact: Contact) => {
          this.addLoadButtonIfEnabled(chatWindow, contact);
+         if (contact.isGroupChat()) {
+            this.syncMUCConversation(contact);
+         }
       });
 
       pluginAPI.registerChatWindowClearedHook((chatWindow: ChatWindow, contact: Contact) => {
          let archiveJid = this.getArchiveJid(contact);
 
+         let fadeElement = chatWindow.getDom().find('.jsxc-window-fade');
+         if (fadeElement.find('.jsxc-mam-load-more').length > 0) {
+            fadeElement.find('.jsxc-mam-load-more').remove();
+         }
+
+         let messageAreaElement = chatWindow.getDom().find('.jsxc-message-area');
+         messageAreaElement.off('scroll');
+
          if (this.supportCache[archiveJid.bare]) {
             this.getArchive(contact.getJid()).clear();
          }
+
+         setTimeout(() => {
+            this.addLoadButtonIfEnabled(chatWindow, contact, false);
+         }, 500);
       });
 
       this.pluginAPI.getConnection().registerHandler(this.onMamMessage, null, 'message', null);
+   }
+
+   private syncMUCConversation(contact: IContact) {
+      let archive = this.getArchive(contact.getJid());
+      Promise.resolve(archive.newMessages()).then(() => {
+         this.pluginAPI.Log.debug('Finished MAM Sync');
+      });
    }
 
    public getStorage() {
@@ -122,21 +145,24 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       return new JID(jid.bare);
    }
 
-   private addLoadButtonIfEnabled(chatWindow: ChatWindow, contact: Contact) {
+   private addLoadButtonIfEnabled(chatWindow: ChatWindow, contact: Contact, loadNow: boolean = true) {
       let archivingJid = this.getArchiveJid(contact);
 
       this.determineServerSupport(archivingJid).then(version => {
          if (version) {
-            this.addLoadButton(chatWindow.getDom(), contact);
+            this.addLoadButton(chatWindow.getDom(), contact, loadNow);
          }
       });
    }
 
-   private addLoadButton(chatWindowElement: JQuery<HTMLElement>, contact: Contact) {
+   private addLoadButton(chatWindowElement: JQuery<HTMLElement>, contact: Contact, loadNow: boolean) {
+      let fadeElement = chatWindowElement.find('.jsxc-window-fade');
+      if (fadeElement.find('.jsxc-mam-load-more').length > 0) {
+         return;
+      }
       let classNameShow = 'jsxc-show';
       let classNameMamEnable = 'jsxc-mam-enabled';
       let messageAreaElement = chatWindowElement.find('.jsxc-message-area');
-      let fadeElement = chatWindowElement.find('.jsxc-window-fade');
 
       let archive = this.getArchive(contact.getJid());
 
@@ -150,18 +176,32 @@ export default class MessageArchiveManagementPlugin extends AbstractPlugin {
       element.append(spanElement);
 
       messageAreaElement.on('scroll', function () {
-         const topDelta = 10;
-         const scrollTop = Math.abs(this.scrollTop);
-         const isAtTop = this.clientHeight + scrollTop + topDelta >= this.scrollHeight;
+         let scrollHeight: number = messageAreaElement[0].scrollHeight;
+         let clientHeight: number = messageAreaElement[0].clientHeight;
+         let scrollTop: number = messageAreaElement[0].scrollTop;
+         if (scrollTop < 0) scrollTop = scrollTop * -1;
 
-         if (isAtTop && !archive.isExhausted()) {
+         let autoLoadOnScrollToTop = Client.getOption('autoLoadOnScrollToTop') || false;
+
+         if (
+            (clientHeight + 42 > scrollHeight - scrollTop && !archive.isExhausted()) ||
+            messageAreaElement.text().trim().length === 0
+         ) {
+            if (autoLoadOnScrollToTop) {
+               archive.nextMessages();
+            }
+
             element.addClass(classNameShow);
          } else {
             element.removeClass(classNameShow);
          }
       });
 
-      setTimeout(() => messageAreaElement.trigger('scroll'), 1000);
+      if (loadNow) {
+         messageAreaElement.trigger('scroll');
+      } else {
+         element.addClass(classNameShow);
+      }
 
       if (!archive.isExhausted()) {
          chatWindowElement.addClass(classNameMamEnable);

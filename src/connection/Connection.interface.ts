@@ -58,6 +58,8 @@ export interface IConnection {
       end?: Date
    ): Promise<Element>;
 
+   queryArchiveNewMessages(startDate: Date, archive: IJID, version: string, queryId: string): Promise<Element>;
+
    changePassword(newPassword: string): Promise<Element>;
 
    close();

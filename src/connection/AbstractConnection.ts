@@ -316,6 +316,48 @@ abstract class AbstractConnection {
       return this.sendIQ(iq);
    }
 
+   public queryArchiveNewMessages(startDate: Date, archive: JID, version: string, queryId: string): Promise<Element> {
+      let iq = $iq({
+         type: 'set',
+         to: archive.bare,
+      });
+
+      iq.c('query', {
+         xmlns: version,
+         queryid: queryId,
+      });
+
+      iq.c('x', {
+         xmlns: 'jabber:x:data',
+         type: 'submit',
+      });
+
+      iq.c('field', {
+         var: 'FORM_TYPE',
+         type: 'hidden',
+      })
+         .c('value')
+         .t(version)
+         .up()
+         .up();
+
+      iq.c('field', {
+         var: 'start',
+      })
+         .c('value')
+         .t(startDate.toISOString())
+         .up()
+         .up();
+
+      iq.up().c('set', {
+         xmlns: 'http://jabber.org/protocol/rsm',
+      });
+
+      iq.up();
+
+      return this.sendIQ(iq);
+   }
+
    public changePassword(newPassword: string): Promise<Element> {
       let iq = $iq({
          type: 'set',
