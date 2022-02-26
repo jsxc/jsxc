@@ -439,7 +439,8 @@
     "Edit_avatar": "Bearbeite Profilfoto",
     "Every_member_can_see_your_full_JID": null,
     "message_not_delivered": "Nachricht nicht zugestellt",
-    "User_media_not_readable": null
+    "User_media_not_readable": null,
+    "Configuration_canceled": "Raumkonfiguration abgebrochen"
   },
   "Notifications": "Benachrichtigungen"
 }

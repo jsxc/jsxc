@@ -29,6 +29,7 @@ class MultiUserJoinDialog {
    private roomInputElement: JQuery<HTMLElement>;
    private passwordInputElement: JQuery<HTMLElement>;
    private nicknameInputElement: JQuery<HTMLElement>;
+   private autojoinInputElement: JQuery<HTMLElement>;
 
    constructor(private server?: string, private room?: string) {
       let content = multiUserJoinTemplate({
@@ -48,6 +49,8 @@ class MultiUserJoinDialog {
       this.roomInputElement = dom.find('input[name="room"]');
       this.passwordInputElement = dom.find('input[name="password"]');
       this.nicknameInputElement = dom.find('input[name="nickname"]');
+      this.autojoinInputElement = dom.find('input[name="autojoin"]');
+      this.autojoinInputElement.prop('checked', true);
 
       if (server && room) {
          this.serverInputElement.val(server);
@@ -63,7 +66,10 @@ class MultiUserJoinDialog {
       this.account = Client.getAccountManager().getAccount(id);
 
       this.connection = this.account.getConnection();
-      this.defaultNickname = this.connection.getJID().node;
+      this.defaultNickname =
+         this.account.getDefaultNickname() === undefined
+            ? this.connection.getJID().node
+            : this.account.getDefaultNickname();
 
       this.nicknameInputElement.attr('placeholder', this.defaultNickname);
 
@@ -303,7 +309,7 @@ class MultiUserJoinDialog {
       let roomJid = new JID(room);
 
       if (this.account.getContact(roomJid)) {
-         return Promise.reject('You_already_joined_this_room');
+         return Promise.reject(Translation.t('You_already_joined_this_room'));
       }
 
       this.dom.find('input[name="room-jid"]').val(room);
@@ -312,7 +318,7 @@ class MultiUserJoinDialog {
    }
 
    private requestRoomInfo = async (room: JID) => {
-      this.setWaitingMessage('Loading_room_information');
+      this.setWaitingMessage(Translation.t('Loading_room_information'));
 
       const discoService = this.connection.getDiscoService();
 
@@ -425,7 +431,7 @@ class MultiUserJoinDialog {
       let multiUserContact = new MultiUserContact(this.account, jid, name);
       multiUserContact.setNickname(nickname);
       multiUserContact.setBookmark(true);
-      multiUserContact.setAutoJoin(true);
+      multiUserContact.setAutoJoin(this.autojoinInputElement.prop('checked'));
       multiUserContact.setPassword(password);
       multiUserContact.setSubject(subject);
 
