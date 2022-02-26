@@ -439,7 +439,10 @@
     "Edit_avatar": "Bearbeite Profilfoto",
     "Every_member_can_see_your_full_JID": null,
     "message_not_delivered": "Nachricht nicht zugestellt",
-    "User_media_not_readable": null
+    "User_media_not_readable": null,
+    "show_two_column_pref": "Zwei-Spalten-Layout",
+    "show_two_column_description": "Der Client verwendet ein Zweispaltenvollbildlayout",
+    "Active_conversations": "Aktive Unterhaltungen"
   },
   "Notifications": "Benachrichtigungen"
 }

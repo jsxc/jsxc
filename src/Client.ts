@@ -49,7 +49,32 @@ export default class Client {
 
       Migration.run(Client.getVersion(), storage);
 
+      Client.initLayout();
+
       return Options.getDefault('automaticallyRestoreAccounts') ? Client.accountManager.restoreAccounts() : 0;
+   }
+
+   private static initLayout() {
+      let useTwoColumnLayout = Client.getOption('useTwoColumnLayout') || false;
+      if (useTwoColumnLayout) {
+         $(document.body)
+            .find('.jsxc-window-fade')
+            .each(function () {
+               $(this).css('width', '');
+               $(this).css('height', '');
+            });
+         $(document.body)
+            .find('.jsxc-bar--window.jsxc-bar')
+            .each(function () {
+               $(this).css('width', '');
+               $(this).css('height', '');
+            });
+         $(document.body).addClass('jsxc-fullscreen');
+         $(document.body).addClass('jsxc-two-columns');
+      } else {
+         $(document.body).removeClass('jsxc-fullscreen');
+         $(document.body).removeClass('jsxc-two-columns');
+      }
    }
 
    public static getVersion(): string {

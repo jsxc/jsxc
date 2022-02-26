@@ -19,6 +19,7 @@ import confirmDialog from './dialogs/confirm';
 import Utils from '@util/Utils';
 import Emoticons from '@src/Emoticons';
 import showAddAvatarDialog from './dialogs/avatarupload';
+import JID from '@src/JID';
 
 let rosterTemplate = require('../../template/roster.hbs');
 
@@ -559,5 +560,34 @@ export default class Roster {
       this.element.find('.jsxc-collapsible').on('click', function () {
          $(this).toggleClass('jsxc-active');
       });
+
+      this.element.find('.jsxc-fullscreen-active-conversations-select').on('change', e => {
+         let uid = $(e.target).val().toString();
+         let contact = this.rosterItems[uid].getContact();
+         let chatWindow = contact.getChatWindowController();
+
+         if ($('body').hasClass('jsxc-fullscreen') || Client.isExtraSmallDevice()) {
+            Client.getChatWindowList().minimizeAll();
+         }
+
+         chatWindow.openProminently();
+      });
+
+      setTimeout(() => {
+         let select = this.element.find('.jsxc-fullscreen-active-conversations-select');
+         if (select.find('option').length === 0) {
+            let cwindows = Client.getChatWindowList().getChatWindowIds();
+            for (let item of cwindows) {
+               let contact = Client.getAccountManager().getAccount().getContact(new JID(item));
+               let option = $(
+                  `<option data-jid="${
+                     contact.getJid().bare
+                  }" value="${contact.getUid()}">${contact.getName()}</option>`
+               );
+               select.append(option);
+            }
+            select.val(select.find(':first-child').val());
+         }
+      }, 2000);
    }
 }
