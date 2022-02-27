@@ -46,8 +46,16 @@ export default class SortedPersistentMap {
       this.initialized = true;
    }
 
-   public get(id: string) {
-      return this.map[id];
+   public get(id: string | number): any {
+      if (typeof id === 'string') {
+         return this.map[id];
+      } else {
+         return this.list.length > 0 && id >= 0 && id < this.list.length ? this.map[this.list.get(id)] : null;
+      }
+   }
+
+   public getLastItem(): any {
+      return this.list.length > 0 ? this.map[this.list.get(this.list.length - 1)] : null;
    }
 
    public push(element: IIdentifiable) {
