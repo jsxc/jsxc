@@ -440,7 +440,8 @@
     "Every_member_can_see_your_full_JID": null,
     "message_not_delivered": "Nachricht nicht zugestellt",
     "User_media_not_readable": null,
-    "Configuration_canceled": "Raumkonfiguration abgebrochen"
+    "Configuration_canceled": "Raumkonfiguration abgebrochen",
+    "noomemofrommam": "Omemo verschlüsselte Nachrichten aus dem Archiv können nicht entschlüsselt werden."
   },
   "Notifications": "Benachrichtigungen"
 }

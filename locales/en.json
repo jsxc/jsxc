@@ -440,7 +440,8 @@
     "Every_member_can_see_your_full_JID": "Every member can see your full JID",
     "message_not_delivered": "Message not delivered",
     "User_media_not_readable": "User media not readable. Is your device used by another application?",
-    "Configuration_canceled": "Room configuration canceled"
+    "Configuration_canceled": "Room configuration canceled",
+    "noomemofrommam": "Omemo encrypted messages from archive can not be decrypted."
   },
   "Notifications": "Notifications"
 }
