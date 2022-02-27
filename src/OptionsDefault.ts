@@ -159,3 +159,7 @@ export let mamReverse = false;
 
 /* This option enables auto sync if top is reached while scrolling. */
 export let autoLoadOnScrollToTop = false;
+
+export let nominatimurl = 'https://nominatim.openstreetmap.org';
+
+export let enableGeocode = true;

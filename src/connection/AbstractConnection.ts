@@ -60,6 +60,7 @@ abstract class AbstractConnection {
       NS.register('VCARD', 'vcard-temp');
       NS.register('FORWARD', 'urn:xmpp:forward:0');
       NS.register('NICK+', 'http://jabber.org/protocol/nick+notify');
+      NS.register('GELOC+', 'http://jabber.org/protocol/geoloc+notify');
    }
 
    public getPubSubService = (): PubSubService => {

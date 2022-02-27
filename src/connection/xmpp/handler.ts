@@ -35,6 +35,7 @@ interface IStropheConnection {
 
 export default class XMPPHandler {
    constructor(private account: Account, private connection: IStropheConnection) {
+      account.getDiscoInfo().addFeature('http://jabber.org/protocol/geoloc+notify');
       account.getDiscoInfo().addFeature('http://jabber.org/protocol/nick+notify');
    }
 

@@ -14,11 +14,14 @@ import Emoticons from '@src/Emoticons';
 import Utils from '@util/Utils';
 import { IMessage } from '@src/Message.interface';
 import MultiUserContact from '@src/MultiUserContact';
+import Location from '@util/Location';
+import Geoloc from '@src/Geoloc';
 
 let rosterItemTemplate = require('../../template/roster-item.hbs');
 
 export default class RosterItem {
    private element: JQuery;
+   private geoloc: Geoloc;
 
    constructor(private contact: IContact) {
       let self = this;
@@ -168,6 +171,77 @@ export default class RosterItem {
 
          updateStatus(status);
       });
+
+      this.contact.registerHook('geoloc', (geo: any) => {
+         let geolocdiv = this.element.find('.jsxc-bar__geoloc');
+         if (geo && geo.lat !== undefined && geo.lon !== undefined) {
+            geolocdiv.addClass('jsxc-position-show');
+            if (this.geoloc === undefined || (this.geoloc.getLat() !== geo.lat && this.geoloc.getLon() !== geo.lon)) {
+               let distance =
+                  this.geoloc !== undefined
+                     ? Location.distanceBetweenCoordinates(this.geoloc.getLat(), this.geoloc.getLon(), geo.lat, geo.lon)
+                     : 0;
+               this.geoloc = new Geoloc(
+                  geo.from,
+                  geo.lat,
+                  geo.lon,
+                  geo.timestamp,
+                  geo.alt,
+                  geo.accuracy,
+                  geo.speed,
+                  geo.bearing,
+                  geo.altaccuracy
+               );
+
+               let href = Location.locationToLink(this.geoloc.getLat(), this.geoloc.getLon());
+
+               geolocdiv.off('click').on('click', e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  let a = $(
+                     `<a href="${href}" target="_blank" rel="noopener noreferrer">${this.geoloc.getLat()} Longitude: ${this.geoloc.getLon()}</a>`
+                  );
+                  $(document.body).append(a);
+                  a.get(0).click();
+                  a.remove();
+               });
+
+               if (
+                  (Client.getOption('enableGeocode') || false) &&
+                  (distance === 0 || distance > Location.GEOCODE_THRESHOLD)
+               ) {
+                  Location.reverseGeocodeLocation(this.geoloc.getLat(), this.geoloc.getLon())
+                     .then((result: { street: string; nr: string; zip: string; city: string; country: string }) => {
+                        let address =
+                           result.street +
+                           ' ' +
+                           result.nr +
+                           ',\n' +
+                           result.zip +
+                           ' ' +
+                           result.city +
+                           '\n' +
+                           result.country +
+                           '\n(' +
+                           new Date(geo.timestamp).toISOString() +
+                           ')';
+                        geolocdiv.attr('title', address);
+                     })
+                     .catch(e => {
+                        geolocdiv.attr('title', `Latitude: ${this.geoloc.getLat()} Longitude: ${this.geoloc.getLon()}`);
+                     });
+               } else {
+                  geolocdiv.attr('title', `Latitude: ${this.geoloc.getLat()} Longitude: ${this.geoloc.getLon()}`);
+               }
+            }
+         } else {
+            geolocdiv.removeClass('jsxc-position-show');
+            this.geoloc = undefined;
+            geolocdiv.attr('title', '');
+            geolocdiv.off('click');
+         }
+      });
+
       updateStatus(this.contact.getStatus());
 
       this.contact.registerHook('subscription', () => {
