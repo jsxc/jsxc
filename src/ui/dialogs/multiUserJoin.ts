@@ -208,6 +208,8 @@ class MultiUserJoinDialog {
       // workaround: chrome does not display dropdown arrow for dynamically filled datalists
       $('#jsxc-roomlist select').empty();
 
+      let array = [];
+
       $(stanza)
          .find('item')
          .each(function () {
@@ -218,9 +220,20 @@ class MultiUserJoinDialog {
             optionElement.text(name);
             optionElement.attr('data-jid', jid.full);
             optionElement.attr('value', jid.node);
-
-            $('#jsxc-roomlist select').append(optionElement);
+            array.push(optionElement);
          });
+
+      array.sort(function compare(a, b) {
+         if (!a.attr('value') || !b.attr('value')) {
+            return 0;
+         }
+
+         return a.attr('value').localeCompare(b.attr('value'));
+      });
+
+      for (let obj of array) {
+         $('#jsxc-roomlist select').append(obj);
+      }
 
       let set = $(stanza).find('set[xmlns="http://jabber.org/protocol/rsm"]');
       let roomInfoElement = this.dom.find('.jsxc-inputinfo.jsxc-room');
