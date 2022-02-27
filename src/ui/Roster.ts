@@ -338,6 +338,7 @@ export default class Roster {
          handler: showAboutDialog,
          label: Translation.t('About'),
          offlineAvailable: true,
+         icon: 'info',
       });
 
       let onlineHelpUrl = Client.getOption(HELP_KEY);
@@ -559,6 +560,16 @@ export default class Roster {
 
       this.element.find('.jsxc-collapsible').on('click', function () {
          $(this).toggleClass('jsxc-active');
+      });
+
+      this.element.find('.jsxc-join-muc-button').on('click', () => {
+         showMultiUserJoinDialog();
+      });
+      this.element.find('.jsxc-add-contact-button').on('click', () => {
+         showContactDialog();
+      });
+      this.element.find('.jsxc-search-contact-button').on('click', () => {
+         showContactSearchDialog();
       });
 
       this.element.find('.jsxc-fullscreen-active-conversations-select').on('change', e => {
