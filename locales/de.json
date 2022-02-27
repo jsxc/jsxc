@@ -366,6 +366,7 @@
     "Are_you_sure": "Bist du sicher?",
     "Invite_user": "Lade Benutzer ein",
     "muc_invite_explanation": "Bitte gebe Benutzername oder Jabber ID des Kontaktes ein den du einladen möchtest.",
+    "muc_invite_explanation_rooms": "Bitte wähle die Gruppe aus zu der der Benutzer eingeladen werden soll.",
     "omemo-device-list-explanation": "Mit OMEMO kannst du verschlüsselte Nachrichten an alle OMEMO-fähigen Geräte von dir und deinem Kontakt senden. Um sicher zu gehen, dass diese Geräte wirklich dir oder deinem Kontakt gehören, solltest du die untenstehenden Identitäten über einen anderen Kommunikationskanal vergleichen. Wenn du sie nicht vergleichen möchtest, kannst du trotzdem auf \"Anerkennen\" klicken; ggf. können dann aber fremde Personen mitlesen.",
     "No_devices_available": "Keine Geräte verfügbar",
     "Ignore": "Ignorieren",

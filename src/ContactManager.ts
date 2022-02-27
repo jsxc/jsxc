@@ -91,6 +91,10 @@ export default class ContactManager {
       storage.setItem('contacts', 'loaded', true);
    }
 
+   public getContacts(): { [key: string]: IContact } {
+      return this.contacts;
+   }
+
    public async add(contact: IContact): Promise<void> {
       this.contacts[contact.getId()] = contact;
 
