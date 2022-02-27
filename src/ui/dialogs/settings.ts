@@ -55,7 +55,33 @@ class ClientSection extends Section {
          )
       );
 
+      contentElement.append(
+         new ListItem(
+            Translation.t('use_notification_counter'),
+            Translation.t('use_notification_counter_desc'),
+            undefined,
+            undefined,
+            this.toggleNotificationIcon()
+         )
+      );
+
       return contentElement.getDOM();
+   }
+
+   private toggleNotificationIcon() {
+      let checked = Client.getOption('useNotificationCounter') || true;
+      let element = $('<input type="checkbox" style="margin-left:10px;">');
+      if (checked) {
+         element.prop('checked', checked);
+      }
+
+      element.on('change', () => {
+         let value = element.prop('checked');
+         element.val(value);
+         Client.setOption('useNotificationCounter', value ? value : true);
+      });
+
+      return element;
    }
 
    private getLanguageSelectionElement() {
