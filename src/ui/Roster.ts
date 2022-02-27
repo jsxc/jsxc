@@ -364,17 +364,18 @@ export default class Roster {
       }
 
       this.addMenuEntry({
-         id: 'search-contact',
-         handler: showContactSearchDialog,
-         label: Translation.t('contact_search'),
-         icon: 'search',
+         id: 'settings',
+         handler: showSettingsDialog,
+         label: Translation.t('Settings'),
+         offlineAvailable: true,
+         icon: 'gear',
       });
 
       this.addMenuEntry({
-         id: 'add-contact',
-         handler: () => showContactDialog(),
-         label: Translation.t('Add_buddy'),
-         icon: 'contact',
+         id: 'add-avatar',
+         handler: showAddAvatarDialog,
+         label: Translation.t('Edit_avatar'),
+         icon: 'smiley',
       });
 
       this.addMenuEntry({
@@ -391,24 +392,24 @@ export default class Roster {
       });
 
       this.addMenuEntry({
+         id: 'search-contact',
+         handler: showContactSearchDialog,
+         label: Translation.t('contact_search'),
+         icon: 'search',
+      });
+
+      this.addMenuEntry({
+         id: 'add-contact',
+         handler: () => showContactDialog(),
+         label: Translation.t('Add_buddy'),
+         icon: 'contact',
+      });
+
+      this.addMenuEntry({
          id: 'join-muc',
          handler: () => showMultiUserJoinDialog(),
          label: Translation.t('Join_chat'),
          icon: 'groupcontact',
-      });
-
-      this.addMenuEntry({
-         id: 'settings',
-         handler: showSettingsDialog,
-         label: Translation.t('Settings'),
-         offlineAvailable: true,
-         icon: 'gear',
-      });
-
-      this.addMenuEntry({
-         id: 'add-avatar',
-         handler: showAddAvatarDialog,
-         label: Translation.t('Edit_avatar'),
       });
    }
 
