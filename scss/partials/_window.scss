@@ -955,6 +955,31 @@ ul.jsxc-message-history {
   }
 }
 
+.jsxc-search-negativeresult {
+  display: none;
+}
+
+.jsxc-search-positiveresult {
+  background: var(--jsxc-color-error);
+  color: #fff;
+}
+
+.jsxc-message-search {
+  &-off-icon {
+    background-color: #000;
+    background-image: url("../images/icons/msgsearch_off.svg");
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 30px 30px;
+    cursor: pointer;
+    height: 40px;
+    opacity: 0.3;
+    overflow: hidden;
+    position: relative;
+    width: 40px;
+  }
+}
+
 .jsxc-pre {
   background-color: #f5f5f5;
   border: 1px solid #ccc;

@@ -445,7 +445,8 @@
     "help_format_tools":"You can use simple styling options to format your text. The keys to identify the beginning and the end of a formatting is exactly at the beginning and the end of the word or word group. There must be a space before the beginning key and a space after the ending key, otherwise the formatting will not be recognized.\n\nYou can use the tools directly while writing, pressing a tool will insert the key at the cursors position. Or you can mark a word or word group and press a formatting button.",
     "close_toolbar_message":"Do you really want to close the text formatting toolbar? You can enable the toolbar in the settings again.",
     "close_toolbar_title": "Close format toolbar",
-    "message_length": "Message length"
+    "message_length": "Message length",
+    "Clear_search": "Clear Search"
   },
   "Notifications": "Notifications"
 }

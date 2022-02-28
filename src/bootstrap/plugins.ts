@@ -19,6 +19,7 @@ import TimePlugin from '../plugins/TimePlugin';
 import JingleMessageInitiationPlugin from '../plugins/JingleMessageInitiationPlugin';
 import AvatarPEPPlugin from '@src/plugins/AvatarPEPPlugin';
 import LastMessageCorrectionPlugin from '@src/plugins/LastMessageCorrectionPlugin';
+import ChatwindowSearchPlugin from '@src/plugins/ChatwindowSearch';
 
 Client.addPlugin(OTRPlugin);
 Client.addPlugin(OMEMOPlugin);
@@ -40,3 +41,4 @@ Client.addPlugin(TimePlugin);
 Client.addPlugin(JingleMessageInitiationPlugin);
 Client.addPlugin(AvatarPEPPlugin);
 Client.addPlugin(LastMessageCorrectionPlugin);
+Client.addPlugin(ChatwindowSearchPlugin);

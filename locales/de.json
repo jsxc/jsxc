@@ -445,7 +445,8 @@
     "help_format_tools":"Sie können Ihren Text mit einfachen Stiloptionen formatieren. Der Formatierungsschlüssel zum Erkennen des Anfangs und des Endes einer Formatierung liegt genau am Anfang und am Ende des Wortes oder der Wortgruppe. Es muss ein Leerzeichen vor dem Anfangsschlüssel und ein Leerzeichen nach dem Endschlüssel stehen, sonst wird die Formatierung nicht erkannt.\n\nSie können die Werkzeuge direkt beim Schreiben verwenden. Durch Drücken eines Werkzeugs wird der Formatierungsschlüssel an der Cursorposition eingefügt. Sie können auch ein Wort oder eine Wortgruppe markieren und eine Formatierungstaste drücken.",
     "close_toolbar_message":"Möchten Sie die Symbolleiste zur Textformatierung wirklich schließen? Sie können die Symbolleiste in den Einstellungen wieder aktivieren.",
     "close_toolbar_title": "Formatierungsleiste schließen",
-    "message_length": "Nachrichtenlänge"
+    "message_length": "Nachrichtenlänge",
+    "Clear_search": "Suche zurücksetzen"
   },
   "Notifications": "Benachrichtigungen"
 }
