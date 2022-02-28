@@ -6,6 +6,8 @@ import MultiUserContact from '../../../../MultiUserContact';
 import AbstractHandler from '../../AbstractHandler';
 import { MessageMark } from '@src/Message.interface';
 import MultiUserStatusCodeHandler from './StatusCodeHandler';
+import Client from '@src/Client';
+import { MucSysMessage } from '@ui/dialogs/settings';
 
 // body.replace(/^\/me /, '<i title="/me">' + Utils.removeHTML(this.sender.getName()) + '</i> ');
 
@@ -60,7 +62,10 @@ export default class extends AbstractHandler {
                });
             }
 
-            contact.addSystemMessage(':page_with_curl: ' + translatedMessage.replaceAll('&quot;', '"'));
+            let mucSYSMessageMask = Client.getOption('mucSYSMessageMask') || MucSysMessage.NONE;
+            if ((mucSYSMessageMask & MucSysMessage.UNKNOWN) === MucSysMessage.UNKNOWN) {
+               contact.addSystemMessage(':page_with_curl: "' + translatedMessage.replaceAll('&quot;', '"') + '"');
+            }
          }
 
          return this.PRESERVE_HANDLER;

@@ -153,6 +153,17 @@ export let trustedDomains: string[] = [];
 
 export let includeOSInVersionResponse = false;
 
+/* Bitmask for hiding muc system messages for:
+   NONE = 0, //show none
+   UNKNOWN = 1, //show other then the following
+   LEAVE_JOIN = 2, //show join/leave messages
+   JID = 4, //show info about anonymous jid
+   KICK = 8, //show if user was kicked
+   BAN = 16, //show if user was banned
+   LOGGING = 32 //show info about logging in muc
+*/
+export let mucSYSMessageMask = 0;
+
 /* When rejoin a muc, jsxc syncs messages whose are written in absence, do to server implementations faults sometimes the order is reverse when
    receiving the messages. This toggle will enable reverse the message list before adding messages to chatwindow. */
 export let mamReverse = false;
