@@ -23,6 +23,7 @@ import Translation from '../util/Translation';
 import MultiUserContact from '@src/MultiUserContact';
 import alertDialog from './dialogs/AlertDialog';
 import confirmDialog from './dialogs/confirm';
+import { EmojiButton } from '@joeattardi/emoji-button';
 
 let chatWindowTemplate = require('../../template/chatWindow.hbs');
 
@@ -58,6 +59,8 @@ export default class ChatWindow {
    private settingsMenu: Menu;
 
    private encryptionMenu: Menu;
+
+   private emojiPicker = new EmojiButton();
 
    constructor(protected contact: Contact) {
       let template = chatWindowTemplate({
@@ -149,6 +152,27 @@ export default class ChatWindow {
 
       this.contact.getTranscript().registerHook('unreadMessageIds', updateUnreadMessage);
       updateUnreadMessage();
+
+      let useExtendedEmojiPicker = Client.getOption('useExtendedEmojiPicker') || false;
+      if (useExtendedEmojiPicker) {
+         this.initExtendedEmojiButton();
+      }
+   }
+
+   private initExtendedEmojiButton() {
+      this.element.find('.jsxc-menu--emoticons').addClass('jsxc-hidden');
+      let emojiButton = this.element.find('.jsxc-menu-extended-emoticons');
+      emojiButton.removeClass('jsxc-hidden');
+
+      this.emojiPicker.on('emoji', selection => {
+         this.inputElement.val(this.inputElement.val() + selection.emoji);
+      });
+      emojiButton.on('click', () => {
+         this.emojiPicker.togglePicker(emojiButton[0]);
+         if (this.emojiPicker.isPickerVisible()) {
+            $('.emoji-picker__wrapper input').attr('placeholder', Translation.t('search_emoji'));
+         }
+      });
    }
 
    private initFormatTools(): void {

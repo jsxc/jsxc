@@ -154,3 +154,5 @@ export let trustedDomains: string[] = [];
 export let includeOSInVersionResponse = false;
 
 export let useFormatTools = true;
+
+export let useExtendedEmojiPicker = false;

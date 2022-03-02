@@ -1027,7 +1027,6 @@ code {
 
     .jsxc-format-list {
       display: flex;
-
       list-style: none;
       margin: 0;
       padding: 0;
@@ -1084,4 +1083,13 @@ code {
     padding-right: 5px;
     text-align: right;
   }
+}
+
+.emoji-picker__wrapper {
+  z-index: 99;
+}
+
+.jsxc-menu-extended-emoticons {
+  font-size: 23px;
+  padding: 5px;
 }
