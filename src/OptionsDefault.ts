@@ -174,3 +174,5 @@ export let autoLoadOnScrollToTop = false;
 export let nominatimurl = 'https://nominatim.openstreetmap.org';
 
 export let enableGeocode = true;
+
+export let autoAnswerSubscription = true;
