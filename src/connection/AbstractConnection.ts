@@ -59,6 +59,8 @@ abstract class AbstractConnection {
 
       NS.register('VCARD', 'vcard-temp');
       NS.register('FORWARD', 'urn:xmpp:forward:0');
+      NS.register('NICK+', 'http://jabber.org/protocol/nick+notify');
+      NS.register('GELOC+', 'http://jabber.org/protocol/geoloc+notify');
    }
 
    public getPubSubService = (): PubSubService => {
@@ -309,6 +311,48 @@ abstract class AbstractConnection {
       if (typeof beforeResultId === 'string' || typeof beforeResultId === 'number') {
          iq.c('before').t(beforeResultId);
       }
+
+      iq.up();
+
+      return this.sendIQ(iq);
+   }
+
+   public queryArchiveNewMessages(startDate: Date, archive: JID, version: string, queryId: string): Promise<Element> {
+      let iq = $iq({
+         type: 'set',
+         to: archive.bare,
+      });
+
+      iq.c('query', {
+         xmlns: version,
+         queryid: queryId,
+      });
+
+      iq.c('x', {
+         xmlns: 'jabber:x:data',
+         type: 'submit',
+      });
+
+      iq.c('field', {
+         var: 'FORM_TYPE',
+         type: 'hidden',
+      })
+         .c('value')
+         .t(version)
+         .up()
+         .up();
+
+      iq.c('field', {
+         var: 'start',
+      })
+         .c('value')
+         .t(startDate.toISOString())
+         .up()
+         .up();
+
+      iq.up().c('set', {
+         xmlns: 'http://jabber.org/protocol/rsm',
+      });
 
       iq.up();
 

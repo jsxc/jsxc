@@ -1,0 +1,15 @@
+ <div class="jsxc-multiselect">
+    <div class="jsxc-selectbox" >
+        <select>
+        <option>{{t "Select_an_option"}}</option>
+        </select>
+        <div class="jsxc-overselect"></div>
+    </div>
+    <div class="bitmaskchoice">
+        {{#each values}} 
+            <label>
+                <input type="checkbox" value="{{this.value}}" {{this.checked}} />{{this.name}}
+            </label>
+        {{/each}}
+    </div>
+</div>

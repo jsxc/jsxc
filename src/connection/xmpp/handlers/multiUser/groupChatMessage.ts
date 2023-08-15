@@ -6,6 +6,8 @@ import MultiUserContact from '../../../../MultiUserContact';
 import AbstractHandler from '../../AbstractHandler';
 import { MessageMark } from '@src/Message.interface';
 import MultiUserStatusCodeHandler from './StatusCodeHandler';
+import Client from '@src/Client';
+import { MucSysMessage } from '@ui/dialogs/settings';
 
 // body.replace(/^\/me /, '<i title="/me">' + Utils.removeHTML(this.sender.getName()) + '</i> ');
 
@@ -44,12 +46,27 @@ export default class extends AbstractHandler {
 
          contact.setSubject(subject);
 
-         let translatedMessage = Translation.t('changed_subject_to', {
-            nickname,
-            subject,
-         });
+         let translatedMessage = null;
 
-         contact.addSystemMessage(':page_with_curl: ' + translatedMessage);
+         if (subject !== '') {
+            //if room was created with standard configuration, then there is no topic at all
+            if (nickname !== '') {
+               //if the message comes from the muc service instead of the user, then its a bare jid without nickname
+               translatedMessage = Translation.t('changed_subject_to', {
+                  nickname,
+                  subject,
+               });
+            } else {
+               translatedMessage = Translation.t('subject_was_changed', {
+                  subject,
+               });
+            }
+
+            let mucSYSMessageMask = Client.getOption('mucSYSMessageMask') || MucSysMessage.NONE;
+            if ((mucSYSMessageMask & MucSysMessage.UNKNOWN) === MucSysMessage.UNKNOWN) {
+               contact.addSystemMessage(':page_with_curl: "' + translatedMessage.replaceAll('&quot;', '"') + '"');
+            }
+         }
 
          return this.PRESERVE_HANDLER;
       }

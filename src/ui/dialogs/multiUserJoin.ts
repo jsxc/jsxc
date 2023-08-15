@@ -29,6 +29,7 @@ class MultiUserJoinDialog {
    private roomInputElement: JQuery<HTMLElement>;
    private passwordInputElement: JQuery<HTMLElement>;
    private nicknameInputElement: JQuery<HTMLElement>;
+   private autojoinInputElement: JQuery<HTMLElement>;
 
    constructor(private server?: string, private room?: string) {
       let content = multiUserJoinTemplate({
@@ -48,6 +49,8 @@ class MultiUserJoinDialog {
       this.roomInputElement = dom.find('input[name="room"]');
       this.passwordInputElement = dom.find('input[name="password"]');
       this.nicknameInputElement = dom.find('input[name="nickname"]');
+      this.autojoinInputElement = dom.find('input[name="autojoin"]');
+      this.autojoinInputElement.prop('checked', true);
 
       if (server && room) {
          this.serverInputElement.val(server);
@@ -63,7 +66,10 @@ class MultiUserJoinDialog {
       this.account = Client.getAccountManager().getAccount(id);
 
       this.connection = this.account.getConnection();
-      this.defaultNickname = this.connection.getJID().node;
+      this.defaultNickname =
+         this.account.getDefaultNickname() === undefined
+            ? this.connection.getJID().node
+            : this.account.getDefaultNickname();
 
       this.nicknameInputElement.attr('placeholder', this.defaultNickname);
 
@@ -202,6 +208,8 @@ class MultiUserJoinDialog {
       // workaround: chrome does not display dropdown arrow for dynamically filled datalists
       $('#jsxc-roomlist select').empty();
 
+      let array = [];
+
       $(stanza)
          .find('item')
          .each(function () {
@@ -212,9 +220,20 @@ class MultiUserJoinDialog {
             optionElement.text(name);
             optionElement.attr('data-jid', jid.full);
             optionElement.attr('value', jid.node);
-
-            $('#jsxc-roomlist select').append(optionElement);
+            array.push(optionElement);
          });
+
+      array.sort(function compare(a, b) {
+         if (!a.attr('value') || !b.attr('value')) {
+            return 0;
+         }
+
+         return a.attr('value').localeCompare(b.attr('value'));
+      });
+
+      for (let obj of array) {
+         $('#jsxc-roomlist select').append(obj);
+      }
 
       let set = $(stanza).find('set[xmlns="http://jabber.org/protocol/rsm"]');
       let roomInfoElement = this.dom.find('.jsxc-inputinfo.jsxc-room');
@@ -303,7 +322,7 @@ class MultiUserJoinDialog {
       let roomJid = new JID(room);
 
       if (this.account.getContact(roomJid)) {
-         return Promise.reject('You_already_joined_this_room');
+         return Promise.reject(Translation.t('You_already_joined_this_room'));
       }
 
       this.dom.find('input[name="room-jid"]').val(room);
@@ -312,7 +331,7 @@ class MultiUserJoinDialog {
    }
 
    private requestRoomInfo = async (room: JID) => {
-      this.setWaitingMessage('Loading_room_information');
+      this.setWaitingMessage(Translation.t('Loading_room_information'));
 
       const discoService = this.connection.getDiscoService();
 
@@ -425,7 +444,7 @@ class MultiUserJoinDialog {
       let multiUserContact = new MultiUserContact(this.account, jid, name);
       multiUserContact.setNickname(nickname);
       multiUserContact.setBookmark(true);
-      multiUserContact.setAutoJoin(true);
+      multiUserContact.setAutoJoin(this.autojoinInputElement.prop('checked'));
       multiUserContact.setPassword(password);
       multiUserContact.setSubject(subject);
 
