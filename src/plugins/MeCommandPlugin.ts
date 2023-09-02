@@ -40,8 +40,18 @@ export default class MeCommandPlugin extends AbstractPlugin {
    private textFormatter = (plaintext: string, direction: DIRECTION, contact: Contact, senderName: string) => {
       let meRegex = /^\/me /;
 
-      if (direction !== DIRECTION.IN) {
-         return plaintext.replace(meRegex, `<i>/me</i> `);
+      if (direction === DIRECTION.OUT) {
+         if (contact !== undefined) {
+            let name = senderName || contact.getAccount().getContact().getName();
+
+            if (name.indexOf('@') > -1) {
+               name = name.slice(0, name.indexOf('@'));
+            }
+
+            return plaintext.replace(meRegex, `<i title="/me" style="font-weight: bold;">${name}</i> `);
+         } else {
+            return plaintext.replace(meRegex, `<i>/me</i> `);
+         }
       }
 
       if (!senderName && !contact) {
@@ -55,7 +65,7 @@ export default class MeCommandPlugin extends AbstractPlugin {
             name = name.slice(0, name.indexOf('@'));
          }
 
-         plaintext = plaintext.replace(meRegex, `<i title="/me">${name}</i> `);
+         plaintext = plaintext.replace(meRegex, `<i title="/me" style="font-weight: bold;">${name}</i> `);
       }
 
       return plaintext;

@@ -21,7 +21,7 @@ interface INotificationSettings {
    icon?: string;
 }
 
-enum NotificationState {
+export enum NotificationState {
    DISABLED,
    ENABLED,
    ASK,
@@ -144,6 +144,13 @@ export default class Notification {
          icon: settings.icon,
       });
 
+      let contact: IContact = settings.source;
+
+      popup.onclick = function (event: any) {
+         contact.getChatWindowController().openProminently();
+         event.preventDefault();
+      };
+
       if (settings.duration > 0) {
          setTimeout(function () {
             popup.close();
@@ -167,7 +174,7 @@ export default class Notification {
       });
    }
 
-   private static hasPermission() {
+   public static hasPermission() {
       return NotificationAPI.permission === CONST.NOTIFICATION_GRANTED;
    }
 
