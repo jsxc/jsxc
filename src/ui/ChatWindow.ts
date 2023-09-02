@@ -581,9 +581,15 @@ export default class ChatWindow {
             },
          })
          .on('resizestart', () => {
+            if ($('.jsxc-fullscreen.jsxc-two-columns').length > 0) {
+               return;
+            }
             fadeElement.addClass('jsxc-window-fade--resizing');
          })
          .on('resizemove', ev => {
+            if ($('.jsxc-fullscreen.jsxc-two-columns').length > 0) {
+               return;
+            }
             let barHeight = element.find('.jsxc-bar--window').height();
             let windowHeight = $(window).height();
 
@@ -601,12 +607,15 @@ export default class ChatWindow {
          });
 
       $(window).on('resize', () => {
-         fadeElement.css({
-            width: '',
-            height: '',
-         });
+         let keepWindowSizeOnResize = Client.getOption('keepWindowSizeOnResize') || false;
+         if (!keepWindowSizeOnResize) {
+            fadeElement.css({
+               width: '',
+               height: '',
+            });
 
-         element.find('.jsxc-bar--window').css('width', '');
+            element.find('.jsxc-bar--window').css('width', '');
+         }
       });
    }
 
