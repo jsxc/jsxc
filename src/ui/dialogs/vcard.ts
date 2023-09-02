@@ -3,6 +3,11 @@ import { IContact } from '../../Contact.interface';
 import Translation from '@util/Translation';
 import { Presence } from '@connection/AbstractConnection';
 import Color from '@util/Color';
+import MultiUserContact from '@src/MultiUserContact';
+import Avatar from '@src/Avatar';
+import AvatarUI from '@src/ui/AvatarSet';
+import Hash from '@util/Hash';
+import { IAvatar } from '@src/Avatar.interface';
 
 let vcardTemplate = require('../../../template/vcard.hbs');
 let vcardBodyTemplate = require('../../../template/vcard-body.hbs');
@@ -15,16 +20,20 @@ export default function (contact: IContact) {
       let presence = Presence[contact.getPresence(resource)];
 
       return {
+         resourcetype: contact.isGroupChat() ? Translation.t('Nickname') : Translation.t('Resource'),
          resource,
          client: Translation.t('loading'),
          presence: Translation.t(presence),
       };
    });
 
+   let roominfos = contact.isGroupChat() ? getRoomInfos(<MultiUserContact>contact) : undefined;
+
    let content = vcardTemplate({
       jid: contact.getJid().bare,
       name: contact.getName(),
       basic: basicData,
+      roomfeatures: roominfos,
    });
 
    dialog = new Dialog(content);
@@ -73,17 +82,59 @@ export default function (contact: IContact) {
 
    contact
       .getVcard()
-      .then(vcardSuccessCallback)
-      .then(function (vcardData) {
-         let content = vcardBodyTemplate({
-            properties: vcardData,
-         });
+      .then((vcard: any) => {
+         if (vcard.PHOTO) {
+            let avatar: IAvatar = new Avatar(
+               Hash.SHA1FromBase64((<any>vcard.PHOTO).src),
+               (<any>vcard.PHOTO).type,
+               (<any>vcard.PHOTO).src
+            );
+            let hash = avatar.getHash();
 
+            let storedHash = contact.getAccount().getStorage().getItem(contact.getJid().bare);
+            if (storedHash === undefined || hash !== storedHash) {
+               let avatarUI = AvatarUI.get(contact);
+               contact.getAccount().getStorage().setItem(contact.getJid().bare, hash);
+               avatarUI.reload();
+            }
+         }
+         return Promise.resolve(vcardSuccessCallback(vcard));
+      })
+      .then(function (vcardData) {
+         let content = $(
+            vcardBodyTemplate({
+               properties: !contact.isGroupChat() ? vcardData : undefined,
+            })
+         );
+
+         content.addClass('jsxc-vcard-data');
          dialog.getDom().append(content);
 
          dialog.getDom().find('.jsxc-waiting').remove();
       })
       .catch(vcardErrorCallback);
+}
+
+function getRoomInfos(contact: MultiUserContact, first: boolean = true): any[] {
+   let result = [];
+   if (contact.getSubject() && contact.getSubject().length > 0) {
+      result.push({ label: Translation.t('subject'), description: contact.getSubject() });
+   }
+   for (let item of contact.getFeatures()) {
+      let itemname = 'muc_' + item;
+      result.push({
+         label: '> ',
+         description: Translation.t(`${itemname}.keyword`) + ' (' + Translation.t(`${itemname}.description`) + ')',
+      });
+   }
+   if (result.length === 0 && first) {
+      let refresh = async function () {
+         await (<MultiUserContact>contact).refreshFeatures();
+      };
+      refresh();
+      result = getRoomInfos(contact, false);
+   }
+   return result;
 }
 
 function vcardSuccessCallback(vCardData): Promise<any> {
@@ -104,8 +155,12 @@ function vcardSuccessCallback(vCardData): Promise<any> {
    }
 
    delete vCardData.PHOTO;
-
-   return Promise.resolve(convertToTemplateData(vCardData));
+   let result = convertToTemplateData(vCardData);
+   if (result !== undefined && result !== null && result.length > 0) {
+      return Promise.resolve(result);
+   } else {
+      return Promise.resolve([]);
+   }
 }
 
 function vcardErrorCallback() {

@@ -103,6 +103,11 @@ ul.jsxc-vcard {
   width: 100px;
 }
 
+ul.jsxc-mucinfos {
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
 //  Spot which is attached to xmpp: uris
 .jsxc-spot {
   background-color: $white;
@@ -215,4 +220,11 @@ ul.jsxc-vcard {
   line-height: 1.4em;
   margin-right: 0.25em;
   padding: 0.2em 0.5em;
+}
+
+h4.jsxc-jid {
+  font-size: 14px;
+  font-weight: bold;
+  margin: 0;
+  padding: 0;
 }

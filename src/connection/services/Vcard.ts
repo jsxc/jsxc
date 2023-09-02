@@ -91,6 +91,10 @@ export default class Vcard extends AbstractService {
 
          if (itemName === 'PHOTO') {
             let img = item.find('BINVAL').text();
+            if (!img || img.trim().length === 0) {
+               return;
+            }
+
             let type = item.find('TYPE').text();
             let src = 'data:' + type + ';base64,' + img; //@REVIEW XSS
 
