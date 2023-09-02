@@ -7,7 +7,6 @@ import Avatar from '@src/Avatar';
 import Hash from '@util/Hash';
 
 const avatarUploadTemplate = require('../../../template/avatarUploadTemplate.hbs');
-const placeholderImage = require('../../../images/icons/placeholder.svg').default;
 
 export default function () {
    let content = avatarUploadTemplate();
@@ -40,7 +39,8 @@ export default function () {
 
             FileHelper.getDataURLFromFile(file).then(data => {
                ImageHelper.scaleDown(data, 0.9, 96).then(thumb => {
-                  $('.jsxc-avatarimage img').attr('src', thumb);
+                  let imagediv = $('.jsxc-avatarimage').find('.jsxc-avatar-upload-placeholer');
+                  imagediv.css('background-image', `url("${thumb}")`);
 
                   const mimetype = file.type;
                   const data = thumb.replace(/^.+;base64,/, '').replace(/[\t\r\n\f ]/gi, '');
@@ -55,10 +55,11 @@ export default function () {
             .getContact()
             .getAvatar()
             .then(avatar => {
-               dom.find('.jsxc-avatarimage img').attr('src', avatar.getData());
+               let imagediv = $('.jsxc-avatarimage').find('.jsxc-avatar-upload-placeholer');
+               imagediv.css('background-image', `url("${avatar.getData()}")`);
             })
             .catch(() => {
-               dom.find('.jsxc-avatarimage img').attr('src', placeholderImage);
+               dom.find('.jsxc-avatarimage').find('.jsxc-avatar-upload-placeholer').css('background-image', '');
                dom.find('.jsxc-js-clear').hide();
             });
 
@@ -101,7 +102,7 @@ export default function () {
             .on('click', ev => {
                ev.preventDefault();
 
-               dom.find('.jsxc-avatarimage img').attr('src', placeholderImage);
+               dom.find('.jsxc-avatarimage').find('.jsxc-avatar-upload-placeholer').css('background-image', '');
                dom.find('.jsxc-js-submit').prop('disabled', false);
                dom.find('.jsxc-js-clear').hide();
 

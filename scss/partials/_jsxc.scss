@@ -103,6 +103,10 @@ ul.jsxc-vcard {
   width: 100px;
 }
 
+.jsxc-avatar:hover {
+  transform: scale(1.35); /* (135% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+}
+
 //  Spot which is attached to xmpp: uris
 .jsxc-spot {
   background-color: $white;

@@ -317,7 +317,11 @@ button.jsxc-page__subheadline {
   justify-content: center;
   margin: 2em 0;
 
-  img {
+  .jsxc-avatar-upload-placeholer {
+    background-image: url("../images/icons/placeholder.svg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
     height: 96px;
     width: 96px;
   }
