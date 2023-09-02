@@ -37,7 +37,7 @@ export default class ChatWindowMessage {
       return this.element;
    }
 
-   public restoreNextMessage() {
+   public restoreNextMessage(add: boolean = true) {
       let nextMessage = this.getNextMessage();
 
       if (!nextMessage || nextMessage.getDOM().length > 0) {
@@ -46,9 +46,10 @@ export default class ChatWindowMessage {
 
       let chatWindowMessage = this.chatWindow.getChatWindowMessage(nextMessage);
       let element = chatWindowMessage.getElement();
-
-      this.getElement().after(element);
-      chatWindowMessage.restoreNextMessage();
+      if (add) {
+         this.getElement().after(element);
+      }
+      chatWindowMessage.restoreNextMessage(add);
    }
 
    private getNextMessage() {
@@ -75,7 +76,10 @@ export default class ChatWindowMessage {
 
       LinkHandlerGeo.get().detect(bodyElement);
 
-      this.element.find('.jsxc-content').html(bodyElement.get(0));
+      let html = $.map(bodyElement, function (val: any, i: number) {
+         return $(val).html();
+      }).join('');
+      this.element.find('.jsxc-content').html(html);
 
       let timestampElement = this.element.find('.jsxc-timestamp');
       DateTime.stringify(this.message.getStamp().getTime(), timestampElement);
@@ -100,8 +104,14 @@ export default class ChatWindowMessage {
          this.element.addClass('jsxc-edited');
       }
 
+      if (!!this.message.getRetractedBy()) {
+         this.element.removeClass('jsxc-edited');
+         this.element.addClass('jsxc-retracted');
+         this.element.find('.jsxc-content').text('[' + Translation.t('message_retracted') + ']');
+      }
+
       this.element.find('.jsxc-version').on('click', () => {
-         if (!this.element.hasClass('jsxc-edited')) {
+         if (!this.element.hasClass('jsxc-edited') || this.element.hasClass('jsxc-retracted')) {
             return;
          }
 
@@ -242,7 +252,7 @@ export default class ChatWindowMessage {
    }
 
    private initMenu() {
-      if (this.message.isSystem()) {
+      if (this.message.isSystem() || !!this.message.getRetractedBy()) {
          return;
       }
 
@@ -262,6 +272,12 @@ export default class ChatWindowMessage {
          const chatWindowMessageReplacement = new ChatWindowMessage(this.originalMessage, this.chatWindow);
 
          this.element.replaceWith(chatWindowMessageReplacement.getElement());
+      });
+
+      this.message.registerHook('retractedBy', () => {
+         const chatWindowMessageRetraction = new ChatWindowMessage(this.originalMessage, this.chatWindow);
+
+         this.element.replaceWith(chatWindowMessageRetraction.getElement());
       });
 
       this.message.registerHook('encrypted', encrypted => {

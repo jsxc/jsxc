@@ -157,7 +157,7 @@ export default class LastMessageCorrectionPlugin extends AbstractPlugin {
       if (message.isOutgoing()) {
          const lastOutgoingMessage = contact.getTranscript().getFirstOutgoingMessage().getLastVersion();
 
-         if (lastOutgoingMessage.getUid() === message.getUid()) {
+         if (lastOutgoingMessage.getUid() === message.getUid() && !lastOutgoingMessage.getRetractedBy()) {
             const chatWindow = contact.getChatWindow();
 
             return {
