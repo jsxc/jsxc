@@ -22,6 +22,12 @@ export let autoLang = true;
 /** Place for roster */
 export let rosterAppend = 'body';
 
+/** Place for windowList */
+export let windowListAppend = 'body';
+
+/** Place for Dialog */
+export let dialogAppend = 'body';
+
 /** Default visibility of roster */
 export let rosterVisibility = SHOWN;
 
