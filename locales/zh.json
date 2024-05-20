@@ -205,16 +205,16 @@
       "description": null
     },
     "muc_nonanonymous": {
-      "keyword": null,
+      "keyword": "不匿名",
       "description": null
     },
     "muc_open": {
-      "keyword": null,
+      "keyword": "打开",
       "description": null
     },
     "muc_passwordprotected": {
       "keyword": null,
-      "description": null
+      "description": "密码保护"
     },
     "muc_persistent": {
       "keyword": null,
