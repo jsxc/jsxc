@@ -1,10 +1,19 @@
-<h3>{{t "Info_about"}} {{name}} ({{jid}})</h3>
+<h3>{{t "Info_about"}} {{name}}</h3>
+<h4 class="jsxc-jid">{{jid}}</h4>
 <div class="jsxc-vcard-tags"></div>
+
+<ul class="jsxc-mucinfos">
+   {{#each roomfeatures}}
+   <li>
+      <strong>{{label}}</strong> {{description}}
+   </li>
+   {{/each}}
+</ul>
 
 <ul class="jsxc-vcard">
    {{#each basic}}
    <li>
-      <strong>{{t "Resource"}}</strong> {{resource}}
+      <strong>{{{resourcetype}}}</strong> {{resource}}
    </li>
    <li data-resource="{{resource}}">
       <strong>{{t "Client"}}</strong> <span class="jsxc-client">{{client}}</span>
