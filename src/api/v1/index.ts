@@ -1,6 +1,7 @@
 import Log from '../../util/Log';
 import Client from '../../Client';
 import Roster from '../../ui/Roster';
+
 import { IPlugin } from '../../plugin/AbstractPlugin';
 import FormWatcher, { SettingsCallback } from '../../FormWatcher';
 import { disconnect } from './disconnect';
@@ -9,6 +10,7 @@ import loginBox from '@ui/dialogs/loginBox';
 import Account from './Account';
 import LinkHandlerXMPP from '@src/LinkHandlerXMPP';
 
+export { default as JID } from '@src/JID';
 export { disconnect };
 export { start, startAndPause } from './start';
 export { register } from './register';

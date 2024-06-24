@@ -1,7 +1,9 @@
 import Log from '../util/Log';
+import Client from '../Client';
 import HookRepository from '@util/HookRepository';
 
 let dialogTemplate = require('../../template/dialog.hbs');
+const DIALOG_APPEND_KEY = 'dialogAppend';
 
 export default class Dialog {
    private hookRepository = new HookRepository();
@@ -23,7 +25,7 @@ export default class Dialog {
 
    public open() {
       if (this.getDom().length === 0) {
-         $('body').append(this.src);
+         $(Client.getOption(DIALOG_APPEND_KEY)).append(this.src);
 
          this.onOpened();
       }

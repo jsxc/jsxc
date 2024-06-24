@@ -1,10 +1,8 @@
 body.jsxc-fullscreen {
-  overflow: hidden;
 
   #jsxc-roster {
     border: 0;
     border-top: 62px solid #2a4163;
-    width: 100%;
     z-index: 50;
   }
 
@@ -13,13 +11,13 @@ body.jsxc-fullscreen {
     z-index: 100;
 
     .jsxc-window-item {
-      bottom: 0;
+      bottom: var(--jsxc-margin-bottom, 40px);
       height: auto;
-      left: 0;
+      left: var(--jsxc-margin-left, 40px);
       margin: 0;
       position: fixed;
-      right: 0;
-      top: 0;
+      right: var(--jsxc-margin-right, 40px);
+      top: var(--jsxc-margin-top, 40px);;
       width: auto;
 
       &.jsxc-minimized {

@@ -101,13 +101,13 @@ input.jsxc-filter-input {
   color: var(--jsxc-color-main-text);
   display: flex;
   flex-direction: column;
-  margin-left: 10px;
   overflow: visible;
   position: fixed;
-  right: 0;
-  top: 0;
+  right: var(--jsxc-margin-right, 40px);
+  top: var(--jsxc-margin-top, 40px);
+  left: var(--jsxc-margin-left, 40px);
+  bottom: var(--jsxc-margin-bottom, 40px);
   transition: right 0.5s;
-  width: 200px;
   z-index: 80;
 
   .jsxc-roster-hidden & {

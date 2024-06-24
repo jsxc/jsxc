@@ -5,13 +5,13 @@
 
 .jsxc-dialog-wrapper {
   background-color: $main-bg-translucent;
-  bottom: 0;
+  bottom: var(--jsxc-margin-bottom, 40px);
   display: flex;
-  left: 0;
+  left: var(--jsxc-margin-left, 40px);
   overflow-y: auto;
   position: fixed;
-  right: 0;
-  top: 0;
+  right: var(--jsxc-margin-right, 40px);
+  top: var(--jsxc-margin-top, 40px);
   z-index: 999;
 }
 
