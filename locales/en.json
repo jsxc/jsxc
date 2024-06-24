@@ -439,7 +439,9 @@
     "Edit_avatar": "Edit avatar",
     "Every_member_can_see_your_full_JID": "Every member can see your full JID",
     "message_not_delivered": "Message not delivered",
-    "User_media_not_readable": "User media not readable. Is your device used by another application?"
+    "User_media_not_readable": "User media not readable. Is your device used by another application?",
+    "use_notification_counter": "Use otification counter in title",
+    "use_notification_counter_desc": "Enables a counter on unread incoming messages."
   },
   "Notifications": "Notifications"
 }

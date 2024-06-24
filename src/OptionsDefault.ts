@@ -152,3 +152,6 @@ export let automaticallyRestoreAccounts = true;
 export let trustedDomains: string[] = [];
 
 export let includeOSInVersionResponse = false;
+
+/*Show a message counter on unread incoming messages in website title.*/
+export let useNotificationCounter = true;
