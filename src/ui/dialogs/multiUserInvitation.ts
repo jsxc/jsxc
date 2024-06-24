@@ -26,6 +26,14 @@ export default function (
    let dom = dialog.open();
    let account = Client.getAccountManager().getAccount(accountId);
 
+   if (from.toLocaleLowerCase().localeCompare(room.toLocaleLowerCase()) === 0) {
+      $(dom.find('.form-group')[0]).hide();
+   }
+
+   if (reason === null || reason === undefined || reason.trim().length === 0) {
+      $(dom.find('.form-group')[2]).hide();
+   }
+
    dom.find('form').on('submit', ev => {
       ev.preventDefault();
 

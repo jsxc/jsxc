@@ -66,6 +66,8 @@ export default class Account {
 
    private pipes = {};
 
+   private defaultNickname: string;
+
    constructor(url: string, jid: string, sid: string, rid: string);
    constructor(url: string, jid: string, password: string);
    constructor(uid: string);
@@ -117,6 +119,20 @@ export default class Account {
 
       this.getContactManager().restoreCache();
       this.getNoticeManager();
+
+      this.registerConnectionHook((status, condition) => {
+         if (status === Strophe.Status.ATTACHED) {
+            this.getConnection()
+               .getPEPService()
+               .retrieveItems('http://jabber.org/protocol/nick')
+               .then((el: Element) => {
+                  this.defaultNickname = $(el).text();
+               })
+               .catch(e => {
+                  this.defaultNickname = undefined;
+               });
+         }
+      });
    }
 
    public getOptions(): Options {
@@ -392,5 +408,13 @@ export default class Account {
       this.setPresence(Presence.offline);
 
       this.remove();
+   }
+
+   public getDefaultNickname(): string {
+      return this.defaultNickname;
+   }
+
+   public setDefaultNickname(nick: string) {
+      this.defaultNickname = nick;
    }
 }

@@ -235,6 +235,14 @@ export default class ChatWindow {
       this.element.find('.jsxc-bar__action-entry.jsxc-js-close').before(element);
    }
 
+   public disableMenu(): void {
+      this.settingsMenu.disable();
+   }
+
+   public enableMenu(): void {
+      this.settingsMenu.enable();
+   }
+
    public addMenuEntry(className: string, label: string, cb: (ev) => void) {
       return this.settingsMenu.addEntry(label, cb, className);
    }

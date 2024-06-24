@@ -19,6 +19,8 @@ import confirmDialog from './dialogs/confirm';
 import Utils from '@util/Utils';
 import Emoticons from '@src/Emoticons';
 import showAddAvatarDialog from './dialogs/avatarupload';
+import Geoloc from '@src/Geoloc';
+import Location from '@util/Location';
 
 let rosterTemplate = require('../../template/roster.hbs');
 
@@ -32,6 +34,7 @@ export default class Roster {
    private contactList: JQuery;
    private groupList: JQuery;
    private rosterItems: { [uid: string]: RosterItem } = {};
+   private static geoloc: Geoloc;
 
    private static instance: Roster;
 
@@ -520,6 +523,17 @@ export default class Roster {
       });
       Client.getPresenceController().registerCurrentPresenceHook(() => {
          this.refreshOwnPresenceIndicator();
+         if (
+            Client.getAccountManager().getAccount() &&
+            Client.getAccountManager().getAccount().getContact() &&
+            Client.getPresenceController().getCurrentPresence() === Presence.online
+         ) {
+            Client.getAccountManager().getAccount().getContact().registerHook('geoloc', this.geoLocHook);
+         }
+
+         if (Client.getPresenceController().getCurrentPresence() === Presence.offline) {
+            $('.jsxc-bar__geoloc').removeClass('jsxc-position-show');
+         }
       });
 
       $('.jsxc-bottom > .jsxc-avatar').on('click', () => {
@@ -527,6 +541,87 @@ export default class Roster {
             showAddAvatarDialog();
          }
       });
+   }
+
+   private geoLocHook(geo: any) {
+      let geolocdiv = $('.jsxc-bottom.jsxc-presence.jsxc-roster-item.jsxc-bar').find('.jsxc-bar__geoloc');
+      if (geolocdiv.length > 0 && geo && geo.lat !== undefined && geo.lon !== undefined) {
+         geolocdiv.addClass('jsxc-position-show');
+         if (
+            Roster.geoloc === undefined ||
+            (Roster.geoloc.getLat() !== geo.lat && Roster.geoloc.getLon() !== geo.lon)
+         ) {
+            let distance =
+               Roster.geoloc !== undefined
+                  ? Location.distanceBetweenCoordinates(
+                       Roster.geoloc.getLat(),
+                       Roster.geoloc.getLon(),
+                       geo.lat,
+                       geo.lon
+                    )
+                  : 0;
+            Roster.geoloc = new Geoloc(
+               geo.from,
+               geo.lat,
+               geo.lon,
+               geo.timestamp,
+               geo.alt,
+               geo.accuracy,
+               geo.speed,
+               geo.bearing,
+               geo.altaccuracy
+            );
+
+            let href = Location.locationToLink(Roster.geoloc.getLat(), Roster.geoloc.getLon());
+
+            geolocdiv.off('click').on('click', e => {
+               e.preventDefault();
+               e.stopPropagation();
+               let a = $(
+                  `<a href="${href}" target="_blank" rel="noopener noreferrer">${Roster.geoloc.getLat()} Longitude: ${Roster.geoloc.getLon()}</a>`
+               );
+               $(document.body).append(a);
+               a.get(0).click();
+               a.remove();
+            });
+
+            if (
+               (Client.getOption('enableGeocode') || false) &&
+               (distance === 0 || distance > Location.GEOCODE_THRESHOLD)
+            ) {
+               Location.reverseGeocodeLocation(Roster.geoloc.getLat(), Roster.geoloc.getLon())
+                  .then((result: { street: string; nr: string; zip: string; city: string; country: string }) => {
+                     let address =
+                        result.street +
+                        ' ' +
+                        result.nr +
+                        ',\n' +
+                        result.zip +
+                        ' ' +
+                        result.city +
+                        '\n' +
+                        result.country +
+                        '\n(' +
+                        new Date(geo.timestamp).toISOString() +
+                        ')';
+                     geolocdiv.attr('title', address);
+                  })
+                  .catch(e => {
+                     geolocdiv.attr(
+                        'title',
+                        `Latitude: ${Roster.geoloc.getLat()} Longitude: ${Roster.geoloc.getLon()}`
+                     );
+                  });
+            } else {
+               geolocdiv.attr('title', `Latitude: ${Roster.geoloc.getLat()} Longitude: ${Roster.geoloc.getLon()}`);
+            }
+         }
+      } else {
+         geolocdiv.removeClass('jsxc-position-show');
+         Roster.geoloc = undefined;
+         geolocdiv.attr('title', '');
+         geolocdiv.off('click');
+      }
    }
 
    private initHandler() {

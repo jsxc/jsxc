@@ -117,11 +117,25 @@ export default class MultiUserContact extends Contact {
       this.removeAllMembers();
 
       this.refreshFeatures();
+      let nick = this.getNickname();
+      if (nick === null || nick === undefined) {
+         nick = this.getAccount().getDefaultNickname();
+         if (nick === null || nick === undefined) {
+            nick = this.getAccount().getJID().node;
+         }
+         this.setNickname(nick);
+      }
 
       return this.getService().joinMultiUserRoom(new JID(this.jid.bare, this.getNickname()), this.data.get('password'));
    }
 
    public leave() {
+      this.data.set('resources', {});
+      this.data.set('presence', Presence.offline);
+
+      this.setNickname(null);
+      this.removeAllMembers();
+
       return this.getService().leaveMultiUserRoom(this.getJid());
    }
 

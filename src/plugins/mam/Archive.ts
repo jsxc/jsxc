@@ -10,10 +10,12 @@ import * as Namespace from '../../connection/xmpp/namespace';
 import { IMessage, MessageMark } from '@src/Message.interface';
 import { IJID } from '@src/JID.interface';
 import MultiUserContact from '@src/MultiUserContact';
+import Client from '@src/Client';
 
 export default class Archive {
    private archiveJid: IJID;
    private messageCache: JQuery<HTMLElement>[] = [];
+   private syncNewMessages: boolean = false;
 
    constructor(private plugin: MessageArchiveManagementPlugin, private contact: Contact) {
       let jid = contact.isGroupChat() ? contact.getJid() : plugin.getConnection().getJID();
@@ -53,6 +55,38 @@ export default class Archive {
       storage.registerHook(key, hook);
    }
 
+   public newMessages() {
+      if (this.messageCache.length > 0) {
+         Log.debug('Ongoing message retrieval');
+         return false;
+      }
+
+      let queryId = UUID.v4();
+
+      this.plugin.addQueryContactRelation(queryId, this.contact);
+      let connection = this.plugin.getConnection();
+
+      let firstMessage = this.contact.getTranscript().getFirstChatMessage();
+
+      if (firstMessage !== undefined && firstMessage !== null && (<any>firstMessage).data !== undefined) {
+         let startDate = firstMessage.getStamp();
+         startDate.setMilliseconds(startDate.getMilliseconds() + 1);
+         this.plugin
+            .determineServerSupport(this.archiveJid)
+            .then(version => {
+               if (!version) {
+                  throw new Error(`Archive JID ${this.archiveJid.full} has no support for MAM.`);
+               }
+               this.syncNewMessages = true;
+               return connection.queryArchiveNewMessages(startDate, this.archiveJid, <string>version, queryId);
+            })
+            .then(this.onComplete)
+            .catch(stanza => {
+               Log.warn('Error while requesting archive', stanza);
+            });
+      }
+   }
+
    public nextMessages() {
       if (this.isExhausted()) {
          Log.debug('No more archived messages.');
@@ -90,7 +124,7 @@ export default class Archive {
             }
 
             let jid = !this.contact.isGroupChat() ? this.contact.getJid() : undefined;
-
+            this.syncNewMessages = false;
             return connection.queryArchive(this.archiveJid, <string>version, queryId, jid, firstResultId, endDate);
          })
          .then(this.onComplete)
@@ -126,6 +160,11 @@ export default class Archive {
 
       if (!plaintextBody) {
          return;
+      }
+
+      if (forwardedElement.find('encrypted[xmlns="eu.siacs.conversations.axolotl"]').length > 0) {
+         plaintextBody = Translation.t('noomemofrommam');
+         htmlBody = $('<b>' + Translation.t('noomemofrommam') + '</b>');
       }
 
       let direction = this.contact.getJid().bare === to.bare ? Message.DIRECTION.OUT : Message.DIRECTION.IN;
@@ -178,6 +217,21 @@ export default class Archive {
       }
 
       let transcript = this.contact.getTranscript();
+      if (this.syncNewMessages) {
+         if (this.messageCache.length > 1) {
+            let firstStamp = this.messageCache[0].find('delay').attr('stamp');
+            let lastStamp = this.messageCache[this.messageCache.length - 1].find('delay').attr('stamp');
+            if (firstStamp && lastStamp) {
+               let reverse = Client.getOption('mamReverse') || false;
+               if (
+                  (!reverse && new Date(firstStamp).getTime() < new Date(lastStamp).getTime()) ||
+                  (reverse && new Date(firstStamp).getTime() > new Date(lastStamp).getTime())
+               ) {
+                  this.messageCache.reverse();
+               }
+            }
+         }
+      }
 
       while (this.messageCache.length > 0) {
          let messageElement = this.messageCache.pop();
@@ -185,7 +239,13 @@ export default class Archive {
          try {
             let message = await this.parseForwardedMessage(messageElement);
 
-            transcript.unshiftMessage(message);
+            if (this.syncNewMessages) {
+               if (!transcript.findMessageByAttrId(message.getAttrId())) {
+                  transcript.pushMessage(message);
+               }
+            } else {
+               transcript.unshiftMessage(message);
+            }
          } catch (err) {
             continue;
          }
@@ -204,7 +264,17 @@ export default class Archive {
             unread: false,
          });
 
-         transcript.unshiftMessage(archiveExhaustedMessage);
+         if (this.syncNewMessages) {
+            if (
+               !transcript.getFirstMessage().isSystem() ||
+               (transcript.getFirstMessage().isSystem() &&
+                  transcript.getFirstMessage().getPlaintextMessage() !== Translation.t('Archive_exhausted'))
+            ) {
+               transcript.pushMessage(archiveExhaustedMessage);
+            }
+         } else {
+            transcript.unshiftMessage(archiveExhaustedMessage);
+         }
       }
 
       this.setExhausted(isArchiveExhausted);

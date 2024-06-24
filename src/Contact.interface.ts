@@ -9,6 +9,7 @@ import ContactProvider from './ContactProvider';
 import Account from './Account';
 import DiscoInfo from './DiscoInfo';
 import { IAvatar } from './Avatar.interface';
+import { IGeoloc } from './Geoloc.interface';
 
 export enum ContactType {
    CHAT = 'chat',
@@ -94,6 +95,8 @@ export interface IContact {
    getStatus(): string;
 
    setStatus(status: string);
+
+   setPosition(geoloc: IGeoloc);
 
    setName(name: string);
 

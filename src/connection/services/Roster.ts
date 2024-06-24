@@ -2,6 +2,7 @@ import AbstractService from './AbstractService';
 import { IJID } from '../../JID.interface';
 import * as NS from '../xmpp/namespace';
 import { $pres, $iq } from '../../vendor/Strophe';
+import Client from '@src/Client';
 
 export default class Roster extends AbstractService {
    public getRoster(version?: string): Promise<Element> {
@@ -40,6 +41,20 @@ export default class Roster extends AbstractService {
       let waitForRoster = this.addContactToRoster(jid, alias);
 
       this.sendSubscriptionRequest(jid);
+
+      /*
+         The following will fix an issue which was noticed on openfire where
+         1. User A adds user B to roster.
+         2. User B gets the friendship_request subcription notification and adds User A with the upcoming dialog.
+         3. User A was added to User B's roster (green dot and colored rosteritem).
+         4. But User B is grey and without the green dot on User A's roster although both are online.
+
+         Maybe https://github.com/igniterealtime/Openfire/pull/2010 will make the following unnecessary
+      */
+      let autoanswer = Client.getStorage().getItem('autoAnswerSubscription') || true;
+      if (autoanswer) {
+         this.sendSubscriptionAnswer(jid, true);
+      }
 
       return waitForRoster;
    }
