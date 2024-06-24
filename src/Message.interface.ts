@@ -45,6 +45,7 @@ export interface IMessagePayload {
    chatMarkersAcknowledged?: boolean;
    replacedBy?: string;
    original?: string;
+   retractedBy?: string;
 }
 
 export interface IMessage {
@@ -159,4 +160,8 @@ export interface IMessage {
    setOriginal(message: IMessage): void;
 
    isReplacement(): boolean;
+
+   getRetractedBy(): IMessage;
+
+   setRetractedBy(message: IMessage): void;
 }
