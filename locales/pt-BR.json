@@ -384,7 +384,7 @@
     "Clean_up_own_devices": "Limpar o próprio dispositivo",
     "omemo-clean-up-explanation": "Se você limpar seus próprios dispositivos, todos os dispositivos serão removidos de sua lista de dispositivos. Na próxima vez que usar seus dispositivos, os mesmos serão adicionados novamente a lista, portanto apenas dispositivos ativos estarão na lista e serão usados por seus contatos para criptografar mensagens.",
     "Accounts": "Contas",
-    "Archive_exhausted": "Arquivo exaurido",
+    "Archive_exhausted": "Arquivo esgotado",
     "Attachment_was_not_processed": "Anexo não foi processado",
     "Blindly_trusted_all_your_own_devices_on_first_use": "Confiar cegamente em todos os seus dispositivos no primeiro uso",
     "Blindly_trusted_peer_on_first_use": "Confiar cegamente no parceiro no primeiro uso",
@@ -438,8 +438,8 @@
     "Occupants_not_provided": null,
     "Edit_avatar": "Editar o avatar",
     "Every_member_can_see_your_full_JID": null,
-    "message_not_delivered": null,
-    "User_media_not_readable": null
+    "User_media_not_readable": null,
+    "message_not_delivered": null
   },
   "Notifications": "Notificações"
 }
