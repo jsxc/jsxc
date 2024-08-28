@@ -439,7 +439,18 @@
     "Edit_avatar": "Edit avatar",
     "Every_member_can_see_your_full_JID": "Every member can see your full JID",
     "message_not_delivered": "Message not delivered",
-    "User_media_not_readable": "User media not readable. Is your device used by another application?"
+    "User_media_not_readable": "User media not readable. Is your device used by another application?",
+    "Configuration_canceled": "Room configuration canceled",
+    "noomemofrommam": "Omemo encrypted messages from archive can not be decrypted.",
+    "Unkown": "Unknown",
+    "Kick": "Kick",
+    "Ban": "Ban",
+    "Join_Leave": "Join/Leave",
+    "JIDPublicity": "JID Publicity",
+    "Logging": "Logginginfos",
+    "Select_an_option": "Select an option",
+    "mucSYSMessageMask": "Hide system messages in MUC",
+    "mucSYSMessageMaskDesc": "Enable/Disable system messages in MUC"
   },
   "Notifications": "Notifications"
 }

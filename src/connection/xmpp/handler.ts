@@ -12,6 +12,7 @@ import CapsHandler from './handlers/caps';
 import MultiUserDirectInvitationHandler from './handlers/multiUser/DirectInvitation';
 import MultiUserXMessageHandler from './handlers/multiUser/XMessage';
 import AbstractHandler from './AbstractHandler';
+import EventHandler from './handlers/event';
 import * as NS from './namespace';
 
 type StropheHandlerOptions = {
@@ -33,7 +34,10 @@ interface IStropheConnection {
 }
 
 export default class XMPPHandler {
-   constructor(private account: Account, private connection: IStropheConnection) {}
+   constructor(private account: Account, private connection: IStropheConnection) {
+      account.getDiscoInfo().addFeature('http://jabber.org/protocol/geoloc+notify');
+      account.getDiscoInfo().addFeature('http://jabber.org/protocol/nick+notify');
+   }
 
    public registerHandler() {
       this.addHandler(ChatMessageHandler, null, 'message', 'chat');
@@ -53,6 +57,7 @@ export default class XMPPHandler {
       this.addHandler(MultiUserDirectInvitationHandler, 'jabber:x:conference', 'message');
 
       this.addHandler(CapsHandler, CapsHandler.NAMESPACE);
+      this.addHandler(EventHandler, null, 'message', null);
       // this.connection.conn.addHandler(this.onReceived, null, 'message');
    }
 

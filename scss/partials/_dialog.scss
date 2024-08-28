@@ -338,3 +338,43 @@ button.jsxc-page__subheadline {
     }
   }
 }
+
+.jsxc-multiselect {
+  margin-left: auto;
+  margin-right: auto;
+  width: 200px;
+
+  .jsxc-selectbox {
+    position: relative;
+
+    select {
+      font-weight: bold;
+      width: 100%;
+    }
+
+    .jsxc-overselect {
+      bottom: 0;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+  }
+
+  div.bitmaskchoice {
+    border: 1px #dadada solid;
+    display: none;
+
+    label {
+      display: block;
+
+      input {
+        margin: 4px;
+      }
+    }
+
+    label:hover {
+      background-color: #1e90ff;
+    }
+  }
+}

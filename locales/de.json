@@ -251,7 +251,7 @@
     "Loading_room_information": "Informationen über Gruppe werden geladen",
     "Destroy": "Auflösen",
     "Leave": "Verlassen",
-    "changed_subject_to": "__nickname__ hat das Thema auf __subject__ geändert",
+    "changed_subject_to": "__nickname__ hat das Thema auf \"__subject__\" geändert",
     "muc_removed_kicked": "Du wurdest aus der Gruppe entfernt",
     "muc_removed_info_kicked": "__nickname__ wurde aus der Gruppe entfernt",
     "muc_removed_banned": "Du wurdest aus der Gruppe ausgeschlossen",
@@ -439,7 +439,18 @@
     "Edit_avatar": "Bearbeite Profilfoto",
     "Every_member_can_see_your_full_JID": null,
     "message_not_delivered": "Nachricht nicht zugestellt",
-    "User_media_not_readable": null
+    "User_media_not_readable": null,
+    "Configuration_canceled": "Raumkonfiguration abgebrochen",
+    "noomemofrommam": "Omemo verschlüsselte Nachrichten aus dem Archiv können nicht entschlüsselt werden.",
+    "Unkown": "Unbekannt",
+    "Kick": "Kick",
+    "Ban": "Ban",
+    "Join_Leave": "Betreten / Verlassen",
+    "JIDPublicity": "JID Info",
+    "Logging": "Logginginfos",
+    "Select_an_option": "Auswählen",
+    "mucSYSMessageMask": "Systeminfos in Gruppenräumen anzeigen",
+    "mucSYSMessageMaskDesc": "Hier können einzelne Systemmeldungen in Gruppenräumen angezeigt oder deaktiviert werden."
   },
   "Notifications": "Benachrichtigungen"
 }

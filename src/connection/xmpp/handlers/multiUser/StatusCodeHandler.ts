@@ -2,16 +2,55 @@ import Translation from '../../../../util/Translation';
 import MultiUserContact from '../../../../MultiUserContact';
 import showSelectionDialog from '../../../../ui/dialogs/selection';
 import showRoomConfigurationDialog, { CANCELED } from '../../../../ui/dialogs/multiUserRoomConfiguration';
+import { DIRECTION } from '@src/Message.interface';
+import { MucSysMessage } from '@ui/dialogs/settings';
+import Client from '@src/Client';
 
 export default class MultiUserStatusCodeHandler {
    public static processCodes(codes: string[], multiUserContact: MultiUserContact, nickname?: string) {
       let statusCodeHandler = new MultiUserStatusCodeHandler(multiUserContact, codes.indexOf('110') > -1, nickname);
+      let mucSYSMessageMask = Client.getOption('mucSYSMessageMask') || MucSysMessage.NONE;
 
       for (let code of codes) {
          let msg = statusCodeHandler.processCode(code);
 
          if (typeof msg === 'string') {
-            multiUserContact.addSystemMessage(msg);
+            let addMsg = true;
+
+            switch (parseInt(code, 10)) {
+               case 100:
+               case 172:
+               case 173:
+                  addMsg = (mucSYSMessageMask & MucSysMessage.JID) === MucSysMessage.JID ? true : false;
+                  break;
+               case 170:
+                  addMsg = (mucSYSMessageMask & MucSysMessage.LOGGING) === MucSysMessage.LOGGING ? true : false;
+                  break;
+               case 301:
+                  addMsg = (mucSYSMessageMask & MucSysMessage.BAN) === MucSysMessage.BAN ? true : false;
+                  break;
+               case 307:
+               case 321:
+               case 322:
+                  addMsg = (mucSYSMessageMask & MucSysMessage.KICK) === MucSysMessage.KICK ? true : false;
+                  break;
+
+               default:
+                  addMsg = (mucSYSMessageMask & MucSysMessage.UNKNOWN) === MucSysMessage.UNKNOWN ? true : false;
+                  break;
+            }
+
+            if (addMsg) {
+               let firstmsg = multiUserContact.getTranscript().getFirstMessage();
+
+               if (firstmsg !== undefined && firstmsg.getDirection() === DIRECTION.SYS) {
+                  if (firstmsg.getPlaintextMessage() !== msg) {
+                     multiUserContact.addSystemMessage(msg);
+                  }
+               } else {
+                  multiUserContact.addSystemMessage(msg);
+               }
+            }
          }
       }
    }
@@ -103,6 +142,8 @@ export default class MultiUserStatusCodeHandler {
          .then(stanza => {
             if (stanza === CANCELED) {
                multiUserContact.addSystemMessage(Translation.t('Configuration_canceled'));
+               multiUserContact.getChatWindow().close();
+               multiUserContact.getAccount().getContactManager().delete(multiUserContact);
             }
          })
          .catch(() => {});

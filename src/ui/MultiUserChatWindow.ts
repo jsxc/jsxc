@@ -165,6 +165,7 @@ export default class MultiUserChatWindow extends ChatWindow {
 
       this.addMenuEntry('jsxc-leave', Translation.t('Leave'), () => {
          this.contact.leave();
+         this.contact.shutdown();
       });
 
       this.addMenuEntry('jsxc-invite', Translation.t('Invite'), () => {
@@ -210,9 +211,12 @@ export default class MultiUserChatWindow extends ChatWindow {
 
    private enable() {
       this.element.removeClass('jsxc-disabled');
+      this.enableMenu();
+      this.getAccount().triggerChatWindowInitializedHook(this, this.contact);
    }
 
    private disable() {
+      this.disableMenu();
       this.element.addClass('jsxc-disabled');
    }
 }

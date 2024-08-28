@@ -4,6 +4,8 @@ import MultiUserContact from '../../../../MultiUserContact';
 import MultiUserStatusCodeHandler from './StatusCodeHandler';
 import { Strophe } from '../../../../vendor/Strophe';
 import JID from '@src/JID';
+import Client from '@src/Client';
+import { MucSysMessage } from '@ui/dialogs/settings';
 
 export default class MultiUserPresenceProcessor {
    private codes: string[];
@@ -67,17 +69,19 @@ export default class MultiUserPresenceProcessor {
          );
       } else {
          this.multiUserContact.removeMember(this.nickname);
-
-         if (this.codes.length === 1 && this.codes.indexOf('110') > -1) {
-            this.inform(':door: ' + Translation.t('You_left_the_building'));
-         } else if (this.codes.length === 0) {
-            this.inform(
-               ':door: ' +
-                  Translation.t('left_the_building', {
-                     nickname: this.nickname,
-                     escapeInterpolation: true,
-                  })
-            );
+         let mucSYSMessageMask = Client.getOption('mucSYSMessageMask') || MucSysMessage.NONE;
+         if ((mucSYSMessageMask & MucSysMessage.LEAVE_JOIN) === MucSysMessage.LEAVE_JOIN) {
+            if (this.codes.length === 1 && this.codes.indexOf('110') > -1) {
+               this.inform(':door: ' + Translation.t('You_left_the_building'));
+            } else if (this.codes.length === 0) {
+               this.inform(
+                  ':door: ' +
+                     Translation.t('left_the_building', {
+                        nickname: this.nickname,
+                        escapeInterpolation: true,
+                     })
+               );
+            }
          }
       }
    }
@@ -91,15 +95,17 @@ export default class MultiUserPresenceProcessor {
       let jid = jidString ? new JID(jidString) : undefined;
 
       let isNew = this.multiUserContact.addMember(this.nickname, affiliation, role, jid);
-
-      if (isNew && this.multiUserContact.isMemberListComplete()) {
-         this.inform(
-            ':footprints: ' +
-               Translation.t('entered_the_room', {
-                  nickname: this.nickname,
-                  escapeInterpolation: true,
-               })
-         );
+      let mucSYSMessageMask = Client.getOption('mucSYSMessageMask') || MucSysMessage.NONE;
+      if ((mucSYSMessageMask & MucSysMessage.LEAVE_JOIN) === MucSysMessage.LEAVE_JOIN) {
+         if (isNew && this.multiUserContact.isMemberListComplete()) {
+            this.inform(
+               ':footprints: ' +
+                  Translation.t('entered_the_room', {
+                     nickname: this.nickname,
+                     escapeInterpolation: true,
+                  })
+            );
+         }
       }
    }
 
