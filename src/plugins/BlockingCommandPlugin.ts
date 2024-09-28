@@ -161,7 +161,10 @@ export default class BlockingCommandPlugin extends AbstractPlugin {
          }
       });
 
-      blockedJids.forEach(jid => getElements(jid).addClass('jsxc-blocked'));
+      setTimeout(() => {
+         // on login it could happen, that blocklist was loaded before roster, so wait 2seconds to update roster...
+         blockedJids.forEach(jid => getElements(jid).addClass('jsxc-blocked'));
+      }, 2000);
    };
 
    private onBlocklistUpdate = (stanza: string) => {
