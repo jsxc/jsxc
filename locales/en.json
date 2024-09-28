@@ -366,6 +366,7 @@
     "Are_you_sure": "Are you sure?",
     "Invite_user": "Invite user",
     "muc_invite_explanation": "Enter username or Jabber ID of the contact you like to invite.",
+    "muc_invite_explanation_rooms": "Choose the room you want the user invite to.",
     "omemo-device-list-explanation": "With OMEMO you can send an encrypted message to all OMEMO capable devices of you and your contact. To ensure that those devices really belong to you or your contact, you should compare their key IDs over another communication channel. If you don't want to compare those IDs, just click \"Recognize\", but please be aware that in this case someone could read along.",
     "No_devices_available": "No devices available",
     "Ignore": "Ignore",
@@ -439,7 +440,10 @@
     "Edit_avatar": "Edit avatar",
     "Every_member_can_see_your_full_JID": "Every member can see your full JID",
     "message_not_delivered": "Message not delivered",
-    "User_media_not_readable": "User media not readable. Is your device used by another application?"
+    "User_media_not_readable": "User media not readable. Is your device used by another application?",
+    "show_two_column_pref": "Two Column Layout",
+    "show_two_column_description": "The Client will use a two column fullscreen layout",
+    "Active_conversations": "Active Conversations"
   },
   "Notifications": "Notifications"
 }

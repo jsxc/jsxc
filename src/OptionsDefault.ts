@@ -152,3 +152,10 @@ export let automaticallyRestoreAccounts = true;
 export let trustedDomains: string[] = [];
 
 export let includeOSInVersionResponse = false;
+
+/*In Chrome the resize events will be triggered if a download starts because chrome shows a bottom bar with downloads.
+ This results in resizing all chatwindows to default. To prevent this behavior set keepWindowSizeOnResize to true otherwhise false. */
+export let keepWindowSizeOnResize = true;
+
+/*if true start in fullscreen layout. */
+export let useTwoColumnLayout = false;

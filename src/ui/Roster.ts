@@ -19,6 +19,7 @@ import confirmDialog from './dialogs/confirm';
 import Utils from '@util/Utils';
 import Emoticons from '@src/Emoticons';
 import showAddAvatarDialog from './dialogs/avatarupload';
+import JID from '@src/JID';
 
 let rosterTemplate = require('../../template/roster.hbs');
 
@@ -337,6 +338,7 @@ export default class Roster {
          handler: showAboutDialog,
          label: Translation.t('About'),
          offlineAvailable: true,
+         icon: 'info',
       });
 
       let onlineHelpUrl = Client.getOption(HELP_KEY);
@@ -362,17 +364,18 @@ export default class Roster {
       }
 
       this.addMenuEntry({
-         id: 'search-contact',
-         handler: showContactSearchDialog,
-         label: Translation.t('contact_search'),
-         icon: 'search',
+         id: 'settings',
+         handler: showSettingsDialog,
+         label: Translation.t('Settings'),
+         offlineAvailable: true,
+         icon: 'gear',
       });
 
       this.addMenuEntry({
-         id: 'add-contact',
-         handler: () => showContactDialog(),
-         label: Translation.t('Add_buddy'),
-         icon: 'contact',
+         id: 'add-avatar',
+         handler: showAddAvatarDialog,
+         label: Translation.t('Edit_avatar'),
+         icon: 'smiley',
       });
 
       this.addMenuEntry({
@@ -389,24 +392,24 @@ export default class Roster {
       });
 
       this.addMenuEntry({
+         id: 'search-contact',
+         handler: showContactSearchDialog,
+         label: Translation.t('contact_search'),
+         icon: 'search',
+      });
+
+      this.addMenuEntry({
+         id: 'add-contact',
+         handler: () => showContactDialog(),
+         label: Translation.t('Add_buddy'),
+         icon: 'contact',
+      });
+
+      this.addMenuEntry({
          id: 'join-muc',
          handler: () => showMultiUserJoinDialog(),
          label: Translation.t('Join_chat'),
          icon: 'groupcontact',
-      });
-
-      this.addMenuEntry({
-         id: 'settings',
-         handler: showSettingsDialog,
-         label: Translation.t('Settings'),
-         offlineAvailable: true,
-         icon: 'gear',
-      });
-
-      this.addMenuEntry({
-         id: 'add-avatar',
-         handler: showAddAvatarDialog,
-         label: Translation.t('Edit_avatar'),
       });
    }
 
@@ -559,5 +562,44 @@ export default class Roster {
       this.element.find('.jsxc-collapsible').on('click', function () {
          $(this).toggleClass('jsxc-active');
       });
+
+      this.element.find('.jsxc-join-muc-button').on('click', () => {
+         showMultiUserJoinDialog();
+      });
+      this.element.find('.jsxc-add-contact-button').on('click', () => {
+         showContactDialog();
+      });
+      this.element.find('.jsxc-search-contact-button').on('click', () => {
+         showContactSearchDialog();
+      });
+
+      this.element.find('.jsxc-fullscreen-active-conversations-select').on('change', e => {
+         let uid = $(e.target).val().toString();
+         let contact = this.rosterItems[uid].getContact();
+         let chatWindow = contact.getChatWindowController();
+
+         if ($('body').hasClass('jsxc-fullscreen') || Client.isExtraSmallDevice()) {
+            Client.getChatWindowList().minimizeAll();
+         }
+
+         chatWindow.openProminently();
+      });
+
+      setTimeout(() => {
+         let select = this.element.find('.jsxc-fullscreen-active-conversations-select');
+         if (select.find('option').length === 0) {
+            let cwindows = Client.getChatWindowList().getChatWindowIds();
+            for (let item of cwindows) {
+               let contact = Client.getAccountManager().getAccount().getContact(new JID(item));
+               let option = $(
+                  `<option data-jid="${
+                     contact.getJid().bare
+                  }" value="${contact.getUid()}">${contact.getName()}</option>`
+               );
+               select.append(option);
+            }
+            select.val(select.find(':first-child').val());
+         }
+      }, 2000);
    }
 }
