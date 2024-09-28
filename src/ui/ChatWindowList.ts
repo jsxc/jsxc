@@ -1,9 +1,11 @@
 import ChatWindow from './ChatWindow';
+import Client from '../Client';
 
 let chatWindowListTemplate = require('../../template/chatWindowList.hbs');
 
 const SCROLL_REFRESH = 500;
 const SCROLL_OFFSET = 200;
+const WINDOWLIST_APPEND_KEY = 'windowListAppend';
 
 export default class ChatWindowList {
    private element: JQuery;
@@ -32,7 +34,7 @@ export default class ChatWindowList {
 
    private constructor() {
       let template = chatWindowListTemplate();
-      $('body').append(template);
+      $(Client.getOption(WINDOWLIST_APPEND_KEY)).append(template);
 
       this.element = $('#jsxc-window-list');
       this.listElement = this.element.find('>ul');
