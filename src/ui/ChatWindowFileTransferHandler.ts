@@ -49,7 +49,11 @@ export default class FileTransferHandler {
          if (!file) {
             return;
          }
-
+         /*Fixed an issue where on chrome based browsers the file select dialog did not fired the event that a file was selected,
+           if it was the same file than before. */
+         fileElement.off('change');
+         fileElement.val('');
+         /****/
          this.fileSelected(file);
       });
    }
