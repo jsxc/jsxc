@@ -338,3 +338,19 @@ button.jsxc-page__subheadline {
     }
   }
 }
+
+.jsxc-dialog .jsxc-vcard-data {
+  margin-top: 2em;
+
+  >li {
+    border: 1px solid var(--jsxc-color-border-dark);
+    display: block;
+    margin-top: 0.5em;
+    padding-left: 0.25em;
+    padding-right: 0.25em;
+  }
+
+  li>div {
+    float: right;
+  }
+}
