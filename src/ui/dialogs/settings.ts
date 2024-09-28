@@ -55,7 +55,59 @@ class ClientSection extends Section {
          )
       );
 
+      contentElement.append(
+         new ListItem(
+            Translation.t('show_format_pref'),
+            Translation.t('show_format_description'),
+            undefined,
+            undefined,
+            this.toggleFormatTools()
+         )
+      );
+
       return contentElement.getDOM();
+   }
+
+   private toggleFormatTools() {
+      let element = $('<input type="checkbox" style="margin-left:10px;">');
+
+      element.on('change', () => {
+         let value = element.prop('checked');
+         element.val(value);
+         Client.setOption('useFormatTools', value ? value : undefined);
+         if (value) {
+            $(document)
+               .find('.jsxc-format-input')
+               .each(function (pos: number) {
+                  $(this).removeClass('jsxc-hidden');
+               });
+         } else {
+            $(document)
+               .find('.jsxc-format-input')
+               .each(function (pos: number) {
+                  $(this).addClass('jsxc-hidden');
+               });
+         }
+      });
+
+      let useFormatTools = Client.getOption('useFormatTools') || false;
+      element.prop('checked', useFormatTools);
+      element.val(useFormatTools);
+      if (useFormatTools) {
+         $(document)
+            .find('.jsxc-format-input')
+            .each(function (pos: number) {
+               $(this).removeClass('jsxc-hidden');
+            });
+      } else {
+         $(document)
+            .find('.jsxc-format-input')
+            .each(function (pos: number) {
+               $(this).addClass('jsxc-hidden');
+            });
+      }
+
+      return element;
    }
 
    private getLanguageSelectionElement() {
@@ -302,6 +354,7 @@ class MainAppSection extends Section {
       contentElement.append(this.getListItemForData('', 'Jabber Search', '0055', '1.3'));
       contentElement.append(this.getListItemForData('', 'Publish-Subscribe', '0060', '1.2.1'));
       contentElement.append(this.getListItemForData('', 'Personal Eventing Protocol', '0163', '1.2.1'));
+      contentElement.append(this.getListItemForData('', 'Message Styling', '0393', '1.1.1'));
 
       return contentElement.getDOM();
    }

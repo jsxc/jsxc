@@ -75,7 +75,10 @@ export default class ChatWindowMessage {
 
       LinkHandlerGeo.get().detect(bodyElement);
 
-      this.element.find('.jsxc-content').html(bodyElement.get(0));
+      let html = $.map(bodyElement, function (val: any, i: number) {
+         return $(val).html();
+      }).join('');
+      this.element.find('.jsxc-content').html(html);
 
       let timestampElement = this.element.find('.jsxc-timestamp');
       DateTime.stringify(this.message.getStamp().getTime(), timestampElement);
@@ -173,9 +176,13 @@ export default class ChatWindowMessage {
       }
 
       if (attachment.hasData()) {
-         attachmentElement = $('<a target="_blank" rel="noopener noreferrer">').append(attachmentElement);
+         attachmentElement = $('<a target="_blank" class="jsxc-image-download" rel="noopener noreferrer">').append(
+            attachmentElement
+         );
          attachmentElement.attr('href', attachment.getData());
-         attachmentElement.attr('download', attachment.getName());
+
+         if (!attachment.isImage() || !attachment.getData().startsWith('http'))
+            attachmentElement.attr('download', attachment.getName());
 
          if (attachment.getHandler()) {
             attachmentElement.on('click', ev => {

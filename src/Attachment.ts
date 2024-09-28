@@ -213,4 +213,27 @@ export default class Attachment {
          this.properties.set('thumbnail', thumbnailData);
       });
    }
+
+   public static generateLightImageAttachement(url: string): string {
+      let wrapperElement = $('<div>');
+      let parts = url.split('.');
+
+      wrapperElement.addClass('jsxc-attachment');
+      wrapperElement.addClass('jsxc-image');
+      wrapperElement.addClass('jsxc-image-' + parts[parts.length - 1]);
+      wrapperElement.addClass('jsxc-persistent');
+
+      let img = $('<img alt="preview" style="max-width:100px; max-height:100px">');
+      img.attr('title', url.substring(url.lastIndexOf('/') + 1));
+      img.attr('src', url);
+
+      wrapperElement.append(img);
+      return (
+         '<a href="' +
+         url +
+         '" class="jsxc-image-download" target="_blank" rel="noopener noreferrer">' +
+         wrapperElement.html() +
+         '</a>'
+      );
+   }
 }

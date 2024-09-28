@@ -1,3 +1,4 @@
+import { IContact } from '@src/Contact.interface';
 import ChatWindow from './ChatWindow';
 
 let chatWindowListTemplate = require('../../template/chatWindowList.hbs');
@@ -60,6 +61,16 @@ export default class ChatWindowList {
          let chatWindow: ChatWindow = this.windows[chatWindowId];
 
          chatWindow.getContact().getChatWindowController().minimize();
+      }
+   }
+
+   public get(contact: IContact) {
+      let chatWindowIds = this.getChatWindowIds();
+
+      if (chatWindowIds.indexOf(contact.getJid().bare) >= 0) {
+         return this.windows[contact.getJid().bare];
+      } else {
+         return null;
       }
    }
 
