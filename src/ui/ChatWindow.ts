@@ -215,7 +215,7 @@ export default class ChatWindow {
          this.element.find('.jsxc-message-area').prepend(messageElement);
       }
 
-      chatWindowMessage.restoreNextMessage();
+      chatWindowMessage.restoreNextMessage(false);
 
       setTimeout(() => this.scrollMessageAreaToBottom(), 500);
 

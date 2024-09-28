@@ -37,7 +37,7 @@ export default class ChatWindowMessage {
       return this.element;
    }
 
-   public restoreNextMessage() {
+   public restoreNextMessage(add: boolean = true) {
       let nextMessage = this.getNextMessage();
 
       if (!nextMessage || nextMessage.getDOM().length > 0) {
@@ -46,9 +46,10 @@ export default class ChatWindowMessage {
 
       let chatWindowMessage = this.chatWindow.getChatWindowMessage(nextMessage);
       let element = chatWindowMessage.getElement();
-
-      this.getElement().after(element);
-      chatWindowMessage.restoreNextMessage();
+      if (add) {
+         this.getElement().after(element);
+      }
+      chatWindowMessage.restoreNextMessage(add);
    }
 
    private getNextMessage() {
