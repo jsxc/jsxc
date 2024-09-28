@@ -62,4 +62,18 @@ export default class Utils {
 
       return bytes.buffer;
    }
+
+   public static decodeEntities(str: string) {
+      if (str && typeof str === 'string') {
+         // strip script/html tags
+         let element = document.createElement('div');
+         str = str.replace(/<script[^>]*>([\S\s]*?)<\/script>/gim, '');
+         str = str.replace(/<\/?\w(?:[^"'>]|"[^"]*"|'[^']*')*>/gim, '');
+         element.innerHTML = str;
+         str = element.textContent;
+         element.textContent = '';
+      }
+
+      return str;
+   }
 }

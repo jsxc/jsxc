@@ -139,8 +139,19 @@ export default class RosterItem {
          } else {
             this.element
                .find('.jsxc-bar__caption__secondary')
-               .text(Emoticons.toUnicode(':speech_balloon:') + ' ' + message.getPlaintextEmoticonMessage('unicode'));
-            this.element.find('.jsxc-bar__caption__secondary').attr('title', message.getPlaintextMessage());
+               .text(
+                  Emoticons.toUnicode(':speech_balloon:') +
+                     ' ' +
+                     (message.getRetractedBy()
+                        ? Translation.t('message_retracted')
+                        : Utils.decodeEntities(message.getPlaintextEmoticonMessage('unicode')))
+               );
+            this.element
+               .find('.jsxc-bar__caption__secondary')
+               .attr(
+                  'title',
+                  message.getRetractedBy() ? Translation.t('message_retracted') : message.getPlaintextMessage()
+               );
          }
       };
 

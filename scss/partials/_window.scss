@@ -129,7 +129,6 @@
           opacity: 1;
         }
       }
-
       @media (min-width: 768px) {
         height: 30px;
         width: 30px;
@@ -294,7 +293,6 @@
   &:hover {
     opacity: 0.5;
   }
-
   @media (min-width: 768px) {
     width: 34px;
   }
@@ -565,6 +563,20 @@
   }
 }
 
+.jsxc-chatmessage.jsxc-retracted {
+  opacity: 0.6;
+
+  .jsxc-content {
+    font-size: 0.8em;
+  }
+
+  .jsxc-version::before {
+    @extend %jsxc-icon-font;
+    content: map-get($jsxc-icons-map, "delete");
+    cursor: pointer;
+  }
+}
+
 ul.jsxc-message-history {
   padding: 0.5em 0 2em;
   width: 250px;
@@ -828,7 +840,6 @@ ul.jsxc-message-history {
       }
     }
   }
-
   @media (min-width: 768px) {
     width: 34px;
   }
